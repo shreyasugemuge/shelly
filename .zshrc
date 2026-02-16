@@ -39,9 +39,16 @@ setopt SHARE_HISTORY
 setopt APPEND_HISTORY
 setopt INC_APPEND_HISTORY
 
-# ── Completion ──
+# ── Completion (cached — regenerate once per day) ──
 autoload -Uz compinit
-compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+_zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
+[[ -d "${_zcompdump:h}" ]] || mkdir -p "${_zcompdump:h}"
+if [[ -f "$_zcompdump" && $(date +'%j') == $(stat -f '%Sm' -t '%j' "$_zcompdump" 2>/dev/null || date -r "$_zcompdump" +'%j' 2>/dev/null) ]]; then
+    compinit -C -d "$_zcompdump"
+else
+    compinit -d "$_zcompdump"
+fi
+unset _zcompdump
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
@@ -55,3 +62,6 @@ bindkey '^[[B' history-search-forward
 
 # ── Version alias ──
 alias dotfiles-version='echo "zsh-dotfiles v${ZSH_DOTFILES_VERSION}"'
+
+# ── Startup benchmark ──
+alias zsh-bench='time zsh -i -c exit'

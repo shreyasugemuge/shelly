@@ -37,8 +37,16 @@ function _set_face() {
     fi
 }
 
+_prompt_untracked=""
+
 function _set_vcs_info() {
     vcs_info
+    # Lightweight untracked-file check
+    if [[ -n "${vcs_info_msg_0_}" ]] && git status --porcelain 2>/dev/null | grep -q '^??'; then
+        _prompt_untracked="%F{208}?%f"
+    else
+        _prompt_untracked=""
+    fi
 }
 
 # Hook both into precmd — face MUST come first to capture $?
@@ -57,7 +65,7 @@ precmd_functions=(_set_face _set_vcs_info)
 # ── Build the prompt ──
 setopt PROMPT_SUBST
 
-PROMPT='%F{245}[%f${_prompt_face}%F{245}]%f ${vcs_info_msg_0_} %F{magenta}%n%f%F{245}@%f%F{117}%m%f %F{cyan}%~%f
+PROMPT='%F{245}[%f${_prompt_face}%F{245}]%f ${vcs_info_msg_0_}${_prompt_untracked} %F{magenta}%n%f%F{245}@%f%F{117}%m%f %F{cyan}%(5~|%-1~/.../%3~|%~)%f
 %F{245}$%f '
 
 # ── Right prompt (optional) ──

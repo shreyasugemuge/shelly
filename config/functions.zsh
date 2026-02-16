@@ -50,9 +50,11 @@ function extract() {
 
 # ── whichip: Friendly display of all IPs ──
 function whichip() {
-    echo "Public IP : $(curl -s ipinfo.io/ip)"
+    echo "Public IP : $(curl -s --max-time 3 ipinfo.io/ip)"
     if [[ "$OSTYPE" == darwin* ]]; then
-        echo "Local IP  : $(ipconfig getifaddr en0 2>/dev/null || echo 'not connected')"
+        local _iface
+        _iface="$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')"
+        echo "Local IP  : $(ipconfig getifaddr "${_iface:-en0}" 2>/dev/null || echo 'not connected')"
     else
         echo "Local IP  : $(hostname -I 2>/dev/null | awk '{print $1}' || echo 'not connected')"
     fi
@@ -61,5 +63,14 @@ function whichip() {
 # ── weather: Quick weather report ──
 function weather() {
     local city="${1:-}"
-    curl -s "wttr.in/${city}?format=3"
+    curl -s --max-time 3 "wttr.in/${city}?format=3"
+}
+
+# ── portfind: Find what's listening on a port ──
+function portfind() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: portfind <port>"
+        return 1
+    fi
+    lsof -i :"$1"
 }
