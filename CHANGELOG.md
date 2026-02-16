@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-02-16
+
+Performance, robustness, and quality-of-life improvements across the board.
+
+### Added
+- **Lazy-loaded NVM** — stub functions for `nvm`, `node`, `npm`, `npx` defer sourcing until first use, saving ~300ms on every shell startup
+- **Cached `compinit`** — completion dump regenerated once per day instead of every shell start
+- **Untracked file indicator** — git prompt now shows `?` (orange) when untracked files exist
+- **Path truncation** — deep paths auto-shorten (e.g., `~/…/foo/bar/baz` instead of full path)
+- **`portfind <port>`** function — find what's listening on a given port via `lsof`
+- **`tre`** alias — `tree -C -L 2` for quick, colorized directory overview
+- **`gb`** alias — `git branch`
+- **`gco`** alias — `git checkout`
+- **`gsw`** alias — `git switch`
+- **`zsh-bench`** alias — `time zsh -i -c exit` for startup benchmarking
+
+### Changed
+- `globip` alias — added `--max-time 3` to `curl` to prevent hanging when offline
+- `whichip()` function — added `--max-time 3` to `curl`
+- `weather()` function — added `--max-time 3` to `curl`
+- `locip` alias — detects active network interface via `route get default` instead of hardcoding `en0`
+- `whichip()` function — detects active interface with fallback to `en0`
+
 ## [1.0.0] - 2026-02-16
 
 Complete rewrite from Bash to Zsh. This is a breaking change from all previous versions.
@@ -86,7 +109,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/shreyas613/bash_old/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/shreyas613/bash_old/compare/v0.3.0...v1.0.0
 [0.3.0]: https://github.com/shreyas613/bash_old/releases/tag/v0.3.0
 [0.2.0]: https://github.com/shreyas613/bash_old/releases/tag/v0.2.0
