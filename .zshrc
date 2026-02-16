@@ -21,7 +21,8 @@ for config_file in \
     "$ZDOTDIR_CUSTOM/environment.zsh" \
     "$ZDOTDIR_CUSTOM/prompt.zsh" \
     "$ZDOTDIR_CUSTOM/aliases.zsh" \
-    "$ZDOTDIR_CUSTOM/functions.zsh"; do
+    "$ZDOTDIR_CUSTOM/functions.zsh" \
+    "$ZDOTDIR_CUSTOM/plugins.zsh"; do
     [[ -f "$config_file" ]] && source "$config_file"
 done
 unset config_file
