@@ -154,3 +154,7 @@ The original bash configuration is preserved in `archive/` for reference. See `a
 ## License
 
 [MIT](LICENSE) — Shreyas Ugemuge, 2017–2026
+
+## Author
+
+Shreyas
