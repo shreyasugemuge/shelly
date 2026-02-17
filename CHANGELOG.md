@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-02-17
+
+Tone down colors — let syntax highlighting do its job.
+
+### Changed
+- **Prompt**: user@host now dim gray, directory path now default terminal color; removed magenta, light blue, and cyan from static prompt elements — color reserved for meaningful indicators (face status, git state)
+- **Startup dashboard**: section headers (`── System ──`, `── Network ──`) changed from cyan to dim gray; hostname no longer bold; removed all decorative color variables
+
+### Added
+- **`CLAUDE.md`** — project context file documenting repo layout, color philosophy, design decisions, versioning process, and gotchas
+
 ## [1.2.0] - 2026-02-17
 
 Auto-dependency management and startup system/network dashboard.
@@ -123,7 +134,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/shreyas613/bash_old/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/shreyas613/bash_old/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/shreyas613/bash_old/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/shreyas613/bash_old/compare/v0.3.0...v1.0.0

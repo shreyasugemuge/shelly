@@ -1,6 +1,6 @@
 # Zsh Dotfiles
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.2.1-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux-orange.svg)](#prerequisites)
@@ -88,9 +88,8 @@ $
 | `[O_O]`     | red          | Last command failed (exit code != 0)       |
 | `(main)`    | green        | Current git branch                         |
 | `*` / `+`   | orange       | Unstaged / staged changes                  |
-| `user`      | magenta      | Your username                              |
-| `@host`     | light blue   | Machine hostname                           |
-| `~/path`    | cyan         | Current directory                          |
+| `user@host` | gray         | Username and hostname (muted)              |
+| `~/path`    | default      | Current directory                          |
 
 When you're not inside a git repository, the branch section is hidden.
 
@@ -140,6 +139,7 @@ This project follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.
 
 | Version | Date       | Description                              |
 |---------|------------|------------------------------------------|
+| v1.2.1  | 2026-02-17 | Muted prompt/dashboard colors, CLAUDE.md    |
 | v1.2.0  | 2026-02-17 | Auto-deps, startup system/network dashboard |
 | v1.1.0  | 2026-02-16 | Plugins, lazy NVM, cached compinit       |
 | v1.0.0  | 2026-02-16 | Complete zsh rewrite, modular config     |

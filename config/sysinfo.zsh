@@ -7,10 +7,8 @@
 # Only run in interactive shells
 [[ ! -o interactive ]] && return 0
 
-_C='\033[0;36m'   # cyan
-_D='\033[0;90m'   # dim
-_B='\033[1m'      # bold
-_N='\033[0m'      # reset
+_D='\033[0;90m'   # dim gray (labels)
+_N='\033[0m'      # reset (values stay default)
 
 # ── System ──
 _sys_os=""
@@ -38,8 +36,8 @@ elif [[ "$OSTYPE" == linux* ]]; then
 fi
 
 echo ""
-echo -e "${_C}── System ──${_N}"
-echo -e "  ${_B}${_sys_host}${_N}"
+echo -e "${_D}── System ──${_N}"
+echo -e "  ${_sys_host}"
 echo -e "  ${_D}OS${_N}   ${_sys_os}"
 echo -e "  ${_D}CPU${_N}  ${_sys_cpu}"
 [[ -n "$_sys_gpu" ]] && echo -e "  ${_D}GPU${_N}  ${_sys_gpu}"
@@ -61,7 +59,7 @@ else
 fi
 
 echo ""
-echo -e "${_C}── Network ──${_N}"
+echo -e "${_D}── Network ──${_N}"
 echo -e "  ${_D}Public${_N}  ${_net_pub}"
 echo -e "  ${_D}Local${_N}   ${_net_loc}"
 [[ -n "$_net_ssid" ]] && echo -e "  ${_D}Wi-Fi${_N}   ${_net_ssid}"
@@ -69,4 +67,4 @@ echo -e "  ${_D}Local${_N}   ${_net_loc}"
 echo ""
 
 unset _net_pub _net_loc _net_iface _net_ssid _net_dns
-unset _C _D _B _N
+unset _D _N

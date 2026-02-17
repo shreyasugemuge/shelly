@@ -53,19 +53,18 @@ function _set_vcs_info() {
 precmd_functions=(_set_face _set_vcs_info)
 
 # ── Color reference ──
-# Face success : yellow
-# Face error   : red
-# Git branch   : green
-# Git dirty    : orange (208)
-# User         : magenta
-# Host         : 117 (light blue)
-# Directory    : cyan
+# Face success : yellow       (status — keep colorful)
+# Face error   : red          (status — keep colorful)
+# Git branch   : green        (repo context — meaningful color)
+# Git dirty    : orange (208) (repo context — meaningful color)
+# User@host    : 245 (gray)   (static info — stays quiet)
+# Directory    : white/default (readable, no distraction)
 # Separators   : 245 (gray)
 
 # ── Build the prompt ──
 setopt PROMPT_SUBST
 
-PROMPT='%F{245}[%f${_prompt_face}%F{245}]%f ${vcs_info_msg_0_}${_prompt_untracked} %F{magenta}%n%f%F{245}@%f%F{117}%m%f %F{cyan}%(5~|%-1~/.../%3~|%~)%f
+PROMPT='%F{245}[%f${_prompt_face}%F{245}]%f ${vcs_info_msg_0_}${_prompt_untracked} %F{245}%n@%m%f %(5~|%-1~/.../%3~|%~)
 %F{245}$%f '
 
 # ── Right prompt (optional) ──
