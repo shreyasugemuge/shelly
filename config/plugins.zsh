@@ -4,11 +4,13 @@
 # Lightweight plugin loading — no framework needed.
 # Currently: zsh-autosuggestions, zsh-syntax-highlighting
 
+_brew_share="$(brew --prefix 2>/dev/null)/share"
+
 # ── zsh-autosuggestions ──
 # Shows ghost-text suggestions from history as you type.
 # Press → (right arrow) to accept, or keep typing to ignore.
-if [[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-    source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [[ -f "$_brew_share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$_brew_share/zsh-autosuggestions/zsh-autosuggestions.zsh"
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=245'
     ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 fi
@@ -16,6 +18,8 @@ fi
 # ── zsh-syntax-highlighting ──
 # Colors commands as you type: green = valid, red = not found.
 # MUST be sourced last (after all other plugins and widgets).
-if [[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-    source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [[ -f "$_brew_share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    source "$_brew_share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
+
+unset _brew_share

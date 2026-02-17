@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-02-17
+
+Auto-dependency management and startup system/network dashboard.
+
+### Added
+- **`config/deps.zsh`** — automatic dependency checker that runs once per day; installs Homebrew itself if missing, then installs any missing zsh plugin formulae
+- **`config/sysinfo.zsh`** — startup dashboard showing system specs (OS, CPU, GPU, RAM) and network info (public IP, local IP, Wi-Fi SSID, DNS) on every interactive shell open
+- Dynamic `brew --prefix` lookups in `plugins.zsh` — no more hardcoded `/opt/homebrew` paths, works on both Apple Silicon and Intel Macs
+
+### Changed
+- `.zshrc` module load order now includes `deps.zsh` first and `sysinfo.zsh` last
+- `plugins.zsh` uses `$(brew --prefix)` instead of hardcoded Homebrew paths
+- `install.sh` dry-run output now mentions automatic dependency installation
+
 ## [1.1.0] - 2026-02-16
 
 Performance, robustness, and quality-of-life improvements across the board.
@@ -109,7 +123,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/shreyas613/bash_old/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/shreyas613/bash_old/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/shreyas613/bash_old/compare/v0.3.0...v1.0.0
 [0.3.0]: https://github.com/shreyas613/bash_old/releases/tag/v0.3.0

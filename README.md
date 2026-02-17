@@ -1,6 +1,6 @@
 # Zsh Dotfiles
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux-orange.svg)](#prerequisites)
@@ -11,7 +11,11 @@ A modern, modular zsh configuration with a custom prompt featuring an expressive
 
 **Custom prompt** with an exit-code-aware face: `[-_-]` in yellow when the last command succeeded, `[O_O]` in red when it failed. Git branch and dirty/staged status are shown inline when you're inside a repository.
 
-**Modular configuration** split into focused files under `config/` — environment, prompt, aliases, and functions — all sourced automatically by `.zshrc`.
+**Modular configuration** split into focused files under `config/` — environment, prompt, aliases, functions, plugins, and more — all sourced automatically by `.zshrc`.
+
+**Auto-dependency management** via `deps.zsh` — on first shell open (or once per day), automatically installs Homebrew if missing, then installs any required zsh plugins that aren't present. Completely silent when everything is already in place.
+
+**Startup dashboard** showing system specs (OS, CPU, GPU, RAM) and network info (public/local IP, Wi-Fi SSID, DNS) on every interactive shell open.
 
 **XDG-compliant** layout using `~/.config/zsh/` for configuration modules, keeping your home directory clean.
 
@@ -42,9 +46,10 @@ Check which version is installed:
 ## Prerequisites
 
 - **zsh** — macOS includes it by default; on Linux run `sudo apt install zsh`
-- **curl** — for the network aliases (`globip`, `myip`)
 - **git** — for branch/status info in the prompt
-- **figlet** (optional) — for the `yell` alias
+- **curl** — for network aliases and startup info
+
+Homebrew and zsh plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) are installed automatically on first shell open if missing.
 
 ## File Structure
 
@@ -52,10 +57,13 @@ Check which version is installed:
 .
 ├── .zshrc                  Main config — sources all modules
 ├── config/
+│   ├── deps.zsh            Auto-installs Homebrew and missing plugins
 │   ├── environment.zsh     Exports, locale, zsh options, NVM setup
 │   ├── prompt.zsh          Custom prompt with face + git integration
 │   ├── aliases.zsh         Aliases organized by category
-│   └── functions.zsh       Utility functions (extract, mkcd, pan, etc.)
+│   ├── functions.zsh       Utility functions (extract, mkcd, pan, etc.)
+│   ├── plugins.zsh         Plugin loading (autosuggestions, syntax highlighting)
+│   └── sysinfo.zsh         Startup system and network dashboard
 ├── install.sh              Setup script (symlinks + backup)
 ├── VERSION                 Current version number
 ├── CHANGELOG.md            Release history (Keep a Changelog format)
@@ -130,12 +138,14 @@ This removes the symlinks and tells you where your backup is so you can restore 
 
 This project follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.md](CHANGELOG.md) for the full release history and [CONTRIBUTING.md](CONTRIBUTING.md) for the release process.
 
-| Version | Date       | Description                          |
-|---------|------------|--------------------------------------|
-| v1.0.0  | 2026-02-16 | Complete zsh rewrite, modular config |
-| v0.3.0  | 2017-04-14 | Last bash version (archived)         |
-| v0.2.0  | 2017-03-xx | Added network mode, college aliases  |
-| v0.1.0  | 2017-02-xx | Initial bash config                  |
+| Version | Date       | Description                              |
+|---------|------------|------------------------------------------|
+| v1.2.0  | 2026-02-17 | Auto-deps, startup system/network dashboard |
+| v1.1.0  | 2026-02-16 | Plugins, lazy NVM, cached compinit       |
+| v1.0.0  | 2026-02-16 | Complete zsh rewrite, modular config     |
+| v0.3.0  | 2017-04-14 | Last bash version (archived)             |
+| v0.2.0  | 2017-03-xx | Added network mode, college aliases      |
+| v0.1.0  | 2017-02-xx | Initial bash config                      |
 
 ## Migration from Bash
 

@@ -16,13 +16,16 @@ unset _zshrc_realpath _zshrc_dir
 ZDOTDIR_CUSTOM="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 
 # ── Source modular configs ──
-# Order matters: environment first, then prompt, aliases, functions
+# Order matters: deps first (auto-installs missing packages),
+# then environment, prompt, aliases, functions, plugins, sysinfo last
 for config_file in \
+    "$ZDOTDIR_CUSTOM/deps.zsh" \
     "$ZDOTDIR_CUSTOM/environment.zsh" \
     "$ZDOTDIR_CUSTOM/prompt.zsh" \
     "$ZDOTDIR_CUSTOM/aliases.zsh" \
     "$ZDOTDIR_CUSTOM/functions.zsh" \
-    "$ZDOTDIR_CUSTOM/plugins.zsh"; do
+    "$ZDOTDIR_CUSTOM/plugins.zsh" \
+    "$ZDOTDIR_CUSTOM/sysinfo.zsh"; do
     [[ -f "$config_file" ]] && source "$config_file"
 done
 unset config_file

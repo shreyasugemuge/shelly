@@ -180,6 +180,7 @@ do_dry_run() {
     info "Would symlink ~/.zshrc → $REPO_DIR/.zshrc"
     info "Would symlink ~/.config/zsh → $REPO_DIR/config"
     info "Would create ~/.local/share/zsh and ~/.cache/zsh"
+    info "Would auto-install missing Homebrew dependencies on first shell open"
     info "Would offer to set zsh as default shell"
     echo ""
     ok "Dry run complete — run without --dry-run to install"

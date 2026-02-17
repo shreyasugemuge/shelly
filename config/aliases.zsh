@@ -5,10 +5,15 @@
 alias rm='rm -i'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias ls='ls -h --color=auto 2>/dev/null || ls -hG'
-alias la='ls -ah'
-alias ll='ls -lh'
-alias lla='ls -lah'
+# macOS (BSD) uses -G for color, Linux (GNU) uses --color=auto
+if ls --color=auto /dev/null &>/dev/null; then
+    alias ls='ls -h --color=auto'
+else
+    alias ls='ls -hG'
+fi
+alias la='ls -a'
+alias ll='ls -l'
+alias lla='ls -la'
 
 # ── Config Management ──
 alias zshrc='${EDITOR:-vim} ~/.zshrc'
