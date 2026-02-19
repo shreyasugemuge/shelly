@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-02-20
+
+Config cleanup and documentation.
+
+### Fixed
+- **`sysmon` now force-deletes stale btop/nvtop configs on every launch** — removes `~/.config/btop/btop.conf` and `~/.config/nvtop/interface.ini` before starting the dashboard, ensuring tools always launch with their defaults and no leftover config from previous experiments silently changes the layout
+
+### Added
+- **`CLAUDE.md`** — comprehensive sysmon section with architecture, Apple Silicon limitations, 6 development retrospectives (btop --conf hallucination, config file pollution, sudo in tmux, nvtop N/A fields, failed tool replacements, git lock files in sandbox)
+- **Known Issues** documented in CHANGELOG and README for nvtop Apple Silicon gaps and bandwhich sudo behavior
+
 ## [1.3.0] - 2026-02-19
 
 System monitoring dashboard, neofetch-style splash, and repo cleanup.
@@ -151,7 +162,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/shreyas613/bash_old/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/shreyas613/bash_old/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/shreyas613/bash_old/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/shreyas613/bash_old/compare/v1.1.0...v1.2.0

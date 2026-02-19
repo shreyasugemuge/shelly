@@ -125,6 +125,13 @@ _sysmon_launch() {
     # Kill existing session if present
     tmux has-session -t "$_SYSMON_SESSION" 2>/dev/null && tmux kill-session -t "$_SYSMON_SESSION"
 
+    # ── Force-clean tool configs ──
+    # Remove any stale btop/nvtop configs so tools always launch with
+    # defaults. This prevents leftover configs from previous experiments
+    # from silently changing the dashboard appearance.
+    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/btop/btop.conf" 2>/dev/null
+    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/nvtop/interface.ini" 2>/dev/null
+
     local has_gpu=false
     local has_nvtop=false
     _sysmon_has_gpu && has_gpu=true
