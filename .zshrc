@@ -25,6 +25,7 @@ for config_file in \
     "$ZDOTDIR_CUSTOM/aliases.zsh" \
     "$ZDOTDIR_CUSTOM/functions.zsh" \
     "$ZDOTDIR_CUSTOM/plugins.zsh" \
+    "$ZDOTDIR_CUSTOM/monitor.zsh" \
     "$ZDOTDIR_CUSTOM/sysinfo.zsh"; do
     [[ -f "$config_file" ]] && source "$config_file"
 done
