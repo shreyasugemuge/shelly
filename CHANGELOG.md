@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`sysmon` command** (`config/monitor.zsh`) — one-command system monitoring dashboard using tmux with btop (CPU/RAM/disk), nvtop (GPU), and bandwhich (per-process network bandwidth); auto-installs all prerequisites via brew/apt/dnf/pacman
 
 ### Changed
+- **Startup splash** (`config/sysinfo.zsh`) — replaced plain text dashboard with a neofetch-style splash screen: randomized ASCII art side-by-side with system stats, uptime, package count, git commit streak, and optional fortune quote; removed network calls from startup (use `myip` instead)
 - **`archive/.bashrc`** — scrubbed hardcoded MongoDB password, EC2 IPs, SSH keys, university credentials, and user-specific paths
 - **`CONTRIBUTING.md`** — fixed branch name `main` → `master`
 - **`README.md`** — added sysmon documentation, updated file structure tree with monitor.zsh, deploy.sh, and CLAUDE.md

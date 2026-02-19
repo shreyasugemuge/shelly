@@ -15,7 +15,7 @@ A modern, modular zsh configuration with a custom prompt featuring an expressive
 
 **Auto-dependency management** via `deps.zsh` — on first shell open (or once per day), automatically installs Homebrew if missing, then installs any required zsh plugins that aren't present. Completely silent when everything is already in place.
 
-**Startup dashboard** showing system specs (OS, CPU, GPU, RAM) and network info (public/local IP, Wi-Fi SSID, DNS) on every interactive shell open.
+**Personalized splash screen** on every shell open — randomized ASCII art alongside system stats (OS, CPU, GPU, RAM, uptime, packages, git streak), with an optional fortune quote. No network calls, stays fast.
 
 **XDG-compliant** layout using `~/.config/zsh/` for configuration modules, keeping your home directory clean.
 
