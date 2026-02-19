@@ -1,6 +1,6 @@
 # Zsh Dotfiles
 
-[![Version](https://img.shields.io/badge/version-1.2.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux-orange.svg)](#prerequisites)
@@ -163,6 +163,7 @@ This project follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.
 
 | Version | Date       | Description                              |
 |---------|------------|------------------------------------------|
+| v1.3.0  | 2026-02-19 | Sysmon dashboard, splash screen, cleanup    |
 | v1.2.1  | 2026-02-17 | Muted prompt/dashboard colors, CLAUDE.md    |
 | v1.2.0  | 2026-02-17 | Auto-deps, startup system/network dashboard |
 | v1.1.0  | 2026-02-16 | Plugins, lazy NVM, cached compinit       |

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-02-19
+
+System monitoring dashboard, neofetch-style splash, and repo cleanup.
+
 ### Added
 - **`sysmon` command** (`config/monitor.zsh`) — one-command system monitoring dashboard using tmux with btop (CPU/RAM/disk), nvtop (GPU), and bandwhich (per-process network bandwidth); auto-installs all prerequisites via brew/apt/dnf/pacman
 
@@ -143,7 +147,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/shreyas613/bash_old/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/shreyas613/bash_old/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/shreyas613/bash_old/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/shreyas613/bash_old/compare/v1.0.0...v1.1.0
