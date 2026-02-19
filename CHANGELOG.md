@@ -14,6 +14,10 @@ System monitoring dashboard, neofetch-style splash, and repo cleanup.
 ### Added
 - **`sysmon` command** (`config/monitor.zsh`) — one-command system monitoring dashboard using tmux with btop (CPU/RAM/disk), nvtop (GPU), and bandwhich (per-process network bandwidth); auto-installs all prerequisites via brew/apt/dnf/pacman
 
+### Known Issues
+- **nvtop on Apple Silicon**: GPU %, VRAM bar, and process-level GPU % work; everything else (clock rates, temperature, fan speed, power draw, PCIe TX/RX, per-process GPU MEM/CPU) shows N/A — this is an Apple Metal API limitation, not a bug
+- **bandwhich needs sudo**: the bottom tmux pane may show a password prompt on macOS; click into it and enter your password
+
 ### Changed
 - **Startup splash** (`config/sysinfo.zsh`) — replaced plain text dashboard with a neofetch-style splash screen: randomized ASCII art side-by-side with system stats, uptime, package count, git commit streak, and optional fortune quote; removed network calls from startup (use `myip` instead)
 - **`archive/.bashrc`** — scrubbed hardcoded MongoDB password, EC2 IPs, SSH keys, university credentials, and user-specific paths

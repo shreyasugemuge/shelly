@@ -66,7 +66,7 @@ Homebrew and zsh plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) are 
 │   ├── functions.zsh       Utility functions (extract, mkcd, pan, etc.)
 │   ├── plugins.zsh         Plugin loading (autosuggestions, syntax highlighting)
 │   ├── monitor.zsh         System monitor dashboard (sysmon command)
-│   └── sysinfo.zsh         Startup system and network dashboard
+│   └── sysinfo.zsh         Neofetch-style startup splash screen
 ├── install.sh              Setup script (symlinks + backup)
 ├── deploy.sh               One-command push, tag, and GitHub release
 ├── CLAUDE.md               Project context for AI assistants
@@ -140,6 +140,8 @@ Run `sysmon` to launch a tmux-based monitoring dashboard. On first run it auto-i
 | `sysmon help`   | Quick reference                          |
 
 Inside the dashboard: mouse is enabled for pane switching/resizing, `Ctrl-b d` to detach, `q` to quit a pane's tool.
+
+**Notes**: On Apple Silicon, nvtop shows GPU utilization % and VRAM but most other fields (temperature, fan, power, clock rates) display N/A — this is an Apple Metal API limitation, not a bug. bandwhich requires sudo for packet capture; click into the bottom pane and enter your password if prompted.
 
 ## Customization
 
