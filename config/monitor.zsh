@@ -3,23 +3,23 @@
 #
 # One command — `sysmon` — that installs all prerequisites and launches
 # a tmux-based monitoring dashboard with:
-#   • btop   → CPU, RAM, disk, processes  (main pane)
-#   • nvtop  → GPU monitoring             (right pane, if GPU present)
-#   • bandwhich → per-process network I/O  (bottom pane)
+#   • btop   → all CPU cores + memory + network (left pane)
+#   • nvtop  → GPU % chart + VRAM bar          (right pane, N/A fields hidden)
 #
-# Layout (with GPU):             Layout (without GPU):
-#  ┌──────────┬─────────┐        ┌────────────────────┐
-#  │          │         │        │                    │
-#  │  btop    │  nvtop  │        │       btop         │
-#  │          │         │        │                    │
-#  ├──────────┴─────────┤        ├────────────────────┤
-#  │    bandwhich        │        │     bandwhich       │
-#  └────────────────────┘        └────────────────────┘
+# Layout:
+#  ┌──────────────┬──────────┐
+#  │              │          │
+#  │  btop        │  nvtop   │
+#  │  CPU+mem+net │  GPU %   │
+#  │              │  VRAM    │
+#  │              │          │
+#  └──────────────┴──────────┘
 #
 # Usage:
 #   sysmon          — launch dashboard (install deps if needed)
 #   sysmon kill     — tear down the dashboard session
 #   sysmon status   — check which monitor tools are installed
+#   sysmon help     — quick reference
 
 _SYSMON_SESSION="sysmon"
 
@@ -43,15 +43,13 @@ _sysmon_pkg_install() {
 # ── Check if a GPU is present ──
 _sysmon_has_gpu() {
     if [[ "$OSTYPE" == darwin* ]]; then
-        # Apple Silicon has integrated GPU; discrete GPUs show in SPDisplaysDataType
         system_profiler SPDisplaysDataType 2>/dev/null | grep -qi 'vendor\|chipset\|chip:' 2>/dev/null
     else
-        # Linux: check for NVIDIA/AMD/Intel discrete GPU
         lspci 2>/dev/null | grep -qiE 'VGA|3D|Display' 2>/dev/null
     fi
 }
 
-# ── Check if NVIDIA GPU (nvtop needs this or AMD ROCm) ──
+# ── Check if NVIDIA GPU ──
 _sysmon_has_nvidia() {
     command -v nvidia-smi &>/dev/null || lspci 2>/dev/null | grep -qi nvidia 2>/dev/null
 }
@@ -61,25 +59,13 @@ _sysmon_ensure_deps() {
     local missing=()
     local installed_something=false
 
-    # tmux is required
-    if ! command -v tmux &>/dev/null; then
-        missing+=(tmux)
-    fi
+    # Core: tmux + btop
+    command -v tmux &>/dev/null || missing+=(tmux)
+    command -v btop &>/dev/null || missing+=(btop)
 
-    # btop — the star of the show
-    if ! command -v btop &>/dev/null; then
-        missing+=(btop)
-    fi
-
-    # bandwhich — per-process network bandwidth
-    if ! command -v bandwhich &>/dev/null; then
-        missing+=(bandwhich)
-    fi
-
-    # nvtop — only if a GPU is present and nvtop isn't installed
+    # nvtop — only if a GPU is present
     if _sysmon_has_gpu && ! command -v nvtop &>/dev/null; then
         if [[ "$OSTYPE" == darwin* ]]; then
-            # nvtop on macOS supports Apple Silicon GPU via Metal
             missing+=(nvtop)
         elif _sysmon_has_nvidia || lspci 2>/dev/null | grep -qiE 'AMD|ATI|Intel' 2>/dev/null; then
             missing+=(nvtop)
@@ -125,20 +111,82 @@ _sysmon_launch() {
     # Kill existing session if present
     tmux has-session -t "$_SYSMON_SESSION" 2>/dev/null && tmux kill-session -t "$_SYSMON_SESSION"
 
-    # ── Force-clean tool configs ──
-    # Remove any stale btop/nvtop configs so tools always launch with
-    # defaults. This prevents leftover configs from previous experiments
-    # from silently changing the dashboard appearance.
-    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/btop/btop.conf" 2>/dev/null
-    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/nvtop/interface.ini" 2>/dev/null
+    # ── Force-write btop config: CPU + memory + network ──
+    # Removes disks and process table so CPU core graphs get more space.
+    # Written fresh on every launch.
+    local btop_conf="${XDG_CONFIG_HOME:-$HOME/.config}/btop/btop.conf"
+    mkdir -p "${btop_conf:h}"
+    cat > "$btop_conf" << 'BTOPEOF'
+#* sysmon-managed btop config — written fresh on every sysmon launch
+shown_boxes = "cpu mem net"
+graph_symbol = "braille"
+graph_symbol_cpu = "braille"
+graph_symbol_net = "braille"
+theme_background = False
+color_theme = "Default"
+cpu_graph_upper = "total"
+cpu_graph_lower = "user"
+cpu_single_graph = False
+show_coretemp = True
+update_ms = 1000
+rounded_corners = True
+show_battery = True
+net_auto = True
+net_sync = True
+BTOPEOF
+
+    # ── Force-write nvtop config: hide all N/A fields on Apple Silicon ──
+    # Keeps GPU % chart and VRAM bar, hides broken clock/temp/fan/power fields.
+    # Written fresh on every launch.
+    if [[ "$OSTYPE" == darwin* ]]; then
+        local nvtop_conf="${XDG_CONFIG_HOME:-$HOME/.config}/nvtop/interface.ini"
+        mkdir -p "${nvtop_conf:h}"
+        cat > "$nvtop_conf" << 'NVTOPEOF'
+[General]
+UseColor = true
+UpdateInterval = 1000
+
+[Device 0]
+DeviceId = 0
+GPURate = true
+GPUClockRate = false
+VRAMRate = true
+VRAMClockRate = false
+Temperature = false
+FanSpeed = false
+Power = false
+EncoderRate = false
+DecoderRate = false
+PCIE_TX = false
+PCIE_RX = false
+
+[Chart 0]
+Displayed = true
+Type = GPU_USAGE
+DeviceId = 0
+
+[Chart 1]
+Displayed = true
+Type = VRAM_USAGE
+DeviceId = 0
+
+[Processes]
+DisplayField0 = PID
+DisplayField1 = GPU_USAGE
+DisplayField2 = VRAM_USAGE
+DisplayField3 = COMMAND
+SortBy = GPU_USAGE
+SortOrder = Descending
+NVTOPEOF
+    else
+        # On Linux, clean slate — let nvtop use defaults (fields work there)
+        rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/nvtop/interface.ini" 2>/dev/null
+    fi
 
     local has_gpu=false
     local has_nvtop=false
     _sysmon_has_gpu && has_gpu=true
     command -v nvtop &>/dev/null && has_nvtop=true
-
-    local has_bandwhich=false
-    command -v bandwhich &>/dev/null && has_bandwhich=true
 
     # ── Build the layout ──
     # Start session with btop in the main pane
@@ -147,21 +195,9 @@ _sysmon_launch() {
     if $has_gpu && $has_nvtop; then
         # Split right for nvtop (40% width)
         tmux split-window -h -t "$_SYSMON_SESSION" -p 40 'nvtop'
-        # Select the left pane (btop) then split bottom for network
-        tmux select-pane -t "$_SYSMON_SESSION:0.0"
     fi
 
-    if $has_bandwhich; then
-        # Split bottom for bandwhich (25% height)
-        # bandwhich needs sudo on Linux for packet capture
-        if [[ "$OSTYPE" == darwin* ]]; then
-            tmux split-window -v -t "$_SYSMON_SESSION:0.0" -p 25 'sudo bandwhich 2>/dev/null || bandwhich'
-        else
-            tmux split-window -v -t "$_SYSMON_SESSION:0.0" -p 25 'sudo bandwhich 2>/dev/null || bandwhich'
-        fi
-    fi
-
-    # Focus back on btop (top-left)
+    # Focus btop (left pane)
     tmux select-pane -t "$_SYSMON_SESSION:0.0"
 
     # Set pane borders to look clean
@@ -193,14 +229,13 @@ _sysmon_status() {
     echo ""
     echo -e "${_d}── sysmon status ──${_n}"
 
-    for tool in tmux btop nvtop bandwhich; do
+    for tool in tmux btop nvtop; do
         if command -v "$tool" &>/dev/null; then
             local ver
             case "$tool" in
-                tmux)      ver="$(tmux -V 2>/dev/null | awk '{print $2}')" ;;
-                btop)      ver="$(btop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
-                nvtop)     ver="$(nvtop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
-                bandwhich) ver="$(bandwhich --version 2>/dev/null | awk '{print $2}')" ;;
+                tmux)  ver="$(tmux -V 2>/dev/null | awk '{print $2}')" ;;
+                btop)  ver="$(btop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
+                nvtop) ver="$(nvtop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
             esac
             echo -e "  ${_g}✓${_n} ${tool}  ${_d}${ver}${_n}"
         else
@@ -246,9 +281,8 @@ function sysmon() {
             echo "  sysmon help      show this message"
             echo ""
             echo "  Dashboard panes:"
-            echo "    btop       CPU, RAM, disk, processes"
-            echo "    nvtop      GPU utilization (if GPU present)"
-            echo "    bandwhich  per-process network bandwidth"
+            echo "    btop       all CPU cores + memory + network (braille)"
+            echo "    nvtop      GPU utilization + VRAM (if GPU present)"
             echo ""
             echo "  Inside the dashboard:"
             echo "    mouse       click to switch panes, drag to resize"

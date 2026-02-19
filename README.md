@@ -1,6 +1,6 @@
 # Zsh Dotfiles
 
-[![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux-orange.svg)](#prerequisites)
@@ -19,7 +19,7 @@ A modern, modular zsh configuration with a custom prompt featuring an expressive
 
 **XDG-compliant** layout using `~/.config/zsh/` for configuration modules, keeping your home directory clean.
 
-**System monitoring dashboard** via `sysmon` — a single command that auto-installs btop, nvtop, and bandwhich, then launches a tmux-based dashboard showing CPU, RAM, disk, GPU, and per-process network bandwidth.
+**System monitoring dashboard** via `sysmon` — a single command that auto-installs btop and nvtop, then launches a tmux dashboard with all CPU cores, memory, and network graphs (btop, left) alongside GPU utilization and VRAM (nvtop, right). Clean two-pane layout with braille graphs, N/A fields hidden on Apple Silicon.
 
 **One-command install** via `install.sh` that backs up existing configs, creates symlinks, and optionally sets zsh as your default shell.
 
@@ -126,11 +126,20 @@ See `config/aliases.zsh` for the full list.
 
 Run `sysmon` to launch a tmux-based monitoring dashboard. On first run it auto-installs any missing tools.
 
-| Pane       | Tool      | What it shows                        |
-|------------|-----------|--------------------------------------|
-| Main       | btop      | CPU, RAM, disk, processes            |
-| Right      | nvtop     | GPU utilization (if GPU detected)    |
-| Bottom     | bandwhich | Per-process network bandwidth        |
+```
+┌──────────────┬──────────┐
+│              │          │
+│  btop        │  nvtop   │
+│  CPU+mem+net │  GPU %   │
+│              │  VRAM    │
+│              │          │
+└──────────────┴──────────┘
+```
+
+| Pane       | Tool      | What it shows                              |
+|------------|-----------|-------------------------------------------|
+| Left (60%) | btop      | All CPU cores + memory + network (braille) |
+| Right (40%)| nvtop     | GPU utilization % + VRAM bar               |
 
 | Command         | Description                              |
 |-----------------|------------------------------------------|
@@ -141,7 +150,7 @@ Run `sysmon` to launch a tmux-based monitoring dashboard. On first run it auto-i
 
 Inside the dashboard: mouse is enabled for pane switching/resizing, `Ctrl-b d` to detach, `q` to quit a pane's tool.
 
-**Notes**: On Apple Silicon, nvtop shows GPU utilization % and VRAM but most other fields (temperature, fan, power, clock rates) display N/A — this is an Apple Metal API limitation, not a bug. bandwhich requires sudo for packet capture; click into the bottom pane and enter your password if prompted.
+**Notes**: btop and nvtop configs are force-written on every `sysmon` launch to ensure a consistent layout. On Apple Silicon, nvtop's broken N/A fields (clock rates, temperature, fan, power) are hidden automatically.
 
 ## Customization
 
@@ -165,6 +174,7 @@ This project follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.
 
 | Version | Date       | Description                              |
 |---------|------------|------------------------------------------|
+| v1.3.2  | 2026-02-20 | Lean 2-pane sysmon, nvtop N/A fields hidden  |
 | v1.3.1  | 2026-02-20 | Sysmon config cleanup on every launch        |
 | v1.3.0  | 2026-02-19 | Sysmon dashboard, splash screen, cleanup    |
 | v1.2.1  | 2026-02-17 | Muted prompt/dashboard colors, CLAUDE.md    |

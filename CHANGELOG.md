@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-02-20
+
+Lean two-pane dashboard with clean configs.
+
+### Changed
+- **`sysmon` layout** — removed bandwhich (bottom strip) entirely; dashboard is now a clean two-pane split: btop (left 60%) + nvtop (right 40%)
+- **btop config** — force-written on every launch with `shown_boxes = "cpu mem net"` (removed disks and process table); all CPU cores get maximum space with braille graphs
+- **nvtop config** — force-written on every launch (macOS only) to hide all broken Apple Silicon N/A fields (GPU/MEM clock, temperature, fan speed, power, encoder/decoder, PCIe TX/RX); keeps only GPU % chart, VRAM bar, and trimmed process list (PID, GPU%, VRAM, command)
+
+### Removed
+- **bandwhich** — no longer installed or used by sysmon; per-process network bandwidth pane removed from dashboard
+
 ## [1.3.1] - 2026-02-20
 
 Config cleanup and documentation.
@@ -162,7 +174,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.3.2...HEAD
+[1.3.2]: https://github.com/shreyas613/bash_old/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/shreyas613/bash_old/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/shreyas613/bash_old/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/shreyas613/bash_old/compare/v1.2.0...v1.2.1
