@@ -19,37 +19,31 @@ A modular zsh configuration managed by Shreyas Ugemuge. It lives in `~/.dotfiles
 - **macOS-first, Linux-compatible**: guard platform-specific code with `[[ "$OSTYPE" == darwin* ]]` and always provide a Linux fallback.
 - **XDG-compliant**: config lives under `~/.config/zsh/`, not directly in `$HOME`.
 - **Performance matters**: NVM is lazy-loaded, compinit is cached daily, deps check runs once per day.
-- **sysmon does NOT write config files**: btop, nvtop, and other tools use their own default configs. Do not auto-generate `~/.config/btop/btop.conf` or `~/.config/nvtop/interface.ini` — these are user-managed and writing them causes confusion when reverting.
+- **sysmon force-writes config files on every launch**: btop.conf and nvtop's interface.ini are overwritten each time `sysmon` runs to ensure a consistent dashboard layout. This was a deliberate design choice after experiencing "sticky state" bugs where leftover config files survived git reverts and caused confusing layout changes. The force-write approach means the dashboard always matches what the code specifies.
 
 ## sysmon — System Monitor Dashboard
 
-The `sysmon` command (`config/monitor.zsh`) launches a tmux dashboard with btop, nvtop, and bandwhich.
+The `sysmon` command (`config/monitor.zsh`) launches a tmux dashboard with btop and nvtop.
 
 ### Architecture
 
-- btop: left pane (main), shows CPU/RAM/disk/processes/network
-- nvtop: right pane, shows GPU utilization (Apple Silicon via Metal)
-- bandwhich: bottom strip, shows per-process network bandwidth
+- btop: left pane (60%), shows all CPU cores (braille graphs) + memory + network
+- nvtop: right pane (40%), shows GPU utilization % chart + VRAM bar (N/A fields hidden on macOS)
 - tmux: session named "sysmon", mouse enabled, styled status bar
 - All tools auto-installed on first run via brew/apt/dnf/pacman
+- btop config (`~/.config/btop/btop.conf`) force-written on every launch: `shown_boxes = "cpu mem net"`, braille graphs, no disks, no process table
+- nvtop config (`~/.config/nvtop/interface.ini`) force-written on every launch (macOS only): hides all broken Apple Silicon N/A fields
 
 ### Known Limitations (Apple Silicon)
 
-nvtop on Apple Silicon (M-series) has significant gaps. These fields show N/A and cannot be fixed — they're unsupported by Apple's Metal API:
+nvtop on Apple Silicon (M-series) has significant gaps. These fields show N/A and cannot be fixed — they're unsupported by Apple's Metal API: GPU clock rate, VRAM clock rate, temperature, fan speed, power draw, PCIe TX/RX, per-process GPU MEM and CPU columns.
 
-- GPU clock rate (MHz): N/A
-- VRAM clock rate (MHz): N/A
-- Temperature: N/A°C
-- Fan speed: N/A
-- Power draw: N/A W
-- PCIe TX/RX: N/A
-- Process-level GPU MEM and CPU columns: mostly N/A
+What DOES work: GPU utilization % graph, VRAM usage bar (e.g. 4.16Gi/128Gi), and process-level GPU % for some workloads. The force-written nvtop config hides all N/A fields so the dashboard stays clean.
 
-What DOES work on nvtop Apple Silicon: GPU utilization % graph, VRAM usage bar (e.g. 4.16Gi/128Gi), and process-level GPU % for some workloads.
+### Removed Tools
 
-### bandwhich and sudo
-
-bandwhich needs root for packet capture. The tmux pane runs `sudo bandwhich 2>/dev/null || bandwhich`. On macOS, if sudo hasn't been recently authenticated, the pane will show a password prompt — the user must click into it and type their password.
+- **bandwhich** — removed in v1.3.2. Required sudo for packet capture, showed password prompts in tmux panes, and the user found per-process bandwidth data not useful enough to justify the space.
+- **asitop** — tried and rejected during v1.3.0 development. Requires sudo (reads powermetrics), can't prompt for password in tmux panes, and the output was considered low quality.
 
 ### Subcommands
 
@@ -85,9 +79,8 @@ Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `sty
 - `plugins.zsh` must source syntax-highlighting LAST (zsh requirement)
 - `~/.zshrc.local` is for machine-specific overrides and is not tracked in git
 - btop has NO `--conf` or `--config` CLI flag — it always reads `~/.config/btop/btop.conf`. Do not try to pass a config path.
-- Do not auto-generate config files for btop/nvtop/etc. from monitor.zsh. If the user deletes their config, the tool should just use defaults.
-- asitop requires `sudo` on macOS (reads powermetrics). It cannot prompt for a password inside a tmux pane. If using asitop in tmux, sudo must be pre-authenticated.
-- Tools that need sudo in tmux panes: asitop, bandwhich. Both fail silently or show a password prompt the user can't interact with unless they click into the pane.
+- btop and nvtop configs ARE force-written by monitor.zsh on every `sysmon` launch — this is intentional (see v1.3.2 design decision). Do not remove the force-write behavior.
+- asitop and bandwhich are no longer used — do not re-add them without solving the sudo-in-tmux problem first.
 
 ## Retrospectives — Lessons from v1.3.0 Development
 
@@ -105,7 +98,7 @@ These are documented so future AI assistants (and humans) don't repeat the same 
 
 ### 2. Writing config files from monitor.zsh causes sticky state
 
-**What happened**: monitor.zsh was modified to auto-write `~/.config/btop/btop.conf` with `shown_boxes = "cpu net"`. When the code was later reverted to v1.3.0, the config file persisted on the user's machine, making btop look different than expected even though the code was correct.
+**What happened**: monitor.zsh was modified to auto-write `~/.config/btop/btop.conf` with `shown_boxes = "cpu net"`. When the code was later reverted to v1.3.0, the confif file persisted on the user's machine, making btop look different than expected even though the code was correct.
 
 **Root cause**: Config files written to `~/.config/` are not tracked by git. Reverting the code doesn't revert the side effects on the filesystem.
 
@@ -119,7 +112,7 @@ These are documented so future AI assistants (and humans) don't repeat the same 
 
 **Root cause**: tmux panes don't have an interactive terminal for sudo password prompts unless the user clicks into them.
 
-**Fix**: Pre-authenticating sudo before launching tmux (`sudo -v`) works but adds friction. bandwhich has the same issue — it shows a "Password:" prompt in the pane.
+**Fix**: Pre-authenticating sudo before launching tmux (`sudo -v`) works but adds friction. bandwich has the same issue → it shows a "Password:" prompt in the pane.
 
 **Lesson**: Any tool requiring sudo in a tmux pane needs either pre-auth or a visible fallback message. Plan for this at design time.
 
@@ -135,7 +128,7 @@ These are documented so future AI assistants (and humans) don't repeat the same 
 
 **What happened**: Attempted to replace nvtop with macmon, asitop, istats, and various combinations. Each attempt introduced new problems (sudo requirements, gem dependencies, config file pollution) and the user repeatedly had to revert.
 
-**Lesson**: When something works "well enough" (nvtop shows GPU % which is the main thing), don't over-iterate trying to fix peripheral issues. The user's v1.3.0 with N/A fields visible was preferable to a series of broken alternatives. Improve incrementally, test each change, and don't stack untested changes.
+**Lesson**: When something works "well enough" (nbtop shows GPU % which is the main thing), don't over-iterate trying to fix peripheral issues. The user's v1.3.0 with N/A fields visible was preferable to a series of broken alternatives. Improve incrementally, test each change, and don't stack untested changes.
 
 ### 6. Git lock files in sandboxed environments
 
