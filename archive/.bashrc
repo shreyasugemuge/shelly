@@ -8,15 +8,14 @@
 export NVM_DIR="$HOME/.nvm"
   . "/usr/local/opt/nvm/nvm.sh"
 
-pwd_mongo="ACtbJRdvcUld9Tan"
+# pwd_mongo removed — was hardcoded credential (scrubbed in v1.3.0)
 
 export EDITOR="/usr/local/bin/emacs"
 export LANGUAGE="ENGLISH"
 export GPG_TTY=$(tty)
 
 #hk-auto
-alias ha_ec2="ssh ec2-user@35.171.157.34"
-alias kali="ssh -i \"uge_mac.pem\" root@ec2-13-235-68-207.ap-south-1.compute.amazonaws.com"
+# EC2/SSH aliases removed — contained hardcoded IPs and key paths (scrubbed in v1.3.0)
 
 # Prompt Building and setting
 # Colored braces
@@ -57,7 +56,7 @@ alias dload='~/scripts/download-site.sh'
 
 # push this to the repo
 # the repopath can be changed
-REPOPATH="/Users/shreyasugemuge/some_git_repos/bash"
+REPOPATH="$HOME/some_git_repos/bash"  # was hardcoded path, genericized in v1.3.0
 BRC=".bashrc"
 BNT=".bash_net"
 function updaterc()
@@ -84,7 +83,7 @@ alias bashnet='emacs ~/.bash_net'
 alias ItsSanketsBirthday='./scripts/sanket.sh'
 
 # directory shortcut
-alias ntwrkprog='cd /Users/shreyasugemuge/Desktop/collegestuff/network\ prog\ -\ CSE\ 4232' 
+# directory alias removed — contained hardcoded user path (scrubbed in v1.3.0)
 
 # quick hacks
 alias ..='cd ..'
@@ -101,7 +100,7 @@ alias la='ls -ah'
 alias ll='ls -lh'
 
 #SSH
-alias code01='ssh -x sugemuge2014@code01.fit.edu'
+# SSH alias removed — contained university credentials (scrubbed in v1.3.0)
 
 #GMAIL smtp 
 alias gsauth='~/scripts/GSauthentication.sh'

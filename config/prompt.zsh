@@ -58,7 +58,7 @@ precmd_functions=(_set_face _set_vcs_info)
 # Git branch   : green        (repo context — meaningful color)
 # Git dirty    : orange (208) (repo context — meaningful color)
 # User@host    : 245 (gray)   (static info — stays quiet)
-# Directory    : white/default (readable, no distraction)
+# Directory    : default       (readable, no distraction)
 # Separators   : 245 (gray)
 
 # ── Build the prompt ──

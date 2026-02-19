@@ -19,6 +19,8 @@ A modern, modular zsh configuration with a custom prompt featuring an expressive
 
 **XDG-compliant** layout using `~/.config/zsh/` for configuration modules, keeping your home directory clean.
 
+**System monitoring dashboard** via `sysmon` — a single command that auto-installs btop, nvtop, and bandwhich, then launches a tmux-based dashboard showing CPU, RAM, disk, GPU, and per-process network bandwidth.
+
 **One-command install** via `install.sh` that backs up existing configs, creates symlinks, and optionally sets zsh as your default shell.
 
 ## Quick Start
@@ -63,8 +65,11 @@ Homebrew and zsh plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) are 
 │   ├── aliases.zsh         Aliases organized by category
 │   ├── functions.zsh       Utility functions (extract, mkcd, pan, etc.)
 │   ├── plugins.zsh         Plugin loading (autosuggestions, syntax highlighting)
+│   ├── monitor.zsh         System monitor dashboard (sysmon command)
 │   └── sysinfo.zsh         Startup system and network dashboard
 ├── install.sh              Setup script (symlinks + backup)
+├── deploy.sh               One-command push, tag, and GitHub release
+├── CLAUDE.md               Project context for AI assistants
 ├── VERSION                 Current version number
 ├── CHANGELOG.md            Release history (Keep a Changelog format)
 ├── CONTRIBUTING.md         How to contribute and release
@@ -116,6 +121,25 @@ See `config/aliases.zsh` for the full list.
 | `extract f`  | Extract any archive (.tar.gz, .zip, .7z, etc) |
 | `whichip`    | Display public and local IP addresses         |
 | `weather`    | Quick weather report (optional: pass a city)  |
+
+## System Monitor
+
+Run `sysmon` to launch a tmux-based monitoring dashboard. On first run it auto-installs any missing tools.
+
+| Pane       | Tool      | What it shows                        |
+|------------|-----------|--------------------------------------|
+| Main       | btop      | CPU, RAM, disk, processes            |
+| Right      | nvtop     | GPU utilization (if GPU detected)    |
+| Bottom     | bandwhich | Per-process network bandwidth        |
+
+| Command         | Description                              |
+|-----------------|------------------------------------------|
+| `sysmon`        | Launch dashboard (installs deps if needed) |
+| `sysmon kill`   | Tear down the dashboard session          |
+| `sysmon status` | Check installed tools and session state  |
+| `sysmon help`   | Quick reference                          |
+
+Inside the dashboard: mouse is enabled for pane switching/resizing, `Ctrl-b d` to detach, `q` to quit a pane's tool.
 
 ## Customization
 

@@ -44,7 +44,7 @@ Prefixes: `feat`, `fix`, `docs`, `chore`, `refactor`, `style`, `test`
 3. Update comparison links at the bottom of `CHANGELOG.md`
 4. Commit: `chore: bump version to x.y.z`
 5. Tag: `git tag -a vx.y.z -m "Release vx.y.z"`
-6. Push: `git push origin main --tags`
+6. Push: `git push origin master --tags`
 
 ## Guidelines
 

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`sysmon` command** (`config/monitor.zsh`) — one-command system monitoring dashboard using tmux with btop (CPU/RAM/disk), nvtop (GPU), and bandwhich (per-process network bandwidth); auto-installs all prerequisites via brew/apt/dnf/pacman
+
+### Changed
+- **`archive/.bashrc`** — scrubbed hardcoded MongoDB password, EC2 IPs, SSH keys, university credentials, and user-specific paths
+- **`CONTRIBUTING.md`** — fixed branch name `main` → `master`
+- **`README.md`** — added sysmon documentation, updated file structure tree with monitor.zsh, deploy.sh, and CLAUDE.md
+
 ## [1.2.1] - 2026-02-17
 
 Tone down colors — let syntax highlighting do its job.
