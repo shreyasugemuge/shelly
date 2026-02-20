@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-02-20
+
+Thermal monitoring with macmon — the missing piece for Apple Silicon.
+
+### Added
+- **macmon pane** — bottom-right pane showing CPU/GPU temperature, power draw, and frequency in real-time; no sudo required, uses Apple's private APIs via Rust
+- **Auto-install macmon** — `vladkens/tap/macmon` installed via Homebrew on first `sysmon` run (macOS only)
+- **3-pane layout** — btop (left 60%) + nvtop (top-right) + macmon (bottom-right); macmon fills the gap left by nvtop's N/A temperature/power fields on Apple Silicon
+
+### Changed
+- **`sysmon status`** — now shows macmon version and install state
+- **`sysmon help`** — now lists macmon pane description
+
 ## [1.3.2] - 2026-02-20
 
 Lean two-pane dashboard with clean configs.
@@ -174,7 +187,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.3.3...HEAD
+[1.3.3]: https://github.com/shreyas613/bash_old/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/shreyas613/bash_old/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/shreyas613/bash_old/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/shreyas613/bash_old/compare/v1.2.1...v1.3.0

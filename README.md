@@ -1,6 +1,6 @@
 # Zsh Dotfiles
 
-[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.3.3-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux-orange.svg)](#prerequisites)
@@ -19,7 +19,7 @@ A modern, modular zsh configuration with a custom prompt featuring an expressive
 
 **XDG-compliant** layout using `~/.config/zsh/` for configuration modules, keeping your home directory clean.
 
-**System monitoring dashboard** via `sysmon` — a single command that auto-installs btop and nvtop, then launches a tmux dashboard with all CPU cores, memory, and network graphs (btop, left) alongside GPU utilization and VRAM (nvtop, right). Clean two-pane layout with braille graphs, N/A fields hidden on Apple Silicon.
+**System monitoring dashboard** via `sysmon` — a single command that auto-installs btop, nvtop, and macmon, then launches a tmux dashboard with all CPU cores, memory, and network graphs (btop, left), GPU utilization and VRAM (nvtop, top-right), and CPU/GPU temperature, power draw, and frequency (macmon, bottom-right). Braille graphs, N/A fields hidden on Apple Silicon.
 
 **One-command install** via `install.sh` that backs up existing configs, creates symlinks, and optionally sets zsh as your default shell.
 
@@ -128,18 +128,21 @@ Run `sysmon` to launch a tmux-based monitoring dashboard. On first run it auto-i
 
 ```
 ┌──────────────┬──────────┐
-│              │          │
-│  btop        │  nvtop   │
-│  CPU+mem+net │  GPU %   │
-│              │  VRAM    │
-│              │          │
+│              │  nvtop   │
+│  btop        │  GPU %   │
+│  CPU+mem+net │  VRAM    │
+│              ├──────────┤
+│              │  macmon  │
+│              │  Temp    │
+│              │  Power   │
 └──────────────┴──────────┘
 ```
 
-| Pane       | Tool      | What it shows                              |
-|------------|-----------|-------------------------------------------|
-| Left (60%) | btop      | All CPU cores + memory + network (braille) |
-| Right (40%)| nvtop     | GPU utilization % + VRAM bar               |
+| Pane              | Tool      | What it shows                              |
+|-------------------|-----------|-------------------------------------------|
+| Left (60%)        | btop      | All CPU cores + memory + network (braille) |
+| Top-right (50%)   | nvtop     | GPU utilization % + VRAM bar               |
+| Bottom-right (50%)| macmon    | CPU/GPU temp + power draw + frequency      |
 
 | Command         | Description                              |
 |-----------------|------------------------------------------|
@@ -150,7 +153,7 @@ Run `sysmon` to launch a tmux-based monitoring dashboard. On first run it auto-i
 
 Inside the dashboard: mouse is enabled for pane switching/resizing, `Ctrl-b d` to detach, `q` to quit a pane's tool.
 
-**Notes**: btop and nvtop configs are force-written on every `sysmon` launch to ensure a consistent layout. On Apple Silicon, nvtop's broken N/A fields (clock rates, temperature, fan, power) are hidden automatically.
+**Notes**: btop and nvtop configs are force-written on every `sysmon` launch to ensure a consistent layout. On Apple Silicon, nvtop's broken N/A fields (clock rates, temperature, fan, power) are hidden automatically. macmon provides the thermal/power data that nvtop can't access on Apple Silicon — no sudo required.
 
 ## Customization
 
@@ -174,6 +177,7 @@ This project follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.
 
 | Version | Date       | Description                              |
 |---------|------------|------------------------------------------|
+| v1.3.3  | 2026-02-20 | Added macmon thermal pane, 3-pane layout      |
 | v1.3.2  | 2026-02-20 | Lean 2-pane sysmon, nvtop N/A fields hidden  |
 | v1.3.1  | 2026-02-20 | Sysmon config cleanup on every launch        |
 | v1.3.0  | 2026-02-19 | Sysmon dashboard, splash screen, cleanup    |

@@ -4,15 +4,18 @@
 # One command — `sysmon` — that installs all prerequisites and launches
 # a tmux-based monitoring dashboard with:
 #   • btop   → all CPU cores + memory + network (left pane)
-#   • nvtop  → GPU % chart + VRAM bar          (right pane, N/A fields hidden)
+#   • nvtop  → GPU % chart + VRAM bar          (top-right pane, N/A fields hidden)
+#   • macmon → CPU/GPU temp + power + freq      (bottom-right pane, no sudo)
 #
 # Layout:
 #  ┌──────────────┬──────────┐
-#  │              │          │
-#  │  btop        │  nvtop   │
-#  │  CPU+mem+net │  GPU %   │
-#  │              │  VRAM    │
-#  │              │          │
+#  │              │  nvtop   │
+#  │  btop        │  GPU %   │
+#  │  CPU+mem+net │  VRAM    │
+#  │              ├──────────┤
+#  │              │  macmon  │
+#  │              │  Temp    │
+#  │              │  Power   │
 #  └──────────────┴──────────┘
 #
 # Usage:
@@ -70,6 +73,11 @@ _sysmon_ensure_deps() {
         elif _sysmon_has_nvidia || lspci 2>/dev/null | grep -qiE 'AMD|ATI|Intel' 2>/dev/null; then
             missing+=(nvtop)
         fi
+    fi
+
+    # macmon — Apple Silicon thermal/power monitor (no sudo needed)
+    if [[ "$OSTYPE" == darwin* ]] && ! command -v macmon &>/dev/null; then
+        missing+=(vladkens/tap/macmon)
     fi
 
     if (( ${#missing[@]} == 0 )); then
@@ -185,8 +193,10 @@ NVTOPEOF
 
     local has_gpu=false
     local has_nvtop=false
+    local has_macmon=false
     _sysmon_has_gpu && has_gpu=true
     command -v nvtop &>/dev/null && has_nvtop=true
+    command -v macmon &>/dev/null && has_macmon=true
 
     # ── Build the layout ──
     # Start session with btop in the main pane
@@ -195,6 +205,14 @@ NVTOPEOF
     if $has_gpu && $has_nvtop; then
         # Split right for nvtop (40% width)
         tmux split-window -h -t "$_SYSMON_SESSION" -p 40 'nvtop'
+
+        if $has_macmon; then
+            # Split the nvtop pane vertically — macmon in the bottom half
+            tmux split-window -v -t "$_SYSMON_SESSION:0.1" -p 50 'macmon'
+        fi
+    elif $has_macmon; then
+        # No GPU/nvtop — just put macmon on the right
+        tmux split-window -h -t "$_SYSMON_SESSION" -p 40 'macmon'
     fi
 
     # Focus btop (left pane)
@@ -229,17 +247,22 @@ _sysmon_status() {
     echo ""
     echo -e "${_d}── sysmon status ──${_n}"
 
-    for tool in tmux btop nvtop; do
+    for tool in tmux btop nvtop macmon; do
         if command -v "$tool" &>/dev/null; then
             local ver
             case "$tool" in
-                tmux)  ver="$(tmux -V 2>/dev/null | awk '{print $2}')" ;;
-                btop)  ver="$(btop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
-                nvtop) ver="$(nvtop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
+                tmux)   ver="$(tmux -V 2>/dev/null | awk '{print $2}')" ;;
+                btop)   ver="$(btop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
+                nvtop)  ver="$(nvtop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
+                macmon) ver="$(macmon --version 2>/dev/null | awk '{print $NF}')" ;;
             esac
             echo -e "  ${_g}✓${_n} ${tool}  ${_d}${ver}${_n}"
         else
-            echo -e "  ${_r}✗${_n} ${tool}  ${_d}not installed${_n}"
+            if [[ "$tool" == "macmon" && "$OSTYPE" != darwin* ]]; then
+                echo -e "  ${_d}·${_n} ${tool}  ${_d}macOS only${_n}"
+            else
+                echo -e "  ${_r}✗${_n} ${tool}  ${_d}not installed${_n}"
+            fi
         fi
     done
 
@@ -283,6 +306,7 @@ function sysmon() {
             echo "  Dashboard panes:"
             echo "    btop       all CPU cores + memory + network (braille)"
             echo "    nvtop      GPU utilization + VRAM (if GPU present)"
+            echo "    macmon     CPU/GPU temp + power + frequency (macOS)"
             echo ""
             echo "  Inside the dashboard:"
             echo "    mouse       click to switch panes, drag to resize"

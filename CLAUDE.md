@@ -23,14 +23,15 @@ A modular zsh configuration managed by Shreyas Ugemuge. It lives in `~/.dotfiles
 
 ## sysmon — System Monitor Dashboard
 
-The `sysmon` command (`config/monitor.zsh`) launches a tmux dashboard with btop and nvtop.
+The `sysmon` command (`config/monitor.zsh`) launches a tmux dashboard with btop, nvtop, and macmon.
 
 ### Architecture
 
 - btop: left pane (60%), shows all CPU cores (braille graphs) + memory + network
-- nvtop: right pane (40%), shows GPU utilization % chart + VRAM bar (N/A fields hidden on macOS)
+- nvtop: top-right pane, shows GPU utilization % chart + VRAM bar (N/A fields hidden on macOS)
+- macmon: bottom-right pane (macOS only), shows CPU/GPU temperature, power draw, and frequency — no sudo required
 - tmux: session named "sysmon", mouse enabled, styled status bar
-- All tools auto-installed on first run via brew/apt/dnf/pacman
+- All tools auto-installed on first run via brew/apt/dnf/pacman (`vladkens/tap/macmon` for macmon)
 - btop config (`~/.config/btop/btop.conf`) force-written on every launch: `shown_boxes = "cpu mem net"`, braille graphs, no disks, no process table
 - nvtop config (`~/.config/nvtop/interface.ini`) force-written on every launch (macOS only): hides all broken Apple Silicon N/A fields
 
@@ -98,7 +99,7 @@ These are documented so future AI assistants (and humans) don't repeat the same 
 
 ### 2. Writing config files from monitor.zsh causes sticky state
 
-**What happened**: monitor.zsh was modified to auto-write `~/.config/btop/btop.conf` with `shown_boxes = "cpu net"`. When the code was later reverted to v1.3.0, the confif file persisted on the user's machine, making btop look different than expected even though the code was correct.
+**What happened**: monitor.zsh was modified to auto-write `~/.config/btop/btop.conf` with `shown_boxes = "cpu net"`. When the code was later reverted to v1.3.0, the config file persisted on the user's machine, making btop look different than expected even though the code was correct.
 
 **Root cause**: Config files written to `~/.config/` are not tracked by git. Reverting the code doesn't revert the side effects on the filesystem.
 
@@ -112,7 +113,7 @@ These are documented so future AI assistants (and humans) don't repeat the same 
 
 **Root cause**: tmux panes don't have an interactive terminal for sudo password prompts unless the user clicks into them.
 
-**Fix**: Pre-authenticating sudo before launching tmux (`sudo -v`) works but adds friction. bandwich has the same issue → it shows a "Password:" prompt in the pane.
+**Fix**: Pre-authenticating sudo before launching tmux (`sudo -v`) works but adds friction. bandwhich has the same issue — it shows a "Password:" prompt in the pane.
 
 **Lesson**: Any tool requiring sudo in a tmux pane needs either pre-auth or a visible fallback message. Plan for this at design time.
 
@@ -128,7 +129,7 @@ These are documented so future AI assistants (and humans) don't repeat the same 
 
 **What happened**: Attempted to replace nvtop with macmon, asitop, istats, and various combinations. Each attempt introduced new problems (sudo requirements, gem dependencies, config file pollution) and the user repeatedly had to revert.
 
-**Lesson**: When something works "well enough" (nbtop shows GPU % which is the main thing), don't over-iterate trying to fix peripheral issues. The user's v1.3.0 with N/A fields visible was preferable to a series of broken alternatives. Improve incrementally, test each change, and don't stack untested changes.
+**Lesson**: When something works "well enough" (nvtop shows GPU % which is the main thing), don't over-iterate trying to fix peripheral issues. The user's v1.3.0 with N/A fields visible was preferable to a series of broken alternatives. Improve incrementally, test each change, and don't stack untested changes.
 
 ### 6. Git lock files in sandboxed environments
 
