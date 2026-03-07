@@ -1,8 +1,8 @@
-# Claude Context — Zsh Dotfiles
+# Claude Context — Shelly
 
 ## What This Is
 
-A modular zsh configuration managed by Shreyas Ugemuge. It lives in `~/.dotfiles/zsh` and gets symlinked into place by `install.sh`. The repo name (`bash_old`) is historical — this is pure zsh now.
+Shelly is a modular zsh configuration by Shreyas Ugemuge. It lives in `~/.dotfiles/zsh` and gets symlinked into place by `install.sh`.
 
 ## Repo Layout
 
@@ -43,8 +43,8 @@ What DOES work: GPU utilization % graph, VRAM usage bar (e.g. 4.16Gi/128Gi), and
 
 ### Removed Tools
 
-- **bandwhich** — removed in v1.3.2. Required sudo for packet capture, showed password prompts in tmux panes, and the user found per-process bandwidth data not useful enough to justify the space.
-- **asitop** — tried and rejected during v1.3.0 development. Requires sudo (reads powermetrics), can't prompt for password in tmux panes, and the output was considered low quality.
+- **bandwhich** — removed in v1.3.2. Required sudo for packet capture, showed password prompts in tmux panes, and per-process bandwidth data wasn't useful enough to justify the space.
+- **asitop** — tried and rejected during v1.3.0 development. Requires sudo (reads powermetrics), can't prompt for password in tmux panes, and output was low quality.
 
 ### Subcommands
 
@@ -59,7 +59,7 @@ There is NO `sysmon reset` subcommand. Any unrecognized argument falls through t
 
 Follows semver. See CONTRIBUTING.md for the full process. Quick version:
 1. Update `VERSION` file
-2. Update `CHANGELOG.md` (move Unreleased → new version section)
+2. Update `CHANGELOG.md` (move Unreleased -> new version section)
 3. Commit: `chore: bump version to x.y.z`
 4. Tag + push: `git tag -a vx.y.z -m "Release vx.y.z"` then `git push origin master --tags`
 5. Or use `deploy.sh` which handles push + tag + GitHub release in one command
@@ -68,10 +68,9 @@ Follows semver. See CONTRIBUTING.md for the full process. Quick version:
 
 Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `style:`
 
-## Remotes
+## Remote
 
-- `origin` — `shreyas613/bash_old` (Shreyas's fork, where work happens)
-- `upstream` — `shreyasugemuge/bash` (canonical repo)
+- `origin` — `shreyasugemuge/shelly` (canonical repo)
 
 ## Things to Watch Out For
 
@@ -129,12 +128,12 @@ These are documented so future AI assistants (and humans) don't repeat the same 
 
 **What happened**: Attempted to replace nvtop with macmon, asitop, istats, and various combinations. Each attempt introduced new problems (sudo requirements, gem dependencies, config file pollution) and the user repeatedly had to revert.
 
-**Lesson**: When something works "well enough" (nvtop shows GPU % which is the main thing), don't over-iterate trying to fix peripheral issues. The user's v1.3.0 with N/A fields visible was preferable to a series of broken alternatives. Improve incrementally, test each change, and don't stack untested changes.
+**Lesson**: When something works "well enough" (nvtop shows GPU % which is the main thing), don't over-iterate trying to fix peripheral issues. Improve incrementally, test each change, and don't stack untested changes.
 
 ### 6. Git lock files in sandboxed environments
 
 **What happened**: `.git/index.lock`, `.git/packed-refs.lock`, and `.git/refs/remotes/origin/master.lock` appeared in the sandbox and couldn't be removed (Operation not permitted). All local git operations failed.
 
-**Fix**: Used GitHub's Git Data API (create blob → create tree → create commit → update ref) via curl to push commits directly, bypassing local git entirely.
+**Fix**: Used GitHub's Git Data API (create blob -> create tree -> create commit -> update ref) via curl to push commits directly, bypassing local git entirely.
 
 **Lesson**: In sandboxed/containerized environments, git lock files may be immovable. The GitHub API is a reliable workaround for pushing changes.

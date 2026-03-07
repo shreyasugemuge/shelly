@@ -1,63 +1,52 @@
-# Zsh Dotfiles
+# Shelly
 
-[![Version](https://img.shields.io/badge/version-1.3.3-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux-orange.svg)](#prerequisites)
 
-A modern, modular zsh configuration with a custom prompt featuring an expressive face indicator and git integration.
+A modular zsh configuration with an expressive prompt, system monitoring dashboard, and auto-dependency management. macOS-first, Linux-compatible.
 
-## Features
+Named after a childhood nickname — and because it's a shell config.
 
-**Custom prompt** with an exit-code-aware face: `[-_-]` in yellow when the last command succeeded, `[O_O]` in red when it failed. Git branch and dirty/staged status are shown inline when you're inside a repository.
+## Highlights
 
-**Modular configuration** split into focused files under `config/` — environment, prompt, aliases, functions, plugins, and more — all sourced automatically by `.zshrc`.
-
-**Auto-dependency management** via `deps.zsh` — on first shell open (or once per day), automatically installs Homebrew if missing, then installs any required zsh plugins that aren't present. Completely silent when everything is already in place.
-
-**Personalized splash screen** on every shell open — randomized ASCII art alongside system stats (OS, CPU, GPU, RAM, uptime, packages, git streak), with an optional fortune quote. No network calls, stays fast.
-
-**XDG-compliant** layout using `~/.config/zsh/` for configuration modules, keeping your home directory clean.
-
-**System monitoring dashboard** via `sysmon` — a single command that auto-installs btop, nvtop, and macmon, then launches a tmux dashboard with all CPU cores, memory, and network graphs (btop, left), GPU utilization and VRAM (nvtop, top-right), and CPU/GPU temperature, power draw, and frequency (macmon, bottom-right). Braille graphs, N/A fields hidden on Apple Silicon.
-
-**One-command install** via `install.sh` that backs up existing configs, creates symlinks, and optionally sets zsh as your default shell.
+- **Expressive prompt** — `[-_-]` yellow on success, `[O_O]` red on failure, with inline git branch and dirty/staged indicators
+- **Modular config** — focused files under `config/`, sourced in order by `.zshrc`
+- **Auto-dependency management** — Homebrew and zsh plugins installed automatically on first shell open
+- **Startup splash** — randomized ASCII art + system stats, no network calls
+- **System monitoring** — `sysmon` launches a tmux dashboard with btop, nvtop, and macmon
+- **XDG-compliant** — config lives under `~/.config/zsh/`, not in `$HOME`
+- **One-command install** — backs up existing configs, symlinks everything into place
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/shreyas613/bash_old.git ~/.dotfiles/zsh
+git clone https://github.com/shreyasugemuge/shelly.git ~/.dotfiles/zsh
 cd ~/.dotfiles/zsh
-chmod +x install.sh
 ./install.sh
 exec zsh
 ```
 
-Preview what the installer will do without making changes:
+Preview without making changes:
 
 ```bash
 ./install.sh --dry-run
 ```
 
-Check which version is installed:
-
-```bash
-./install.sh --version
-```
-
 ## Prerequisites
 
-- **zsh** — macOS includes it by default; on Linux run `sudo apt install zsh`
-- **git** — for branch/status info in the prompt
-- **curl** — for network aliases and startup info
+- **zsh** — included on macOS; `sudo apt install zsh` on Linux
+- **git** — for prompt branch/status info
+- **curl** — for network aliases
 
-Homebrew and zsh plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) are installed automatically on first shell open if missing.
+Homebrew and zsh plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) are installed automatically if missing.
 
 ## File Structure
 
 ```
 .
-├── .zshrc                  Main config — sources all modules
+├── .zshrc                  Entry point — sources all modules
 ├── config/
 │   ├── deps.zsh            Auto-installs Homebrew and missing plugins
 │   ├── environment.zsh     Exports, locale, zsh options, NVM setup
@@ -69,62 +58,34 @@ Homebrew and zsh plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) are 
 │   └── sysinfo.zsh         Neofetch-style startup splash screen
 ├── install.sh              Setup script (symlinks + backup)
 ├── deploy.sh               One-command push, tag, and GitHub release
-├── CLAUDE.md               Project context for AI assistants
 ├── VERSION                 Current version number
-├── CHANGELOG.md            Release history (Keep a Changelog format)
+├── CHANGELOG.md            Release history
 ├── CONTRIBUTING.md         How to contribute and release
 ├── LICENSE                 MIT License
-├── .gitignore              Git ignore rules
 └── archive/                Original bash config (v0.3.0, preserved)
 ```
 
 ## Prompt
-
-The prompt renders on two lines:
 
 ```
 [-_-] (main) user@host ~/projects/myapp
 $
 ```
 
-| Element     | Color        | Description                                |
-|-------------|--------------|--------------------------------------------|
-| `[-_-]`     | yellow       | Last command succeeded (exit code 0)       |
-| `[O_O]`     | red          | Last command failed (exit code != 0)       |
-| `(main)`    | green        | Current git branch                         |
-| `*` / `+`   | orange       | Unstaged / staged changes                  |
-| `user@host` | gray         | Username and hostname (muted)              |
-| `~/path`    | default      | Current directory                          |
+| Element     | Color   | Meaning                          |
+|-------------|---------|----------------------------------|
+| `[-_-]`     | yellow  | Last command succeeded           |
+| `[O_O]`     | red     | Last command failed              |
+| `(main)`    | green   | Git branch                       |
+| `*` / `+`   | orange  | Unstaged / staged changes        |
+| `user@host` | gray    | Username and hostname (muted)    |
+| `~/path`    | default | Current directory                |
 
-When you're not inside a git repository, the branch section is hidden.
-
-## Useful Aliases
-
-| Alias      | Expands to                     |
-|------------|--------------------------------|
-| `..`       | `cd ..`                        |
-| `ll`       | `ls -lh`                       |
-| `refresh`  | `exec zsh` (reload shell)      |
-| `zshrc`    | Open `~/.zshrc` in your editor |
-| `myip`     | Show public and local IP       |
-| `gs`       | `git status`                   |
-| `yell`     | `figlet` (ASCII art text)      |
-
-See `config/aliases.zsh` for the full list.
-
-## Useful Functions
-
-| Function     | Description                                   |
-|--------------|-----------------------------------------------|
-| `pan cmd`    | Open a man page as PDF in Preview (macOS)     |
-| `mkcd dir`   | Create a directory and cd into it             |
-| `extract f`  | Extract any archive (.tar.gz, .zip, .7z, etc) |
-| `whichip`    | Display public and local IP addresses         |
-| `weather`    | Quick weather report (optional: pass a city)  |
+Branch section is hidden outside git repositories.
 
 ## System Monitor
 
-Run `sysmon` to launch a tmux-based monitoring dashboard. On first run it auto-installs any missing tools.
+`sysmon` launches a tmux dashboard. Auto-installs all tools on first run.
 
 ```
 ┌──────────────┬──────────┐
@@ -138,30 +99,32 @@ Run `sysmon` to launch a tmux-based monitoring dashboard. On first run it auto-i
 └──────────────┴──────────┘
 ```
 
-| Pane              | Tool      | What it shows                              |
-|-------------------|-----------|-------------------------------------------|
-| Left (60%)        | btop      | All CPU cores + memory + network (braille) |
-| Top-right (50%)   | nvtop     | GPU utilization % + VRAM bar               |
-| Bottom-right (50%)| macmon    | CPU/GPU temp + power draw + frequency      |
+| Pane               | Tool   | Shows                              |
+|--------------------|--------|------------------------------------|
+| Left (60%)         | btop   | All CPU cores + memory + network   |
+| Top-right          | nvtop  | GPU utilization % + VRAM bar       |
+| Bottom-right       | macmon | CPU/GPU temp + power + frequency   |
 
-| Command         | Description                              |
-|-----------------|------------------------------------------|
-| `sysmon`        | Launch dashboard (installs deps if needed) |
-| `sysmon kill`   | Tear down the dashboard session          |
-| `sysmon status` | Check installed tools and session state  |
-| `sysmon help`   | Quick reference                          |
+| Command         | Description                               |
+|-----------------|-------------------------------------------|
+| `sysmon`        | Launch or reattach                        |
+| `sysmon kill`   | Tear down the session                     |
+| `sysmon status` | Check installed tools and session state   |
+| `sysmon help`   | Quick reference                           |
 
-Inside the dashboard: mouse is enabled for pane switching/resizing, `Ctrl-b d` to detach, `q` to quit a pane's tool.
+btop and nvtop configs are force-written on every launch for consistency. On Apple Silicon, nvtop's N/A fields are hidden automatically; macmon provides the thermal/power data that nvtop can't.
 
-**Notes**: btop and nvtop configs are force-written on every `sysmon` launch to ensure a consistent layout. On Apple Silicon, nvtop's broken N/A fields (clock rates, temperature, fan, power) are hidden automatically. macmon provides the thermal/power data that nvtop can't access on Apple Silicon — no sudo required.
+## Aliases & Functions
+
+**Aliases** — `..`, `ll`, `refresh`, `zshrc`, `myip`, `gs`, `gb`, `gco`, `gsw`, `tre`, `yell`, and more. See `config/aliases.zsh`.
+
+**Functions** — `pan` (man page as PDF), `mkcd`, `extract` (any archive), `whichip`, `weather`, `portfind`. See `config/functions.zsh`.
 
 ## Customization
 
-**Local overrides**: Create `~/.zshrc.local` for machine-specific settings that shouldn't be committed. It's automatically sourced at the end of `.zshrc`.
-
-**Add aliases or functions**: Edit the appropriate file in `config/` or create a new `config/custom.zsh` and add a source line in `.zshrc`.
-
-**Change colors**: Prompt colors are defined in `config/prompt.zsh` using `%F{color}` codes.
+- **Local overrides**: `~/.zshrc.local` — machine-specific, not tracked by git
+- **Add aliases/functions**: edit the appropriate file in `config/`
+- **Change colors**: prompt colors in `config/prompt.zsh` using `%F{color}`
 
 ## Uninstall
 
@@ -169,34 +132,10 @@ Inside the dashboard: mouse is enabled for pane switching/resizing, `Ctrl-b d` t
 ./install.sh --uninstall
 ```
 
-This removes the symlinks and tells you where your backup is so you can restore your previous config.
-
 ## Versioning
 
-This project follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.md](CHANGELOG.md) for the full release history and [CONTRIBUTING.md](CONTRIBUTING.md) for the release process.
-
-| Version | Date       | Description                              |
-|---------|------------|------------------------------------------|
-| v1.3.3  | 2026-02-20 | Added macmon thermal pane, 3-pane layout      |
-| v1.3.2  | 2026-02-20 | Lean 2-pane sysmon, nvtop N/A fields hidden  |
-| v1.3.1  | 2026-02-20 | Sysmon config cleanup on every launch        |
-| v1.3.0  | 2026-02-19 | Sysmon dashboard, splash screen, cleanup    |
-| v1.2.1  | 2026-02-17 | Muted prompt/dashboard colors, CLAUDE.md    |
-| v1.2.0  | 2026-02-17 | Auto-deps, startup system/network dashboard |
-| v1.1.0  | 2026-02-16 | Plugins, lazy NVM, cached compinit       |
-| v1.0.0  | 2026-02-16 | Complete zsh rewrite, modular config     |
-| v0.3.0  | 2017-04-14 | Last bash version (archived)             |
-| v0.2.0  | 2017-03-xx | Added network mode, college aliases      |
-| v0.1.0  | 2017-02-xx | Initial bash config                      |
-
-## Migration from Bash
-
-The original bash configuration is preserved in `archive/` for reference. See `archive/.bashrc` for the legacy setup. The [CHANGELOG.md](CHANGELOG.md) documents exactly what was removed and why.
+Follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.md](CHANGELOG.md) for release history and [CONTRIBUTING.md](CONTRIBUTING.md) for the release process.
 
 ## License
 
 [MIT](LICENSE) — Shreyas Ugemuge, 2017–2026
-
-## Author
-
-Shreyas

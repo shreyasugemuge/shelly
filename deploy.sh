@@ -1,5 +1,5 @@
 #!/bin/bash
-# ── Deploy Script ──
+# ── Shelly Deploy ──
 # Author: Shreyas Ugemuge
 #
 # Pushes current branch, tags the release, and creates a GitHub release.

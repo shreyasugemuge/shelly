@@ -1,9 +1,9 @@
 #!/bin/bash
-# ── Zsh Dotfiles Installer ──
+# ── Shelly Installer ──
 # Author: Shreyas Ugemuge
 #
-# This script symlinks the zsh config files from this repo
-# into the right places on your system.
+# Symlinks shelly's zsh config files into the right places
+# on your system.
 #
 # Usage:
 #   ./install.sh            Normal install
@@ -39,11 +39,11 @@ for arg in "$@"; do
         --dry-run)   DRY_RUN=true ;;
         --uninstall) UNINSTALL=true ;;
         --version|-v)
-            echo "zsh-dotfiles v${VERSION}"
+            echo "shelly v${VERSION}"
             exit 0
             ;;
         --help|-h)
-            echo "zsh-dotfiles v${VERSION}"
+            echo "shelly v${VERSION}"
             echo ""
             echo "Usage: ./install.sh [OPTIONS]"
             echo ""
@@ -145,7 +145,7 @@ maybe_set_default_shell() {
 # ── Uninstall ──
 do_uninstall() {
     echo ""
-    echo -e "${YELLOW}Uninstalling zsh dotfiles...${NC}"
+    echo -e "${YELLOW}Uninstalling shelly...${NC}"
     echo ""
 
     if [[ -L "$ZSHRC_TARGET" ]]; then
@@ -190,7 +190,7 @@ do_dry_run() {
 # ── Main ──
 main() {
     echo ""
-    echo -e "${CYAN}── Zsh Dotfiles Installer v${VERSION} ──${NC}"
+    echo -e "${CYAN}── Shelly Installer v${VERSION} ──${NC}"
     echo ""
 
     if $UNINSTALL; then

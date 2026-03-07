@@ -1,8 +1,8 @@
 #!/bin/zsh
-# ── Zsh Dotfiles ──
-# Author: Shreyas Ugemuge
-# Repo:   https://github.com/shreyas613/bash_old
-# See:    CHANGELOG.md for release history
+# ── Shelly ──
+# A modular zsh configuration by Shreyas Ugemuge
+# Repo: https://github.com/shreyasugemuge/shelly
+# See:  CHANGELOG.md for release history
 
 # ── Version ──
 # Read from VERSION file relative to the real path of this .zshrc
@@ -66,7 +66,7 @@ bindkey '^[[B' history-search-forward
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 
 # ── Version alias ──
-alias dotfiles-version='echo "zsh-dotfiles v${ZSH_DOTFILES_VERSION}"'
+alias shelly-version='echo "shelly v${ZSH_DOTFILES_VERSION}"'
 
 # ── Startup benchmark ──
 alias zsh-bench='time zsh -i -c exit'

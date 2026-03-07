@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing to this dotfiles project.
+Thanks for your interest in contributing to Shelly.
 
 ## Versioning
 
