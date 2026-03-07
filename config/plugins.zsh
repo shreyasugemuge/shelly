@@ -3,23 +3,46 @@
 #
 # Lightweight plugin loading — no framework needed.
 # Currently: zsh-autosuggestions, zsh-syntax-highlighting
+#
+# Search order: Homebrew → /usr/share (apt/dnf) → /usr/local/share
 
+# ── Find plugin directories ──
+_plugin_dirs=()
 _brew_share="$(brew --prefix 2>/dev/null)/share"
+[[ -d "$_brew_share" ]] && _plugin_dirs+=("$_brew_share")
+[[ -d /usr/share ]] && _plugin_dirs+=(/usr/share)
+[[ -d /usr/local/share ]] && _plugin_dirs+=(/usr/local/share)
+
+_find_plugin() {
+    local plugin="$1"
+    for _dir in "${_plugin_dirs[@]}"; do
+        if [[ -f "$_dir/$plugin/$plugin.zsh" ]]; then
+            echo "$_dir/$plugin/$plugin.zsh"
+            return 0
+        fi
+    done
+    return 1
+}
 
 # ── zsh-autosuggestions ──
 # Shows ghost-text suggestions from history as you type.
 # Press → (right arrow) to accept, or keep typing to ignore.
-if [[ -f "$_brew_share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-    source "$_brew_share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+_as_path="$(_find_plugin zsh-autosuggestions)"
+if [[ -n "$_as_path" ]]; then
+    source "$_as_path"
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=245'
     ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 fi
+unset _as_path
 
 # ── zsh-syntax-highlighting ──
 # Colors commands as you type: green = valid, red = not found.
 # MUST be sourced last (after all other plugins and widgets).
-if [[ -f "$_brew_share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-    source "$_brew_share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+_sh_path="$(_find_plugin zsh-syntax-highlighting)"
+if [[ -n "$_sh_path" ]]; then
+    source "$_sh_path"
 fi
+unset _sh_path
 
-unset _brew_share
+unset _brew_share _plugin_dirs
+unfunction _find_plugin 2>/dev/null

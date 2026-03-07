@@ -1,9 +1,9 @@
 # Shelly
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux-orange.svg)](#prerequisites)
+[![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux%20|%20WSL-orange.svg)](#prerequisites)
 
 A modular zsh configuration with an expressive prompt, system monitoring dashboard, and auto-dependency management. macOS-first, Linux-compatible.
 
@@ -36,11 +36,11 @@ Preview without making changes:
 
 ## Prerequisites
 
-- **zsh** — included on macOS; `sudo apt install zsh` on Linux
+- **zsh** — included on macOS; `sudo apt install zsh` on Ubuntu/WSL; `sudo dnf install zsh` on Fedora; `sudo pacman -S zsh` on Arch
 - **git** — for prompt branch/status info
 - **curl** — for network aliases
 
-Homebrew and zsh plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) are installed automatically if missing.
+Zsh plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) are installed automatically via your platform's package manager (Homebrew, apt, dnf, or pacman).
 
 ## File Structure
 

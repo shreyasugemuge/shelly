@@ -70,4 +70,3 @@ alias shelly-version='echo "shelly v${ZSH_DOTFILES_VERSION}"'
 
 # ── Startup benchmark ──
 alias zsh-bench='time zsh -i -c exit'
-alias fanboost="~/Comfy/fan_boost.sh"

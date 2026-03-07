@@ -63,8 +63,11 @@ check_zsh() {
         err "zsh is not installed"
         echo ""
         echo "  Install it with:"
-        echo "    macOS:  brew install zsh"
-        echo "    Ubuntu: sudo apt install zsh"
+        echo "    macOS:          brew install zsh"
+        echo "    Ubuntu/Debian:  sudo apt install zsh"
+        echo "    Fedora:         sudo dnf install zsh"
+        echo "    Arch:           sudo pacman -S zsh"
+        echo "    WSL:            sudo apt install zsh"
         exit 1
     fi
     ok "zsh found: $(zsh --version | head -1)"

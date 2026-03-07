@@ -1,12 +1,11 @@
 # ── Dependency Check ──
 # Author: Shreyas Ugemuge
 #
-# On first run (or once per day): ensures Homebrew and required
-# packages are installed. Stays completely silent when everything
-# is already in place.
+# On first run (or once per day): ensures required zsh plugins
+# are installed. Uses the native package manager for each platform.
+# Stays completely silent when everything is already in place.
 
-# ── Required Homebrew formulae ──
-# Only what .zshrc actually needs — nothing extra.
+# ── Required plugins ──
 _zsh_deps=(
     zsh-autosuggestions
     zsh-syntax-highlighting
@@ -31,48 +30,66 @@ _should_check_deps() {
     fi
 }
 
-if _should_check_deps; then
-    # ── Step 1: Homebrew ──
-    if ! command -v brew &>/dev/null; then
-        echo ""
-        echo -e "\033[0;33m⚠  Homebrew not found — installing…\033[0m"
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# ── Check if a plugin is already installed somewhere ──
+_plugin_installed() {
+    local plugin="$1"
+    local brew_share="$(brew --prefix 2>/dev/null)/share"
+    for _dir in "$brew_share" /usr/share /usr/local/share; do
+        [[ -f "$_dir/$plugin/$plugin.zsh" ]] && return 0
+    done
+    return 1
+}
 
-        # Add brew to PATH for the rest of this session
-        if [[ -f /opt/homebrew/bin/brew ]]; then
-            eval "$(/opt/homebrew/bin/brew shellenv)"
-        elif [[ -f /usr/local/bin/brew ]]; then
-            eval "$(/usr/local/bin/brew shellenv)"
-        fi
-
-        if command -v brew &>/dev/null; then
-            echo -e "\033[0;32m✓\033[0m Homebrew installed"
-        else
-            echo -e "\033[0;31m✗\033[0m Homebrew installation failed — install manually from https://brew.sh"
-            touch "$_deps_stamp"
-            unset _deps_stamp _zsh_deps
-            unfunction _should_check_deps 2>/dev/null
-            return 0
-        fi
-    fi
-
-    # ── Step 2: Missing packages ──
-    _missing=()
+# ── Install missing plugins via the platform's package manager ──
+_install_plugins() {
+    local -a missing=()
     for _pkg in "${_zsh_deps[@]}"; do
-        if [[ ! -d "$(brew --prefix)/share/$_pkg" ]]; then
-            _missing+=("$_pkg")
-        fi
+        _plugin_installed "$_pkg" || missing+=("$_pkg")
     done
 
-    if (( ${#_missing[@]} )); then
-        echo -e "\033[0;36m·\033[0m Installing missing dependencies: \033[1m${_missing[*]}\033[0m"
-        brew install "${_missing[@]}" 2>&1 | tail -1
-        echo -e "\033[0;32m✓\033[0m Done. Restart your shell:  \033[1mexec zsh\033[0m"
-    fi
-    unset _missing _pkg
+    (( ${#missing[@]} )) || return 0
 
+    echo -e "\033[0;36m·\033[0m Installing missing plugins: \033[1m${missing[*]}\033[0m"
+
+    if [[ "$OSTYPE" == darwin* ]]; then
+        # macOS: use Homebrew (install it first if missing)
+        if ! command -v brew &>/dev/null; then
+            echo -e "\033[0;33m⚠  Homebrew not found — installing…\033[0m"
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            if [[ -f /opt/homebrew/bin/brew ]]; then
+                eval "$(/opt/homebrew/bin/brew shellenv)"
+            elif [[ -f /usr/local/bin/brew ]]; then
+                eval "$(/usr/local/bin/brew shellenv)"
+            fi
+            if ! command -v brew &>/dev/null; then
+                echo -e "\033[0;31m✗\033[0m Homebrew installation failed — install manually from https://brew.sh"
+                return 1
+            fi
+            echo -e "\033[0;32m✓\033[0m Homebrew installed"
+        fi
+        brew install "${missing[@]}" 2>&1 | tail -1
+    elif command -v apt-get &>/dev/null; then
+        sudo apt-get install -y "${missing[@]}"
+    elif command -v dnf &>/dev/null; then
+        sudo dnf install -y "${missing[@]}"
+    elif command -v pacman &>/dev/null; then
+        sudo pacman -S --noconfirm "${missing[@]}"
+    elif command -v brew &>/dev/null; then
+        # Linux with Homebrew (linuxbrew)
+        brew install "${missing[@]}" 2>&1 | tail -1
+    else
+        echo -e "\033[0;31m✗\033[0m No supported package manager found (brew/apt/dnf/pacman)"
+        echo "  Install manually: ${missing[*]}"
+        return 1
+    fi
+
+    echo -e "\033[0;32m✓\033[0m Done. Restart your shell:  \033[1mexec zsh\033[0m"
+}
+
+if _should_check_deps; then
+    _install_plugins
     touch "$_deps_stamp"
 fi
 
 unset _deps_stamp _zsh_deps
-unfunction _should_check_deps 2>/dev/null
+unfunction _should_check_deps _plugin_installed _install_plugins 2>/dev/null

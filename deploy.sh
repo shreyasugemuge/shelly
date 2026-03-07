@@ -71,7 +71,7 @@ fi
 # Check gh CLI
 if ! command -v gh &>/dev/null; then
     warn "gh CLI not found — will push but skip GitHub release"
-    warn "Install with: brew install gh"
+    warn "Install with: brew install gh (macOS) / apt install gh / dnf install gh"
     _has_gh=false
 else
     _has_gh=true

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-03-07
+
+Cross-platform support — shelly now works on macOS, Linux, and WSL out of the box.
+
+### Added
+- **Cross-platform plugin loading** — `plugins.zsh` searches Homebrew, `/usr/share`, and `/usr/local/share` for zsh plugins, working with any package manager
+- **Cross-platform dependency installation** — `deps.zsh` detects apt, dnf, pacman, or Homebrew and installs missing plugins via the native package manager
+- **Expanded install hints** — `install.sh` and `deploy.sh` now show instructions for macOS, Ubuntu/Debian, Fedora, Arch, and WSL
+
+### Changed
+- **`fanboost` alias** moved to `~/.zshrc.local` (machine-specific, not tracked)
+
 ## [2.0.0] - 2026-03-07
 
 ### Added
@@ -192,7 +204,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/shreyasugemuge/shelly/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/shreyasugemuge/shelly/compare/v1.3.3...v2.0.0
 [1.3.3]: https://github.com/shreyasugemuge/shelly/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/shreyasugemuge/shelly/compare/v1.3.1...v1.3.2
