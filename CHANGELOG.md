@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-03-07
+
+### Added
+- **`fanboost` alias** — shortcut to `~/Comfy/fan_boost.sh` for quick fan control
+
 ## [1.3.3] - 2026-02-20
 
 Thermal monitoring with macmon — the missing piece for Apple Silicon.
@@ -187,7 +192,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyas613/bash_old/compare/v1.3.3...HEAD
+[Unreleased]: https://github.com/shreyas613/bash_old/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/shreyas613/bash_old/compare/v1.3.3...v2.0.0
 [1.3.3]: https://github.com/shreyas613/bash_old/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/shreyas613/bash_old/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/shreyas613/bash_old/compare/v1.3.0...v1.3.1
