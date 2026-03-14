@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-03-14
+
+Dynamic dev workspace, quality hardening, and enhanced completions.
+
+### Added
+- **`devtmux` command** (`config/functions.zsh`) — dynamic multi-project tmux workspace; pick 1-3 projects from `~/code`, opens Claude Code + terminal per column; supports fzf or numbered-list fallback; subcommands: `kill`, `status`, `help`
+- **Tab completion** for `devtmux` and `sysmon` subcommands (kill, stop, status, info, help)
+- **Enhanced zsh completion system** — `zsh-completions` plugin for extra completions (brew, docker, git, etc.); partial/fuzzy matching, colored output, process-aware kill completion, and XDG-compliant completion cache
+- **Input validation** — `portfind` validates port range (1-65535), `mkcd` rejects empty args
+- **Shellcheck zero-warning baseline** — all `config/*.zsh` files pass shellcheck with documented inline suppressions
+- **Plugin sourcing order guard** — comment block in `plugins.zsh` warning that `zsh-syntax-highlighting` must be sourced last
+
+### Changed
+- **Platform detection centralized** — `IS_MACOS`/`IS_LINUX` set once in `.zshrc`, replacing 11 scattered `$OSTYPE` checks across config modules
+- **PATH deduplication** — `typeset -U path` in `environment.zsh` ensures no duplicate PATH entries
+- **Completion matching** — upgraded from simple case-insensitive to multi-strategy: case-insensitive, partial-word, substring
+
+### Security
+- **Secrets audit** — confirmed zero credentials, IPs, or machine-specific paths in tracked config files
+- **SC2155 fixes** — separated declaration and assignment to prevent masking return values
+
 ## [2.1.0] - 2026-03-07
 
 Cross-platform support — shelly now works on macOS, Linux, and WSL out of the box.
@@ -204,7 +225,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/shreyasugemuge/shelly/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/shreyasugemuge/shelly/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/shreyasugemuge/shelly/compare/v1.3.3...v2.0.0
 [1.3.3]: https://github.com/shreyasugemuge/shelly/compare/v1.3.2...v1.3.3
