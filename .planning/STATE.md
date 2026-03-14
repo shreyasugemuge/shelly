@@ -21,12 +21,14 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 ## Current Phase
 
 **Phase 1: Dynamic devtmux**
-- Status: Not started
+- Status: Context gathered
+- Context: `.planning/phases/01-dynamic-devtmux/01-CONTEXT.md`
 - Plan: Not yet created — run `/gsd:plan-phase 1`
 
 ## Recent Activity
 
+- 2026-03-14: Phase 1 context gathered (picker UX, session handling, code folder, layout)
 - 2026-03-14: Project initialized, codebase mapped, requirements defined, roadmap created
 
 ---
-*Last updated: 2026-03-14 after project initialization*
+*Last updated: 2026-03-14 after phase 1 context gathering*
