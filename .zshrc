@@ -17,6 +17,9 @@ unset _zshrc_realpath _zshrc_dir
 [[ "$OSTYPE" == darwin* ]] && IS_MACOS=true || IS_MACOS=false
 [[ "$OSTYPE" == linux*  ]] && IS_LINUX=true  || IS_LINUX=false
 
+# ── Brew prefix (computed once, reused by modules and completion) ──
+_SHELLY_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
+
 # ── Directory where config modules live ──
 ZDOTDIR_CUSTOM="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 
@@ -51,11 +54,10 @@ setopt INC_APPEND_HISTORY
 
 # ── Completion (cached — regenerate once per day) ──
 # Add zsh-completions to fpath if installed (extra completions for brew, docker, git, etc.)
-_brew_prefix="$(brew --prefix 2>/dev/null)"
-if [[ -d "$_brew_prefix/share/zsh-completions" ]]; then
-    fpath=("$_brew_prefix/share/zsh-completions" $fpath)
+if [[ -d "$_SHELLY_BREW_PREFIX/share/zsh-completions" ]]; then
+    fpath=("$_SHELLY_BREW_PREFIX/share/zsh-completions" $fpath)
 fi
-unset _brew_prefix
+unset _SHELLY_BREW_PREFIX
 autoload -Uz compinit
 _zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
 [[ -d "${_zcompdump:h}" ]] || mkdir -p "${_zcompdump:h}"

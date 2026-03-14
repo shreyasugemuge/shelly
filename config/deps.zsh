@@ -41,7 +41,7 @@ _should_check_deps() {
 _plugin_installed() {
     local plugin="$1"
     local brew_share
-    brew_share="$(brew --prefix 2>/dev/null)/share"
+    brew_share="${_SHELLY_BREW_PREFIX}/share"
     for _dir in "$brew_share" /usr/share /usr/local/share; do
         [[ -f "$_dir/$plugin/$plugin.zsh" ]] && return 0
     done

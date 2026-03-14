@@ -8,7 +8,7 @@
 
 # ── Find plugin directories ──
 _plugin_dirs=()
-_brew_share="$(brew --prefix 2>/dev/null)/share"
+_brew_share="${_SHELLY_BREW_PREFIX}/share"
 [[ -d "$_brew_share" ]] && _plugin_dirs+=("$_brew_share")
 [[ -d /usr/share ]] && _plugin_dirs+=(/usr/share)
 [[ -d /usr/local/share ]] && _plugin_dirs+=(/usr/local/share)

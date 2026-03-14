@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v4.2.0 (2026-03-14)
+**Current version:** v4.2.1 (2026-03-14)
 
 ## What This Is
 
@@ -25,6 +25,7 @@ Shelly is a modular zsh configuration and development workspace by Shreyas Ugemu
 - **No fzf**: completion uses native zsh `menu select` + `zsh-autosuggestions`. `devterm` uses numbered-list picker.
 - **iTerm2 for sysmon and devterm**: both features use the `it2api` Python CLI bundled with iTerm2. Requires Python API enabled in iTerm2 preferences.
 - **Force-written configs**: btop.conf and nvtop interface.ini are overwritten on every `sysmon` launch to prevent sticky-state bugs.
+- **Startup caching**: sysinfo.zsh caches hardware info (until reboot), package count (1h), and git streak (5m) to ~/.cache/zsh/sysinfo_cache. brew --prefix computed once in .zshrc as _SHELLY_BREW_PREFIX and reused by deps/plugins.
 
 ## sysmon — System Monitor Dashboard
 
@@ -78,3 +79,5 @@ Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `sty
 - `sysmon` and `devterm` check `$TERM_PROGRAM == "iTerm.app"` — in any other terminal they print a "non-iTerm mode" message and exit cleanly
 - `it2api` requires the Python `iterm2` module and the iTerm2 Python API to be enabled
 - In zsh, `local var` (without `=""`) inside a loop prints `var=value` to stdout on re-entry — always use `local var=""` when declaring variables in loops
+- sysinfo cache at ~/.cache/zsh/sysinfo_cache — delete it to force a full refresh on next shell open
+- _SHELLY_BREW_PREFIX is set in .zshrc before modules and unset after — modules must not depend on it persisting

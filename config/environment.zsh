@@ -44,7 +44,7 @@ if [[ -n "$_nvm_script" ]]; then
     [[ -d "$NVM_DIR/versions/node" ]] && {
         # shellcheck disable=SC2168
         # zsh allows 'local' at file scope; this is a zsh config file, not POSIX sh
-        local _default_node
+        local _default_node=""
         # shellcheck disable=SC2012
         # ls -d with sort -V is intentional here: we need version-sorted directory listing
         _default_node="$(ls -d "$NVM_DIR/versions/node/"* 2>/dev/null | sort -V | tail -1)"

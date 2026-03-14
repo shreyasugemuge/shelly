@@ -380,6 +380,11 @@ _dev_build_session() {
     for (( i=2; i<=count; i++ )); do
         col_out=$("$_IT2API_DEV" split-pane "$last_top" --vertical 2>/dev/null)
         col_sid=${${(M)${=col_out}:#id=*}#id=}
+        if [[ -z "$col_sid" ]]; then
+            echo -e "\033[0;33m·\033[0m Warning: failed to create column $i — continuing with $(( i - 1 )) columns" >&2
+            count=$(( i - 1 ))
+            break
+        fi
         top_sessions+=("$col_sid")
         last_top="$col_sid"
     done

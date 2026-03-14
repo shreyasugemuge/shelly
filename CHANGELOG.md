@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.2.1] - 2026-03-14
+
+Startup performance and robustness — no new features.
+
+### Fixed
+- **Startup: brew --prefix cached** — computed once in `.zshrc` and reused across deps/plugins/completions (~100-200ms saved)
+- **Startup: sysinfo cache** — hardware info (until reboot), package count (1h TTL), git streak (5m TTL) cached to `~/.cache/zsh/sysinfo_cache`; eliminates `system_profiler`, `brew list`, `git log` on most shell opens (~650-1400ms saved)
+- **Git streak guard** — skip `git log` when `$HOME` has no `.git` directory
+- **`local` declaration** — `environment.zsh` `local _default_node` → `local _default_node=""` (zsh typeset gotcha)
+- **devterm pane guard** — `_dev_build_session` checks `col_sid` non-empty after vertical split; gracefully degrades to fewer columns
+
 ## [4.2.0] - 2026-03-14
 
 Devterm full rebuild — pane resize, clean scrollback, locked titles, stale session cleanup.
@@ -336,7 +347,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.2.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.2.1...HEAD
+[4.2.1]: https://github.com/shreyasugemuge/shelly/compare/v4.2.0...v4.2.1
 [4.2.0]: https://github.com/shreyasugemuge/shelly/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/shreyasugemuge/shelly/compare/v4.0.1...v4.1.0
 [4.0.1]: https://github.com/shreyasugemuge/shelly/compare/v4.0.0...v4.0.1
