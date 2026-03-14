@@ -9,6 +9,7 @@
 _zsh_deps=(
     zsh-autosuggestions
     zsh-syntax-highlighting
+    zsh-completions
 )
 
 # ── Run at most once per day ──

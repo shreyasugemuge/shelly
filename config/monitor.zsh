@@ -332,3 +332,18 @@ function sysmon() {
             ;;
     esac
 }
+
+# ── Tab completion for sysmon ──
+_sysmon_completion() {
+    # shellcheck disable=SC2034
+    # subcmds is consumed by _describe, which shellcheck cannot trace
+    local -a subcmds=(
+        'kill:tear down the dashboard session'
+        'stop:tear down the dashboard session'
+        'status:check installed tools and session state'
+        'info:check installed tools and session state'
+        'help:show usage and pane reference'
+    )
+    _describe 'sysmon command' subcmds
+}
+compdef _sysmon_completion sysmon

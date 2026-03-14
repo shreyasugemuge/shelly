@@ -50,6 +50,12 @@ setopt APPEND_HISTORY
 setopt INC_APPEND_HISTORY
 
 # ── Completion (cached — regenerate once per day) ──
+# Add zsh-completions to fpath if installed (extra completions for brew, docker, git, etc.)
+_brew_prefix="$(brew --prefix 2>/dev/null)"
+if [[ -d "$_brew_prefix/share/zsh-completions" ]]; then
+    fpath=("$_brew_prefix/share/zsh-completions" $fpath)
+fi
+unset _brew_prefix
 autoload -Uz compinit
 _zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
 [[ -d "${_zcompdump:h}" ]] || mkdir -p "${_zcompdump:h}"
@@ -60,7 +66,19 @@ else
 fi
 unset _zcompdump
 zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:descriptions' format '%F{yellow}── %d ──%f'
+zstyle ':completion:*:messages' format '%F{purple}── %d ──%f'
+zstyle ':completion:*:warnings' format '%F{red}── no matches ──%f'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' squeeze-slashes true
+zstyle ':completion:*:*:*:*:processes' command 'ps -u $LOGNAME -o pid,user,comm -w'
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompcache"
 
 # ── Key bindings (emacs mode) ──
 bindkey -e

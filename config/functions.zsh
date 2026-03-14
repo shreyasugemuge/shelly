@@ -342,3 +342,18 @@ function devtmux() {
             ;;
     esac
 }
+
+# ── Tab completion for devtmux ──
+_devtmux_completion() {
+    # shellcheck disable=SC2034
+    # subcmds is consumed by _describe, which shellcheck cannot trace
+    local -a subcmds=(
+        'kill:tear down the devtmux session'
+        'stop:tear down the devtmux session'
+        'status:show session state and project panes'
+        'info:show session state and project panes'
+        'help:show usage reference'
+    )
+    _describe 'devtmux command' subcmds
+}
+compdef _devtmux_completion devtmux
