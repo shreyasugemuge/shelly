@@ -1,31 +1,28 @@
-# Shelly v3.0 — Dynamic Dev Workspace + Quality Hardening
+# Shelly — Modular Zsh Configuration
 
 ## What This Is
 
-Shelly is a modular zsh configuration by Shreyas Ugemuge. It provides a curated shell environment with custom prompt, system monitoring (`sysmon`), and development tooling. v3.0 adds a dynamic multi-project dev workspace (`devtmux`) and hardens the codebase with tech debt cleanup and security/QA improvements.
+Shelly is a modular zsh configuration by Shreyas Ugemuge. It provides a curated shell environment with custom prompt, system monitoring (`sysmon`), dynamic multi-project dev workspace (`devtmux`), and cross-platform support (macOS, Linux, WSL).
 
 ## Core Value
 
-`devtmux` lets you instantly spin up a tmux workspace with Claude Code + terminal for up to 3 projects, selected interactively from your code folder.
+A polished, portable shell environment that just works — with tools like `sysmon` and `devtmux` that eliminate manual tmux setup.
 
 ## Requirements
 
 ### Validated
 
-<!-- Shipped and confirmed valuable. -->
-
 - ✓ Modular zsh config with XDG compliance — v1.0
 - ✓ Custom prompt with git integration and exit status — v1.0
 - ✓ sysmon tmux dashboard (btop + nvtop + macmon) — v1.3.3
 - ✓ Cross-platform support (macOS, Linux, WSL) — v2.1.0
+- ✓ Dynamic `devtmux` command with interactive project picker — v3.0
+- ✓ Tech debt reduction (platform detection, PATH, hardcoded paths) — v3.0
+- ✓ QA hardening (shellcheck, input validation, security audit) — v3.0
 
 ### Active
 
-<!-- Current scope. Building toward these. -->
-
-- [ ] Dynamic `devtmux` command with interactive project picker
-- [ ] Tech debt reduction (platform detection, PATH, hardcoded paths)
-- [ ] QA hardening (shellcheck, input validation, security audit)
+<!-- Next milestone scope -->
 
 ### Out of Scope
 
@@ -33,31 +30,35 @@ Shelly is a modular zsh configuration by Shreyas Ugemuge. It provides a curated 
 - IDE integration — this is a terminal-first tool
 - Project templates or scaffolding — devtmux opens existing projects, doesn't create them
 - Re-adding asitop or bandwhich — sudo-in-tmux problem unsolved
+- Mobile app or GUI — shell-native
 
 ## Context
 
-- User currently has a hardcoded `devtmux` alias on their Mac that opens 3 specific projects (vipms, vipl-email-agent, erpnext) in tmux with Claude Code
-- Layout: 3 vertical columns, each with Claude Code (~85% top) + terminal (~15% bottom), session named "dev"
-- Goal is to make this dynamic and portable (part of the repo, not a local alias)
-- Codebase map exists at `.planning/codebase/` with 7 analysis documents
-- CONCERNS.md identifies 15+ areas for tech debt and security improvement
+Shipped v3.0 with 1,359 LOC across 8 zsh modules.
+Tech stack: zsh, tmux, brew/apt/dnf/pacman for deps.
+All 19 v3.0 requirements complete with zero known gaps.
+Enhanced completion system added (zsh-completions, fuzzy matching, tab completion for devtmux/sysmon).
 
 ## Constraints
 
 - **Platform**: macOS-first, Linux-compatible — guard platform-specific code
-- **Dependencies**: fzf is optional (fallback to numbered list)
-- **Performance**: No startup impact — devtmux is an on-demand command
-- **Compatibility**: Must work with existing sysmon tmux session (separate session names)
+- **Dependencies**: fzf optional (fallback to numbered list)
+- **Performance**: No startup impact from devtmux — on-demand command
+- **Compatibility**: Separate tmux sessions for dev and sysmon
 - **No breaking changes**: Existing aliases, functions, and prompt must continue working
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| fzf with numbered-list fallback | Best UX when available, still works without it | — Pending |
-| Function in functions.zsh, not alias | Dynamic behavior needs a proper function | — Pending |
-| Session name "dev" (matches current) | User muscle memory, separate from "sysmon" | — Pending |
-| Up to 3 projects | Matches current workflow, 3 columns fit well | — Pending |
+| fzf with numbered-list fallback | Best UX when available, still works without | ✓ Good |
+| Function in functions.zsh, not alias | Dynamic behavior needs a proper function | ✓ Good |
+| Session name "dev" (matches current) | User muscle memory, separate from "sysmon" | ✓ Good |
+| Up to 3 projects | Matches current workflow, 3 columns fit well | ✓ Good |
+| IS_MACOS/IS_LINUX booleans in .zshrc | Eliminates 11 scattered OSTYPE checks | ✓ Good |
+| typeset -U path for PATH dedup | Simple, preserves first-occurrence order | ✓ Good |
+| Shellcheck inline suppressions | Zero-warning baseline with documented exceptions | ✓ Good |
+| Force-write btop/nvtop configs | Prevents sticky state bugs from surviving git reverts | ✓ Good |
 
 ---
-*Last updated: 2026-03-14 after project initialization*
+*Last updated: 2026-03-14 after v3.0 milestone*
