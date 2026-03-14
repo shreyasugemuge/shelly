@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-03-14
+
+Replace tmux with iTerm2 native API for both sysmon and devterm. Rename devtmux to devterm.
+
+### Added
+- **iTerm2 Python API integration** — `sysmon` and `devterm` now use `it2api` (bundled with iTerm2) to create and manage windows/panes; requires iTerm2 with Python API enabled (Preferences → General → Magic → Enable Python API)
+- **`devterm` command** — renamed from `devtmux`; same picker and yolo mode, now backed by iTerm2 instead of tmux
+- **Window tracking** — session IDs persisted to `~/.cache/zsh/{sysmon,devterm}.session_id`; `sysmon`/`devterm` focus existing windows instead of relaunching
+
+### Changed
+- **`sysmon`** — launches an iTerm2 window instead of a tmux session; `sysmon kill` closes the window via AppleScript; `sysmon status` shows iTerm2 version instead of tmux
+- **`devterm`** (was `devtmux`) — same multi-project layout (Claude Code top + figlet terminal bottom, 1-3 columns) but backed by iTerm2
+- **`devterm status`** — simplified to show open/not open (pane list not available without tmux)
+- **Removed tmux aliases** — `a_tmux`, `l_tmux`, `n_tmux` removed from `aliases.zsh`
+
+### Removed
+- **tmux dependency** — no longer required; sysmon and devterm are macOS/iTerm2-only features
+
+### Deprecated
+- **`devtmux`** — still works as a shim that redirects to `devterm`; will be removed in a future version
+
 ## [3.2.1] - 2026-03-14
 
 devtmux enhancements and dependency management improvements.
@@ -280,7 +301,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.0.0...HEAD
+[4.0.0]: https://github.com/shreyasugemuge/shelly/compare/v3.2.1...v4.0.0
 [3.2.1]: https://github.com/shreyasugemuge/shelly/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/shreyasugemuge/shelly/compare/v3.1.1...v3.2.0
 [3.1.1]: https://github.com/shreyasugemuge/shelly/compare/v3.1.0...v3.1.1

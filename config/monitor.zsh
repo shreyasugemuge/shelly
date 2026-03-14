@@ -2,10 +2,10 @@
 # Author: Shreyas Ugemuge
 #
 # One command — `sysmon` — that installs all prerequisites and launches
-# a tmux-based monitoring dashboard with:
+# an iTerm2 monitoring window with:
 #   • btop   → all CPU cores + memory + network (left pane)
-#   • nvtop  → GPU % chart + VRAM bar          (top-right pane, N/A fields hidden)
-#   • macmon → CPU/GPU temp + power + freq      (bottom-right pane, no sudo)
+#   • nvtop  → GPU % chart + VRAM bar          (right pane, top)
+#   • macmon → CPU/GPU temp + power + freq      (right pane, bottom)
 #
 # Layout:
 #  ┌──────────────┬──────────┐
@@ -20,11 +20,11 @@
 #
 # Usage:
 #   sysmon          — launch dashboard (install deps if needed)
-#   sysmon kill     — tear down the dashboard session
+#   sysmon kill     — close the iTerm2 window
 #   sysmon status   — check which monitor tools are installed
 #   sysmon help     — quick reference
 
-_SYSMON_SESSION="sysmon"
+_IT2API="/Applications/iTerm.app/Contents/Resources/it2api"
 
 # ── Detect package manager ──
 _sysmon_pkg_install() {
@@ -59,13 +59,82 @@ _sysmon_has_nvidia() {
     command -v nvidia-smi &>/dev/null || lspci 2>/dev/null | grep -qi nvidia 2>/dev/null
 }
 
+# ── State file path (stores session ID of the btop pane) ──
+_sysmon_state_file() {
+    echo "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon.session_id"
+}
+
+# ── Ensure iTerm2 and Python module are available ──
+_sysmon_ensure_iterm2() {
+    if [[ ! -d "/Applications/iTerm.app" ]]; then
+        # shellcheck disable=SC2028
+        echo "\033[0;31m✗\033[0m sysmon requires iTerm2 — install from https://iterm2.com"
+        return 1
+    fi
+    if ! python3 -c "import iterm2" 2>/dev/null; then
+        # shellcheck disable=SC2028
+        echo "\033[0;33m·\033[0m Installing Python iterm2 module…"
+        pip3 install iterm2 --quiet || {
+            # shellcheck disable=SC2028
+            echo "\033[0;31m✗\033[0m Failed to install iterm2 module. Run: pip3 install iterm2"
+            return 1
+        }
+    fi
+}
+
+# ── Check if sysmon window is still open ──
+_sysmon_window_exists() {
+    local sid
+    sid="$(cat "$(_sysmon_state_file)" 2>/dev/null)" || return 1
+    [[ -n "$sid" ]] && "$_IT2API" show-hierarchy 2>/dev/null | grep -q "id=$sid"
+}
+
+# ── Focus the sysmon window ──
+_sysmon_focus_window() {
+    local sid
+    sid="$(cat "$(_sysmon_state_file)" 2>/dev/null)" || return 1
+    "$_IT2API" activate session "$sid" 2>/dev/null
+    "$_IT2API" activate-app 2>/dev/null
+}
+
+# ── Close the sysmon window ──
+_sysmon_close_window() {
+    local sid
+    sid="$(cat "$(_sysmon_state_file)" 2>/dev/null)" || {
+        # shellcheck disable=SC2028
+        echo "\033[0;90m·\033[0m No sysmon window tracked"
+        return 0
+    }
+    # Find window ID containing this session
+    local hierarchy cur_win="" win_id=""
+    hierarchy=$("$_IT2API" show-hierarchy 2>/dev/null)
+    while IFS= read -r line; do
+        if [[ "$line" =~ 'Window id=([^ ]+)' ]]; then
+            cur_win="${match[1]}"
+        elif [[ "$line" == *"id=$sid"* ]]; then
+            win_id="$cur_win"
+            break
+        fi
+    done <<< "$hierarchy"
+
+    rm -f "$(_sysmon_state_file)"
+    if [[ -n "$win_id" ]]; then
+        local win_num="${win_id#w}"
+        osascript -e "tell application \"iTerm2\" to close window id $win_num" 2>/dev/null
+        # shellcheck disable=SC2028
+        echo "\033[0;32m✓\033[0m sysmon window closed"
+    else
+        # shellcheck disable=SC2028
+        echo "\033[0;90m·\033[0m sysmon window already closed"
+    fi
+}
+
 # ── Install prerequisites ──
 _sysmon_ensure_deps() {
     local missing=()
     local installed_something=false
 
-    # Core: tmux + btop
-    command -v tmux &>/dev/null || missing+=(tmux)
+    # Core: btop (iTerm2 handles the window management)
     command -v btop &>/dev/null || missing+=(btop)
 
     # nvtop — only if a GPU is present
@@ -109,21 +178,12 @@ _sysmon_ensure_deps() {
 # ── Build and launch the dashboard ──
 _sysmon_launch() {
     # Preflight
-    if ! command -v tmux &>/dev/null; then
-        # shellcheck disable=SC2028
-        # zsh's echo expands \033 escape sequences by default; this is a zsh config file
-        echo "\033[0;31m✗\033[0m tmux is required but not installed"
-        return 1
-    fi
+    _sysmon_ensure_iterm2 || return 1
     if ! command -v btop &>/dev/null; then
         # shellcheck disable=SC2028
-        # zsh's echo expands \033 escape sequences by default; this is a zsh config file
         echo "\033[0;31m✗\033[0m btop is required but not installed"
         return 1
     fi
-
-    # Kill existing session if present
-    tmux has-session -t "$_SYSMON_SESSION" 2>/dev/null && tmux kill-session -t "$_SYSMON_SESSION"
 
     # ── Force-write btop config: CPU + memory + network ──
     # Removes disks and process table so CPU core graphs get more space.
@@ -204,43 +264,50 @@ NVTOPEOF
     command -v nvtop &>/dev/null && has_nvtop=true
     command -v macmon &>/dev/null && has_macmon=true
 
-    # ── Build the layout ──
-    # Start session with btop in the main pane
-    tmux new-session -d -s "$_SYSMON_SESSION" -x "$(tput cols)" -y "$(tput lines)" 'btop'
-
-    if $has_gpu && $has_nvtop; then
-        # Split right for nvtop (40% width)
-        tmux split-window -h -t "$_SYSMON_SESSION" -p 40 'nvtop'
-
-        if $has_macmon; then
-            # Split the nvtop pane vertically — macmon in the bottom half
-            tmux split-window -v -t "$_SYSMON_SESSION:0.1" -p 50 'macmon'
-        fi
-    elif $has_macmon; then
-        # No GPU/nvtop — just put macmon on the right
-        tmux split-window -h -t "$_SYSMON_SESSION" -p 40 'macmon'
+    # ── Create iTerm2 window with btop ──
+    local output session_id
+    output=$("$_IT2API" create-tab --command btop 2>/dev/null) || {
+        # shellcheck disable=SC2028
+        echo "\033[0;31m✗\033[0m Failed to create iTerm2 window"
+        echo "  Ensure Python API is enabled: iTerm2 → Preferences → General → Magic → Enable Python API"
+        return 1
+    }
+    # Parse session ID: output format is "Session "name" id=SESSION_ID WxH frame=..."
+    session_id=${${(M)${=output}:#id=*}#id=}
+    if [[ -z "$session_id" ]]; then
+        # shellcheck disable=SC2028
+        echo "\033[0;31m✗\033[0m Could not parse session ID from it2api output"
+        return 1
     fi
 
-    # Focus btop (left pane)
-    tmux select-pane -t "$_SYSMON_SESSION:0.0"
+    mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+    echo "$session_id" > "$(_sysmon_state_file)"
 
-    # Set pane borders to look clean
-    tmux set-option -t "$_SYSMON_SESSION" pane-border-style 'fg=colour237'
-    tmux set-option -t "$_SYSMON_SESSION" pane-active-border-style 'fg=colour245'
+    if $has_gpu && $has_nvtop; then
+        # Split right for nvtop (vertical divider = new pane to the right)
+        local nvtop_out nvtop_sid
+        nvtop_out=$("$_IT2API" split-pane "$session_id" --vertical 2>/dev/null)
+        nvtop_sid=${${(M)${=nvtop_out}:#id=*}#id=}
+        "$_IT2API" send-text "$nvtop_sid" $'nvtop\n' 2>/dev/null
 
-    # Status bar — minimal, informative
-    tmux set-option -t "$_SYSMON_SESSION" status on
-    tmux set-option -t "$_SYSMON_SESSION" status-style 'bg=colour235,fg=colour248'
-    tmux set-option -t "$_SYSMON_SESSION" status-left ' #[fg=colour214,bold]sysmon#[fg=colour248] │ '
-    tmux set-option -t "$_SYSMON_SESSION" status-left-length 20
-    tmux set-option -t "$_SYSMON_SESSION" status-right '#[fg=colour245]%H:%M │ q to exit pane '
-    tmux set-option -t "$_SYSMON_SESSION" status-right-length 30
+        if $has_macmon; then
+            # Split nvtop pane horizontally for macmon (new pane below)
+            local macmon_out macmon_sid
+            macmon_out=$("$_IT2API" split-pane "$nvtop_sid" 2>/dev/null)
+            macmon_sid=${${(M)${=macmon_out}:#id=*}#id=}
+            "$_IT2API" send-text "$macmon_sid" $'macmon\n' 2>/dev/null
+        fi
+    elif $has_macmon; then
+        # No GPU/nvtop — macmon on the right
+        local macmon_out macmon_sid
+        macmon_out=$("$_IT2API" split-pane "$session_id" --vertical 2>/dev/null)
+        macmon_sid=${${(M)${=macmon_out}:#id=*}#id=}
+        "$_IT2API" send-text "$macmon_sid" $'macmon\n' 2>/dev/null
+    fi
 
-    # Allow mouse for easy pane switching/resizing
-    tmux set-option -t "$_SYSMON_SESSION" mouse on
-
-    # Attach
-    tmux attach-session -t "$_SYSMON_SESSION"
+    # Focus btop pane
+    "$_IT2API" activate session "$session_id" 2>/dev/null
+    "$_IT2API" activate-app 2>/dev/null
 }
 
 # ── Status check ──
@@ -253,11 +320,10 @@ _sysmon_status() {
     echo ""
     echo -e "${_d}── sysmon status ──${_n}"
 
-    for tool in tmux btop nvtop macmon; do
+    for tool in btop nvtop macmon; do
         if command -v "$tool" &>/dev/null; then
             local ver
             case "$tool" in
-                tmux)   ver="$(tmux -V 2>/dev/null | awk '{print $2}')" ;;
                 btop)   ver="$(btop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
                 nvtop)  ver="$(nvtop --version 2>/dev/null | head -1 | awk '{print $NF}')" ;;
                 macmon) ver="$(macmon --version 2>/dev/null | awk '{print $NF}')" ;;
@@ -272,6 +338,15 @@ _sysmon_status() {
         fi
     done
 
+    # iTerm2
+    if [[ -d "/Applications/iTerm.app" ]]; then
+        local iterm_ver
+        iterm_ver=$(defaults read /Applications/iTerm.app/Contents/Info CFBundleShortVersionString 2>/dev/null || echo "?")
+        echo -e "  ${_g}✓${_n} iTerm2  ${_d}${iterm_ver}${_n}"
+    else
+        echo -e "  ${_r}✗${_n} iTerm2  ${_d}not installed${_n}"
+    fi
+
     echo ""
     if _sysmon_has_gpu; then
         echo -e "  ${_d}GPU${_n}  detected"
@@ -280,10 +355,10 @@ _sysmon_status() {
     fi
 
     echo ""
-    if tmux has-session -t "$_SYSMON_SESSION" 2>/dev/null; then
-        echo -e "  ${_d}Session${_n}  ${_g}running${_n} — \`sysmon\` to reattach, \`sysmon kill\` to stop"
+    if _sysmon_window_exists; then
+        echo -e "  ${_d}Window${_n}  ${_g}open${_n} — \`sysmon\` to focus, \`sysmon kill\` to close"
     else
-        echo -e "  ${_d}Session${_n}  not running — \`sysmon\` to start"
+        echo -e "  ${_d}Window${_n}  not open — \`sysmon\` to start"
     fi
     echo ""
 }
@@ -292,12 +367,7 @@ _sysmon_status() {
 function sysmon() {
     case "${1:-}" in
         kill|stop)
-            if tmux has-session -t "$_SYSMON_SESSION" 2>/dev/null; then
-                tmux kill-session -t "$_SYSMON_SESSION"
-                echo -e "\033[0;32m✓\033[0m sysmon session terminated"
-            else
-                echo -e "\033[0;90m·\033[0m No sysmon session running"
-            fi
+            _sysmon_close_window
             ;;
         status|info)
             _sysmon_status
@@ -305,8 +375,8 @@ function sysmon() {
         help|-h|--help)
             echo ""
             echo "  sysmon           launch the monitoring dashboard"
-            echo "  sysmon kill      tear down the dashboard session"
-            echo "  sysmon status    check installed tools & session"
+            echo "  sysmon kill      close the iTerm2 window"
+            echo "  sysmon status    check installed tools & window"
             echo "  sysmon help      show this message"
             echo ""
             echo "  Dashboard panes:"
@@ -314,18 +384,16 @@ function sysmon() {
             echo "    nvtop      GPU utilization + VRAM (if GPU present)"
             echo "    macmon     CPU/GPU temp + power + frequency (macOS)"
             echo ""
-            echo "  Inside the dashboard:"
-            echo "    mouse       click to switch panes, drag to resize"
-            echo "    Ctrl-b d    detach (dashboard keeps running)"
-            echo "    q           quit current pane's tool"
+            echo "  Requires iTerm2 with Python API enabled:"
+            echo "    Preferences → General → Magic → Enable Python API"
             echo ""
             ;;
         *)
             _sysmon_ensure_deps
-            # Reattach if session exists and is detached
-            if tmux has-session -t "$_SYSMON_SESSION" 2>/dev/null; then
-                echo -e "\033[0;90m·\033[0m Reattaching to existing sysmon session…"
-                tmux attach-session -t "$_SYSMON_SESSION"
+            if _sysmon_window_exists; then
+                # shellcheck disable=SC2028
+                echo "\033[0;90m·\033[0m Focusing existing sysmon window…"
+                _sysmon_focus_window
             else
                 _sysmon_launch
             fi
@@ -338,10 +406,10 @@ _sysmon_completion() {
     # shellcheck disable=SC2034
     # subcmds is consumed by _describe, which shellcheck cannot trace
     local -a subcmds=(
-        'kill:tear down the dashboard session'
-        'stop:tear down the dashboard session'
-        'status:check installed tools and session state'
-        'info:check installed tools and session state'
+        'kill:close the iTerm2 window'
+        'stop:close the iTerm2 window'
+        'status:check installed tools and window state'
+        'info:check installed tools and window state'
         'help:show usage and pane reference'
     )
     _describe 'sysmon command' subcmds

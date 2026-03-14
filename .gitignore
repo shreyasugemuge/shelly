@@ -32,6 +32,9 @@ __pycache__/
 # Backups created by install.sh
 .zsh_backup_*/
 
+# Deleted/archived files (not committed)
+to_delete/
+
 # Setup scripts (should not be committed)
 setup.sh
 fix.sh

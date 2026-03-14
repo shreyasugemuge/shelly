@@ -1,6 +1,6 @@
 # Shelly
 
-[![Version](https://img.shields.io/badge/version-3.2.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux%20|%20WSL-orange.svg)](#prerequisites)
@@ -14,10 +14,10 @@ Named after a childhood nickname — and because it's a shell config.
 - **Expressive prompt** — `[-_-]` yellow on success, `[O_O]` red on failure, with inline git branch and dirty/staged indicators
 - **Modular config** — focused files under `config/`, sourced in order by `.zshrc`
 - **Smart completions** — cached compinit with fuzzy/approximate matching, autosuggestions from history + completion
-- **Dev workspace** — `devtmux` picks 1-3 projects and opens Claude Code + terminal per column
+- **Dev workspace** — `devterm` picks 1-3 projects and opens Claude Code + terminal per column in iTerm2
 - **Auto-dependency management** — Homebrew and zsh plugins installed automatically on first shell open
 - **Startup splash** — randomized ASCII art + system stats, no network calls
-- **System monitoring** — `sysmon` launches a tmux dashboard with btop, nvtop, and macmon
+- **System monitoring** — `sysmon` launches an iTerm2 dashboard with btop, nvtop, and macmon
 - **XDG-compliant** — config lives under `~/.config/zsh/`, not in `$HOME`
 - **One-command install** — backs up existing configs, symlinks everything into place
 
@@ -88,7 +88,9 @@ Branch section is hidden outside git repositories.
 
 ## System Monitor
 
-`sysmon` launches a tmux dashboard. Auto-installs all tools on first run.
+`sysmon` launches an iTerm2 dashboard. Auto-installs all tools on first run.
+
+> **Requires** iTerm2 with Python API enabled: Preferences → General → Magic → Enable Python API
 
 ```
 ┌──────────────┬──────────┐
@@ -108,18 +110,20 @@ Branch section is hidden outside git repositories.
 | Top-right          | nvtop  | GPU utilization % + VRAM bar       |
 | Bottom-right       | macmon | CPU/GPU temp + power + frequency   |
 
-| Command         | Description                               |
-|-----------------|-------------------------------------------|
-| `sysmon`        | Launch or reattach                        |
-| `sysmon kill`   | Tear down the session                     |
-| `sysmon status` | Check installed tools and session state   |
-| `sysmon help`   | Quick reference                           |
+| Command         | Description                             |
+|-----------------|-----------------------------------------|
+| `sysmon`        | Launch or focus existing window         |
+| `sysmon kill`   | Close the iTerm2 window                 |
+| `sysmon status` | Check installed tools and window state  |
+| `sysmon help`   | Quick reference                         |
 
 btop and nvtop configs are force-written on every launch for consistency. On Apple Silicon, nvtop's N/A fields are hidden automatically; macmon provides the thermal/power data that nvtop can't.
 
 ## Dev Workspace
 
-`devtmux` launches a tmux workspace for multi-project development.
+`devterm` launches an iTerm2 workspace for multi-project development.
+
+> **Requires** iTerm2 with Python API enabled: Preferences → General → Magic → Enable Python API
 
 ```
 ┌──────────────┬──────────────┬──────────────┐
@@ -132,20 +136,22 @@ btop and nvtop configs are force-written on every launch for consistency. On App
 
 | Command          | Description                               |
 |------------------|-------------------------------------------|
-| `devtmux`        | Pick projects and launch                  |
-| `devtmux kill`   | Tear down the session                     |
-| `devtmux status` | Check session state                       |
-| `devtmux help`   | Quick reference                           |
+| `devterm`        | Pick projects and launch                  |
+| `devterm kill`   | Close the iTerm2 window                   |
+| `devterm status` | Check window state                        |
+| `devterm help`   | Quick reference                           |
 
 Append `y` to a project number to launch Claude Code with `--dangerously-skip-permissions` (yolo mode). For example, entering `1y 3` opens project 1 in skip-permissions mode and project 3 normally.
 
 Set `DEVTMUX_DIR` to change the code folder (defaults to `~/code`).
 
+`devtmux` still works as a shim that redirects to `devterm`.
+
 ## Aliases & Functions
 
 **Aliases** — `..`, `ll`, `refresh`, `zshrc`, `myip`, `gs`, `gb`, `gco`, `gsw`, `tre`, `yell`, and more. See `config/aliases.zsh`.
 
-**Functions** — `pan` (man page as PDF), `mkcd`, `extract` (any archive), `whichip`, `weather`, `portfind`, `devtmux`. See `config/functions.zsh`.
+**Functions** — `pan` (man page as PDF), `mkcd`, `extract` (any archive), `whichip`, `weather`, `portfind`, `devterm`. See `config/functions.zsh`.
 
 ## Customization
 

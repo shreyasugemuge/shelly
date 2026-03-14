@@ -103,8 +103,9 @@ zstyle ':completion:*:(ssh|scp|rsync):*' hosts \
     ${${${(M)${(f)"$(cat ~/.ssh/config 2>/dev/null)"}:#Host *}#Host }:#*[*?]*}
 
 # ── Register completions (must be after compinit) ──
-(( $+functions[_devtmux_completion] )) && compdef _devtmux_completion devtmux
-(( $+functions[_sysmon_completion] ))   && compdef _sysmon_completion sysmon
+(( $+functions[_dev_completion] )) && compdef _dev_completion devterm
+(( $+functions[_dev_completion] )) && compdef _dev_completion devtmux
+(( $+functions[_sysmon_completion] )) && compdef _sysmon_completion sysmon
 
 # ── Key bindings (emacs mode) ──
 bindkey -e

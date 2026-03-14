@@ -42,12 +42,6 @@ alias gitget='git fetch && git pull'
 alias gitsend='git add -A && git commit && git push'
 alias gitlog='git log -10 --pretty=oneline'
 
-# ── Tmux ──
-alias a_tmux='tmux attach -t'
-alias l_tmux='tmux list-sessions'
-alias n_tmux='tmux new-session -s'
-# devtmux moved to config/functions.zsh (v3.0)
-
 # ── Top / Monitoring ──
 alias mytop='top -o mem -O cpu 2>/dev/null || top'
 

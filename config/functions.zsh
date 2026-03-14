@@ -85,12 +85,17 @@ function portfind() {
     lsof -i :"$1"
 }
 
-# ── devtmux: Dynamic dev workspace ──
+# ── devterm: Dynamic dev workspace ──
 
-_DEVTMUX_SESSION="dev"
+_IT2API_DEV="/Applications/iTerm.app/Contents/Resources/it2api"
 
-# _devtmux_persist_dir: Save DEVTMUX_DIR to ~/.zshrc.local (guards against duplicates)
-_devtmux_persist_dir() {
+# _dev_state_file: Path to the file storing the primary session ID
+_dev_state_file() {
+    echo "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/devterm.session_id"
+}
+
+# _dev_persist_dir: Save DEVTMUX_DIR to ~/.zshrc.local (guards against duplicates)
+_dev_persist_dir() {
     local dir="$1"
     local local_rc="$HOME/.zshrc.local"
     if [[ -f "$local_rc" ]] && grep -q 'DEVTMUX_DIR' "$local_rc"; then
@@ -100,8 +105,8 @@ _devtmux_persist_dir() {
     echo -e "\033[0;90m·\033[0m Saved DEVTMUX_DIR to ~/.zshrc.local"
 }
 
-# _devtmux_get_code_dir: Discover code folder (env var, default, or prompt)
-_devtmux_get_code_dir() {
+# _dev_get_code_dir: Discover code folder (env var, default, or prompt)
+_dev_get_code_dir() {
     local dir="${DEVTMUX_DIR:-$HOME/code}"
     if [[ ! -d "$dir" ]]; then
         echo -e "\033[0;33m·\033[0m Code folder not found: $dir" >&2
@@ -112,14 +117,14 @@ _devtmux_get_code_dir() {
             echo -e "\033[0;31m✗\033[0m Directory does not exist: $dir" >&2
             return 1
         fi
-        _devtmux_persist_dir "$dir"
+        _dev_persist_dir "$dir"
         export DEVTMUX_DIR="$dir"
     fi
     echo "$dir"
 }
 
-# _devtmux_pick_projects: Interactive project picker (numbered list)
-_devtmux_pick_projects() {
+# _dev_pick_projects: Interactive project picker (numbered list)
+_dev_pick_projects() {
     local code_dir="$1"
     local names=()
     local branches=()
@@ -136,7 +141,7 @@ _devtmux_pick_projects() {
     fi
 
     echo "" >&2
-    echo -e "  \033[1mdevtmux\033[0m — pick 1-3 projects" >&2
+    echo -e "  \033[1mdevterm\033[0m — pick 1-3 projects" >&2
     echo "" >&2
     for (( i=1; i<=${#names[@]}; i++ )); do
         printf "  \033[0;33m%2d\033[0m  %s \033[0;90m(%s)\033[0m\n" "$i" "${names[$i]}" "${branches[$i]}" >&2
@@ -175,8 +180,54 @@ _devtmux_pick_projects() {
     printf '%s\n' "${selected[@]}"
 }
 
-# _devtmux_build_session: Build the tmux layout with one column per project
-_devtmux_build_session() {
+# _dev_window_exists: Check if the tracked devterm window is still open
+_dev_window_exists() {
+    local sid
+    sid="$(cat "$(_dev_state_file)" 2>/dev/null)" || return 1
+    [[ -n "$sid" ]] && "$_IT2API_DEV" show-hierarchy 2>/dev/null | grep -q "id=$sid"
+}
+
+# _dev_focus_window: Bring the devterm window to front
+_dev_focus_window() {
+    local sid
+    sid="$(cat "$(_dev_state_file)" 2>/dev/null)" || return 1
+    "$_IT2API_DEV" activate session "$sid" 2>/dev/null
+    "$_IT2API_DEV" activate-app 2>/dev/null
+}
+
+# _dev_close_window: Close the devterm iTerm2 window
+_dev_close_window() {
+    local sid
+    sid="$(cat "$(_dev_state_file)" 2>/dev/null)" || {
+        # shellcheck disable=SC2028
+        echo "\033[0;90m·\033[0m No devterm window tracked"
+        return 0
+    }
+    local hierarchy cur_win="" win_id=""
+    hierarchy=$("$_IT2API_DEV" show-hierarchy 2>/dev/null)
+    while IFS= read -r line; do
+        if [[ "$line" =~ 'Window id=([^ ]+)' ]]; then
+            cur_win="${match[1]}"
+        elif [[ "$line" == *"id=$sid"* ]]; then
+            win_id="$cur_win"
+            break
+        fi
+    done <<< "$hierarchy"
+
+    rm -f "$(_dev_state_file)"
+    if [[ -n "$win_id" ]]; then
+        local win_num="${win_id#w}"
+        osascript -e "tell application \"iTerm2\" to close window id $win_num" 2>/dev/null
+        # shellcheck disable=SC2028
+        echo "\033[0;32m✓\033[0m devterm window closed"
+    else
+        # shellcheck disable=SC2028
+        echo "\033[0;90m·\033[0m devterm window already closed"
+    fi
+}
+
+# _dev_build_session: Build the iTerm2 layout with one column per project
+_dev_build_session() {
     # Split args on -- separator: projects before, yolo_flags after
     local projects=()
     local yolo_flags=()
@@ -195,100 +246,70 @@ _devtmux_build_session() {
     local code_dir="${DEVTMUX_DIR:-$HOME/code}"
     local count=${#projects[@]}
 
-    # Create session with first project as working directory
-    tmux new-session -d -s "$_DEVTMUX_SESSION" \
-        -c "$code_dir/${projects[1]}" \
-        -x "$(tput cols)" -y "$(tput lines)"
+    # Create first tab (new iTerm2 window)
+    local output session_id
+    output=$("$_IT2API_DEV" create-tab 2>/dev/null) || {
+        # shellcheck disable=SC2028
+        echo "\033[0;31m✗\033[0m Failed to create iTerm2 window"
+        echo "  Ensure Python API is enabled: iTerm2 → Preferences → General → Magic → Enable Python API"
+        return 1
+    }
+    # Parse session ID: format is "Session "name" id=SESSION_ID WxH frame=..."
+    session_id=${${(M)${=output}:#id=*}#id=}
+    if [[ -z "$session_id" ]]; then
+        # shellcheck disable=SC2028
+        echo "\033[0;31m✗\033[0m Could not parse session ID from it2api output"
+        return 1
+    fi
 
-    # Add remaining columns (horizontal splits)
+    mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+    echo "$session_id" > "$(_dev_state_file)"
+
+    # Track top pane session IDs (one per column)
+    local top_sessions=("$session_id")
+
+    # Create additional columns (vertical splits off the last top pane)
+    local last_top="$session_id"
     for (( i=2; i<=count; i++ )); do
-        tmux split-window -h -t "$_DEVTMUX_SESSION" \
-            -c "$code_dir/${projects[$i]}"
+        local col_out col_sid
+        col_out=$("$_IT2API_DEV" split-pane "$last_top" --vertical 2>/dev/null)
+        col_sid=${${(M)${=col_out}:#id=*}#id=}
+        top_sessions+=("$col_sid")
+        last_top="$col_sid"
     done
 
-    # Equalize column widths — call ONCE, before any vertical splits
-    tmux select-layout -t "$_DEVTMUX_SESSION" even-horizontal
-
-    # Add 15% terminal pane at bottom of each column
-    # After even-horizontal, columns are panes 0..(count-1)
+    # For each column: send claude to top pane, split for terminal, send figlet
     for (( i=1; i<=count; i++ )); do
-        local top_idx=$(( (i-1) * 2 ))
-        tmux split-window -v -t "$_DEVTMUX_SESSION:0.$top_idx" -p 15 \
-            -c "$code_dir/${projects[$i]}"
-    done
-
-    # Launch Claude Code in each top pane (indices 0, 2, 4, ...)
-    for (( i=1; i<=count; i++ )); do
-        local top_pane=$(( (i-1) * 2 ))
+        local top="${top_sessions[$i]}"
+        local proj="${projects[$i]}"
+        local proj_dir="$code_dir/$proj"
         local claude_cmd="claude"
         if (( ${yolo_flags[$i]:-0} )); then
             claude_cmd="claude --dangerously-skip-permissions"
         fi
-        tmux send-keys -t "$_DEVTMUX_SESSION:0.$top_pane" "clear && $claude_cmd" C-m
+
+        # Launch claude in top pane
+        "$_IT2API_DEV" send-text "$top" "cd ${(q)proj_dir} && clear && $claude_cmd"$'\n' 2>/dev/null
+
+        # Split horizontally for terminal pane (below)
+        local term_out term_sid
+        term_out=$("$_IT2API_DEV" split-pane "$top" 2>/dev/null)
+        term_sid=${${(M)${=term_out}:#id=*}#id=}
+        "$_IT2API_DEV" send-text "$term_sid" "cd ${(q)proj_dir} && clear && figlet ${(q)proj}"$'\n' 2>/dev/null
     done
 
-    # Yell the project name in each bottom terminal pane (indices 1, 3, 5, ...)
-    for (( i=1; i<=count; i++ )); do
-        local bot_pane=$(( (i-1) * 2 + 1 ))
-        tmux send-keys -t "$_DEVTMUX_SESSION:0.$bot_pane" "clear && figlet ${projects[$i]}" C-m
-    done
-
-    # Status bar — magenta/purple accent (distinct from sysmon amber)
-    tmux set-option -t "$_DEVTMUX_SESSION" status on
-    tmux set-option -t "$_DEVTMUX_SESSION" status-style 'bg=colour235,fg=colour248'
-    # shellcheck disable=SC2296
-    # ${(j:, :)projects} is zsh array join syntax (join with ", "); not valid in bash
-    tmux set-option -t "$_DEVTMUX_SESSION" status-left " #[fg=colour135,bold]devtmux#[fg=colour248] | #[fg=colour183]${(j:, :)projects}#[fg=colour248] "
-    tmux set-option -t "$_DEVTMUX_SESSION" status-left-length 60
-    tmux set-option -t "$_DEVTMUX_SESSION" status-right '#[fg=colour245]Ctrl-b d detach '
-    tmux set-option -t "$_DEVTMUX_SESSION" pane-border-style 'fg=colour237'
-    tmux set-option -t "$_DEVTMUX_SESSION" pane-active-border-style 'fg=colour135'
-    tmux set-option -t "$_DEVTMUX_SESSION" mouse on
-
-    # Focus top-left pane
-    tmux select-pane -t "$_DEVTMUX_SESSION:0.0"
+    # Focus first top pane
+    "$_IT2API_DEV" activate session "${top_sessions[1]}" 2>/dev/null
+    "$_IT2API_DEV" activate-app 2>/dev/null
 }
 
-# _devtmux_status: Show session state and tool availability
-_devtmux_status() {
-    echo ""
-    if tmux has-session -t "$_DEVTMUX_SESSION" 2>/dev/null; then
-        echo -e "  \033[0;32m✓\033[0m devtmux session running"
-        echo ""
-        tmux list-panes -t "$_DEVTMUX_SESSION" -F '    #{pane_index}: #{pane_current_path}'
-    else
-        echo -e "  \033[0;90m·\033[0m No devtmux session running"
-    fi
-    echo ""
-}
-
-# _devtmux_help: Show usage information
-_devtmux_help() {
-    echo ""
-    echo "  devtmux           launch the dev workspace (interactive project picker)"
-    echo "  devtmux kill      tear down the dev session"
-    echo "  devtmux status    check session state and tool availability"
-    echo "  devtmux help      show this message"
-    echo ""
-    echo "  Workspace layout:"
-    echo "    1-3 projects    select from git repos in your code folder"
-    echo "    add y suffix    skip permissions mode (e.g. 1y 3)"
-    echo "    top pane        Claude Code (~85% height)"
-    echo "    bottom pane     terminal (~15% height)"
-    echo ""
-    echo "  Inside the workspace:"
-    echo "    mouse           click to switch panes, drag to resize"
-    echo "    Ctrl-b d        detach (session keeps running)"
-    echo ""
-}
-
-# _devtmux_launch: Orchestrate code folder discovery, picker, and session build
-_devtmux_launch() {
+# _dev_launch: Orchestrate code folder discovery, picker, and session build
+_dev_launch() {
     local code_dir
-    code_dir="$(_devtmux_get_code_dir)" || return 1
+    code_dir="$(_dev_get_code_dir)" || return 1
 
     local projects_raw
-    projects_raw="$(_devtmux_pick_projects "$code_dir")" || return 1
+    projects_raw="$(_dev_pick_projects "$code_dir")" || return 1
 
     local projects=()
     local yolo_flags=()
@@ -303,67 +324,78 @@ _devtmux_launch() {
         fi
     done <<< "$projects_raw"
 
-    _devtmux_build_session "${projects[@]}" -- "${yolo_flags[@]}"
-
-    if [[ -n "$TMUX" ]]; then
-        tmux switch-client -t "$_DEVTMUX_SESSION"
-    else
-        tmux attach-session -t "$_DEVTMUX_SESSION"
-    fi
+    _dev_build_session "${projects[@]}" -- "${yolo_flags[@]}"
 }
 
-# devtmux: Entry point
-function devtmux() {
+# devterm: Entry point
+function devterm() {
     case "${1:-}" in
         kill|stop)
-            if tmux has-session -t "$_DEVTMUX_SESSION" 2>/dev/null; then
-                tmux kill-session -t "$_DEVTMUX_SESSION"
-                echo -e "\033[0;32m✓\033[0m devtmux session terminated"
-            else
-                echo -e "\033[0;90m·\033[0m No devtmux session running"
-            fi
+            _dev_close_window
             ;;
         status|info)
-            _devtmux_status
+            echo ""
+            if _dev_window_exists; then
+                echo -e "  \033[0;32m✓\033[0m devterm window open"
+            else
+                echo -e "  \033[0;90m·\033[0m No devterm window open"
+            fi
+            echo ""
             ;;
         help|-h|--help)
-            _devtmux_help
+            echo ""
+            echo "  devterm           launch the dev workspace (interactive project picker)"
+            echo "  devterm kill      close the iTerm2 window"
+            echo "  devterm status    check window state"
+            echo "  devterm help      show this message"
+            echo ""
+            echo "  Workspace layout:"
+            echo "    1-3 projects    select from git repos in your code folder"
+            echo "    add y suffix    skip permissions mode (e.g. 1y 3)"
+            echo "    top pane        Claude Code"
+            echo "    bottom pane     terminal with project name banner"
+            echo ""
+            echo "  Requires iTerm2 with Python API enabled:"
+            echo "    Preferences → General → Magic → Enable Python API"
+            echo ""
             ;;
         *)
-            if tmux has-session -t "$_DEVTMUX_SESSION" 2>/dev/null; then
+            if _dev_window_exists; then
                 local choice
-                read -r "choice?devtmux session exists. [r]eattach or [k]ill and start fresh? "
+                read -r "choice?devterm window exists. [f]ocus or [k]ill and start fresh? "
                 case "$choice" in
                     k|K)
-                        tmux kill-session -t "$_DEVTMUX_SESSION"
-                        _devtmux_launch
+                        _dev_close_window
+                        _dev_launch
                         ;;
                     *)
-                        if [[ -n "$TMUX" ]]; then
-                            tmux switch-client -t "$_DEVTMUX_SESSION"
-                        else
-                            tmux attach-session -t "$_DEVTMUX_SESSION"
-                        fi
+                        _dev_focus_window
                         ;;
                 esac
             else
-                _devtmux_launch
+                _dev_launch
             fi
             ;;
     esac
 }
 
-# ── Tab completion for devtmux ──
-_devtmux_completion() {
+# Deprecation shim — forwards old name to devterm
+function devtmux() {
+    echo "devtmux is now 'devterm'. Redirecting…"
+    devterm "$@"
+}
+
+# ── Tab completion for devterm ──
+_dev_completion() {
     # shellcheck disable=SC2034
     # subcmds is consumed by _describe, which shellcheck cannot trace
     local -a subcmds=(
-        'kill:tear down the devtmux session'
-        'stop:tear down the devtmux session'
-        'status:show session state and project panes'
-        'info:show session state and project panes'
+        'kill:close the devterm window'
+        'stop:close the devterm window'
+        'status:show window state'
+        'info:show window state'
         'help:show usage reference'
     )
-    _describe 'devtmux command' subcmds
+    _describe 'devterm command' subcmds
 }
 # compdef registration moved to .zshrc (after compinit)
