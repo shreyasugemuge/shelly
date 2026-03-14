@@ -180,6 +180,29 @@ _dev_pick_projects() {
     printf '%s\n' "${selected[@]}"
 }
 
+# _dev_ensure_iterm2: Check iTerm2 is installed and running
+_dev_ensure_iterm2() {
+    if [[ ! -d "/Applications/iTerm.app" ]]; then
+        # shellcheck disable=SC2028
+        echo "\033[0;31m✗\033[0m devterm requires iTerm2 — install from https://iterm2.com"
+        return 1
+    fi
+    if ! pgrep -x "iTerm2" &>/dev/null; then
+        # shellcheck disable=SC2028
+        echo "\033[0;31m✗\033[0m iTerm2 is not running — open iTerm2 first"
+        return 1
+    fi
+    if ! python3 -c "import iterm2" 2>/dev/null; then
+        # shellcheck disable=SC2028
+        echo "\033[0;33m·\033[0m Installing Python iterm2 module…"
+        pip3 install iterm2 --quiet || {
+            # shellcheck disable=SC2028
+            echo "\033[0;31m✗\033[0m Failed to install iterm2 module. Run: pip3 install iterm2"
+            return 1
+        }
+    fi
+}
+
 # _dev_window_exists: Check if the tracked devterm window is still open
 _dev_window_exists() {
     local sid
@@ -246,12 +269,14 @@ _dev_build_session() {
     local code_dir="${DEVTMUX_DIR:-$HOME/code}"
     local count=${#projects[@]}
 
+    _dev_ensure_iterm2 || return 1
+
     # Create first tab (new iTerm2 window)
     local output session_id
     output=$("$_IT2API_DEV" create-tab 2>/dev/null) || {
         # shellcheck disable=SC2028
         echo "\033[0;31m✗\033[0m Failed to create iTerm2 window"
-        echo "  Ensure Python API is enabled: iTerm2 → Preferences → General → Magic → Enable Python API"
+        echo "  Is Python API enabled? iTerm2 → Preferences → General → Magic → Enable Python API"
         return 1
     }
     # Parse session ID: format is "Session "name" id=SESSION_ID WxH frame=..."

@@ -71,6 +71,11 @@ _sysmon_ensure_iterm2() {
         echo "\033[0;31m✗\033[0m sysmon requires iTerm2 — install from https://iterm2.com"
         return 1
     fi
+    if ! pgrep -x "iTerm2" &>/dev/null; then
+        # shellcheck disable=SC2028
+        echo "\033[0;31m✗\033[0m iTerm2 is not running — open iTerm2 first"
+        return 1
+    fi
     if ! python3 -c "import iterm2" 2>/dev/null; then
         # shellcheck disable=SC2028
         echo "\033[0;33m·\033[0m Installing Python iterm2 module…"
