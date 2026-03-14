@@ -64,16 +64,11 @@ _sysmon_state_file() {
     echo "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon.session_id"
 }
 
-# ── Ensure iTerm2 and Python module are available ──
+# ── Ensure running inside iTerm2 and Python module is available ──
 _sysmon_ensure_iterm2() {
-    if [[ ! -d "/Applications/iTerm.app" ]]; then
+    if [[ "$TERM_PROGRAM" != "iTerm.app" ]]; then
         # shellcheck disable=SC2028
-        echo "\033[0;31m✗\033[0m sysmon requires iTerm2 — install from https://iterm2.com"
-        return 1
-    fi
-    if ! pgrep -x "iTerm2" &>/dev/null; then
-        # shellcheck disable=SC2028
-        echo "\033[0;31m✗\033[0m iTerm2 is not running — open iTerm2 first"
+        echo "\033[0;90m·\033[0m non-iTerm mode: sysmon requires iTerm2 (current terminal: ${TERM_PROGRAM:-unknown})"
         return 1
     fi
     if ! python3 -c "import iterm2" 2>/dev/null; then
