@@ -78,6 +78,12 @@ Plans:
 
 **Requirements:** QA-01, QA-02, QA-03, QA-04, QA-05
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Shellcheck audit, SC2155 fixes, inline suppressions, and input validation for portfind/mkcd
+- [ ] 03-02-PLAN.md — Plugin sourcing order guard and secrets/paths audit with human verification
+
 **Key deliverables:**
 - shellcheck audit of all `config/*.zsh` files with fixes or documented exceptions
 - Input validation added to shell functions (`mkcd`, `extract`, etc.)
@@ -95,4 +101,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-03-14*
-*Last updated: 2026-03-14 after phase 1 complete (plan 01-02)*
+*Last updated: 2026-03-14 after phase 3 planning complete*
