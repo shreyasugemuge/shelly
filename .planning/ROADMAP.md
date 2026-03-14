@@ -19,6 +19,12 @@
 
 **Requirements:** DEV-01, DEV-02, DEV-03, DEV-04, DEV-05, DEV-06, DEV-07, DEV-08, DEV-09, DEV-10
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Implement complete devtmux function in functions.zsh (picker, layout, session mgmt, subcommands)
+- [ ] 01-02-PLAN.md — Remove old alias from aliases.zsh and human-verify end-to-end workflow
+
 **Key deliverables:**
 - `devtmux` function in `config/functions.zsh`
 - Code folder detection (`~/code` default, prompt if missing)
@@ -83,4 +89,4 @@
 
 ---
 *Roadmap created: 2026-03-14*
-*Last updated: 2026-03-14 after initial definition*
+*Last updated: 2026-03-14 after phase 1 planning*
