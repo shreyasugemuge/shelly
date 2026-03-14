@@ -67,8 +67,8 @@ The `devtmux` command (`config/functions.zsh`) launches a tmux workspace for mul
 ### How It Works
 
 - Discovers code folder via `$DEVTMUX_DIR`, defaults to `~/code`, prompts if missing
-- Project picker: numbered-list multi-select (enter space-separated numbers)
-- Opens 1-3 projects, each as a tmux column with Claude Code (top) + terminal (bottom)
+- Project picker: numbered-list multi-select (enter space-separated numbers); append `y` to a number (e.g. `1y`) for yolo mode (Claude with `--dangerously-skip-permissions`)
+- Opens 1-3 projects, each as a tmux column with Claude Code (top) + figlet project banner + terminal (bottom)
 - Session management: reattach existing, kill+recreate, or `devtmux kill`
 
 ### Subcommands

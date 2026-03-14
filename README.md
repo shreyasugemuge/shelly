@@ -1,6 +1,6 @@
 # Shelly
 
-[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.2.1-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux%20|%20WSL-orange.svg)](#prerequisites)
@@ -44,7 +44,7 @@ Preview without making changes:
 - **git** — for prompt branch/status info
 - **curl** — for network aliases
 
-Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`) are installed automatically on first launch via your platform's package manager (Homebrew, apt, dnf, or pacman).
+Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`) and CLI tools (`figlet`, `tree`) are installed automatically on first launch via your platform's package manager (Homebrew, apt, dnf, or pacman).
 
 ## File Structure
 
@@ -52,7 +52,7 @@ Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions
 .
 ├── .zshrc                  Entry point — sources all modules
 ├── config/
-│   ├── deps.zsh            Auto-installs Homebrew and missing plugins
+│   ├── deps.zsh            Auto-installs Homebrew, plugins, and CLI tools
 │   ├── environment.zsh     Exports, locale, zsh options, NVM setup
 │   ├── prompt.zsh          Custom prompt with face + git integration
 │   ├── aliases.zsh         Aliases organized by category
@@ -136,6 +136,8 @@ btop and nvtop configs are force-written on every launch for consistency. On App
 | `devtmux kill`   | Tear down the session                     |
 | `devtmux status` | Check session state                       |
 | `devtmux help`   | Quick reference                           |
+
+Append `y` to a project number to launch Claude Code with `--dangerously-skip-permissions` (yolo mode). For example, entering `1y 3` opens project 1 in skip-permissions mode and project 3 normally.
 
 Set `DEVTMUX_DIR` to change the code folder (defaults to `~/code`).
 
