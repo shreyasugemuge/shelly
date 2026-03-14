@@ -85,6 +85,33 @@ function portfind() {
     lsof -i :"$1"
 }
 
+# ── ccnotify: iTerm2 notification when a command finishes ──
+function ccnotify() {
+    local msg="${*:-done}"
+    if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+        printf '\033]9;%s\007' "$msg"
+    fi
+}
+
+# ── cc: Claude Code with completion notification ──
+function cc() {
+    claude "$@"
+    ccnotify "Claude Code finished"
+}
+
+# ── iterm-setup: Install iTerm2 shell integration (run once) ──
+function iterm-setup() {
+    if [[ "$TERM_PROGRAM" != "iTerm.app" ]]; then
+        echo "iterm-setup: not running in iTerm2"
+        return 1
+    fi
+    local dest="${HOME}/.iterm2_shell_integration.zsh"
+    echo "· Downloading iTerm2 shell integration…"
+    curl -sL "https://iterm2.com/shell_integration/zsh" -o "$dest" && \
+        echo "✓ Installed — restart your shell or run: source $dest" || \
+        echo "✗ Download failed"
+}
+
 # ── devterm: Dynamic dev workspace ──
 
 _IT2API_DEV="/Applications/iTerm.app/Contents/Resources/it2api"
@@ -130,9 +157,13 @@ _dev_pick_projects() {
     local branches=()
 
     for d in "$code_dir"/*/; do
-        [[ -d "$d/.git" ]] || continue
+        # Accept both .git dirs (normal repos) and .git files (worktrees)
+        [[ -e "$d/.git" ]] || continue
         names+=("${d:t}")
-        branches+=("$(git -C "$d" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')")
+        local branch wt_marker=""
+        branch="$(git -C "$d" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
+        [[ -f "$d/.git" ]] && wt_marker=" [wt]"
+        branches+=("${branch}${wt_marker}")
     done
 
     if (( ${#names[@]} == 0 )); then
@@ -306,6 +337,16 @@ _dev_build_session() {
         local claude_cmd="claude"
         if (( ${yolo_flags[$i]:-0} )); then
             claude_cmd="claude --dangerously-skip-permissions"
+        fi
+
+        # Set badge to project name (persists through claude running)
+        local badge_b64
+        badge_b64=$(printf '%s' "$proj" | base64 | tr -d '\n')
+        "$_IT2API_DEV" send-text "$top" "printf '\\033]1337;SetBadgeFormat=${badge_b64}\\a'"$'\n' 2>/dev/null
+
+        # Yolo mode: set tab title with warning indicator
+        if (( ${yolo_flags[$i]:-0} )); then
+            "$_IT2API_DEV" send-text "$top" $'printf "\\033]2;\xe2\x9a\xa1 YOLO\\007"\n' 2>/dev/null
         fi
 
         # Launch claude in top pane

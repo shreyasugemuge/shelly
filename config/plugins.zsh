@@ -41,6 +41,17 @@ if [[ -n "$_as_path" ]]; then
 fi
 unset _as_path
 
+# ── iTerm2 Shell Integration ──
+# Enables command marks (Cmd+Shift+↑/↓), semantic history, recent dirs (Cmd+Opt+/).
+# Source if present; run `iterm-setup` once to install.
+if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+    _iterm_si="${HOME}/.iterm2_shell_integration.zsh"
+    # shellcheck disable=SC1090
+    # Dynamic path: sourced only when file exists (installed via iterm-setup)
+    [[ -f "$_iterm_si" ]] && source "$_iterm_si"
+    unset _iterm_si
+fi
+
 # ── SOURCING ORDER GUARD ──────────────────────────────────────────────
 # zsh-syntax-highlighting MUST be the last plugin sourced in this file.
 # It wraps ZLE widgets at source time; sourcing anything after it

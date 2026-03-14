@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-03-14
+
+iTerm2 shell integration, devterm badges, yolo indicators, worktree support, and Claude Code notification helpers.
+
+### Added
+- **iTerm2 shell integration** (`plugins.zsh`) — auto-sourced when present; run `iterm-setup` once to install; enables command marks (Cmd+Shift+↑/↓), semantic history, recent directories (Cmd+Opt+/)
+- **devterm pane badges** — each project column gets an iTerm2 badge (top-right corner) showing the project name, visible through Claude Code
+- **Yolo tab indicator** — panes launched with `y` suffix get a ⚡ YOLO tab title as a visual safety signal
+- **Git worktree support** — devterm project picker now detects worktrees (`.git` file) alongside normal repos, shows `[wt]` marker and correct branch name
+- **`ccnotify`** — sends an iTerm2 notification when called; use to signal task completion
+- **`cc`** — wrapper around `claude` that fires `ccnotify` when Claude Code exits
+- **`iterm-setup`** — one-time installer for iTerm2 shell integration (`~/.iterm2_shell_integration.zsh`)
+
 ## [4.0.1] - 2026-03-14
 
 ### Fixed
@@ -307,7 +320,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.0.1...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.1.0...HEAD
+[4.1.0]: https://github.com/shreyasugemuge/shelly/compare/v4.0.1...v4.1.0
 [4.0.1]: https://github.com/shreyasugemuge/shelly/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/shreyasugemuge/shelly/compare/v3.2.1...v4.0.0
 [3.2.1]: https://github.com/shreyasugemuge/shelly/compare/v3.2.0...v3.2.1
