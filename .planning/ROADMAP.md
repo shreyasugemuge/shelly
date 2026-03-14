@@ -62,6 +62,12 @@ Plans:
 - grep for `~/.dotfiles/zsh` finds only the variable assignment
 - `exec zsh` loads cleanly, sysmon works, all aliases resolve
 
+
+**Plans:** 1 plan
+
+Plans:
+- [ ] 02-01-PLAN.md — Centralize platform detection, PATH dedup, and doc cleanup
+
 **Depends on:** Phase 1 (devtmux may use platform detection)
 
 ---
