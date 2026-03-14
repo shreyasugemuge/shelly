@@ -28,6 +28,8 @@ cd ~/.dotfiles/zsh
 exec zsh
 ```
 
+> **Note:** `~/.dotfiles/zsh` is a conventional example location — you can clone to any path you prefer (e.g., `~/shelly`, `~/.config/shelly`). The install script symlinks config files into place dynamically.
+
 Preview without making changes:
 
 ```bash

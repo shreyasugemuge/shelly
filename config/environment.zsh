@@ -58,3 +58,8 @@ if [[ -n "$_nvm_script" ]]; then
 else
     unset _nvm_script
 fi
+
+# ── PATH Deduplication ──
+# Remove duplicate entries; preserves first-occurrence order.
+typeset -U path
+export PATH
