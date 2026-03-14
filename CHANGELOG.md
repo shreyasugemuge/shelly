@@ -7,12 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-03-14
+
+Fuzzy completion overhaul and dependency cleanup.
+
+### Added
+- **fzf as required dependency** — auto-installed by `deps.zsh`; used by devtmux project picker and fzf-tab completion
+- **fzf-tab** — replaces default zsh tab completion with fzf-powered fuzzy matching and directory previews; auto-cloned from GitHub on first launch
+- **fzf shell integration** — `Ctrl-T` (files), `Ctrl-R` (history), `Alt-C` (cd) keybindings via `source <(fzf --zsh)`
+
+### Changed
+- **devtmux project picker** — fzf is now required (no more numbered-list fallback)
+- **Completion system** — replaced `zsh-autosuggestions` (ghost-text) with `fzf-tab` (fuzzy matching with previews on Tab)
+
+### Removed
+- **zsh-autosuggestions** — replaced by fzf-tab; uninstalled from system
+- **deploy.sh** — removed (manual tag+push workflow is sufficient)
+
 ## [3.0.0] - 2026-03-14
 
 Dynamic dev workspace, quality hardening, and enhanced completions.
 
 ### Added
-- **`devtmux` command** (`config/functions.zsh`) — dynamic multi-project tmux workspace; pick 1-3 projects from `~/code`, opens Claude Code + terminal per column; supports fzf or numbered-list fallback; subcommands: `kill`, `status`, `help`
+- **`devtmux` command** (`config/functions.zsh`) — dynamic multi-project tmux workspace; pick 1-3 projects from `~/code` via fzf, opens Claude Code + terminal per column; subcommands: `kill`, `status`, `help`
 - **Tab completion** for `devtmux` and `sysmon` subcommands (kill, stop, status, info, help)
 - **Enhanced zsh completion system** — `zsh-completions` plugin for extra completions (brew, docker, git, etc.); partial/fuzzy matching, colored output, process-aware kill completion, and XDG-compliant completion cache
 - **Input validation** — `portfind` validates port range (1-65535), `mkcd` rejects empty args
@@ -35,7 +52,7 @@ Cross-platform support — shelly now works on macOS, Linux, and WSL out of the 
 ### Added
 - **Cross-platform plugin loading** — `plugins.zsh` searches Homebrew, `/usr/share`, and `/usr/local/share` for zsh plugins, working with any package manager
 - **Cross-platform dependency installation** — `deps.zsh` detects apt, dnf, pacman, or Homebrew and installs missing plugins via the native package manager
-- **Expanded install hints** — `install.sh` and `deploy.sh` now show instructions for macOS, Ubuntu/Debian, Fedora, Arch, and WSL
+- **Expanded install hints** — `install.sh` now shows instructions for macOS, Ubuntu/Debian, Fedora, Arch, and WSL
 
 ### Changed
 - **`fanboost` alias** moved to `~/.zshrc.local` (machine-specific, not tracked)
@@ -225,7 +242,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/shreyasugemuge/shelly/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/shreyasugemuge/shelly/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/shreyasugemuge/shelly/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/shreyasugemuge/shelly/compare/v1.3.3...v2.0.0

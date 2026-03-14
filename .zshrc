@@ -80,6 +80,20 @@ zstyle ':completion:*' rehash true
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompcache"
 
+# ── fzf-tab (must load after compinit) ──
+_fzf_tab_dir="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf-tab"
+if [[ -f "$_fzf_tab_dir/fzf-tab.plugin.zsh" ]]; then
+    # shellcheck disable=SC1091
+    # fzf-tab is cloned by deps.zsh; path is known and stable
+    source "$_fzf_tab_dir/fzf-tab.plugin.zsh"
+    # Preview files/directories during completion
+    zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -1 --color=always $realpath 2>/dev/null || ls -1 $realpath'
+    zstyle ':fzf-tab:complete:ls:*' fzf-preview 'ls -1 --color=always $realpath 2>/dev/null || ls -1 $realpath'
+    zstyle ':fzf-tab:*' fzf-flags --height=40% --reverse
+    zstyle ':fzf-tab:*' switch-group ',' '.'
+fi
+unset _fzf_tab_dir
+
 # ── Key bindings (emacs mode) ──
 bindkey -e
 bindkey '^[[A' history-search-backward

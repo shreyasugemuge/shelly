@@ -49,7 +49,7 @@ Prefixes: `feat`, `fix`, `docs`, `chore`, `refactor`, `style`, `test`
 ## Guidelines
 
 - Keep aliases short and memorable
-- Guard macOS-specific commands with `[[ "$OSTYPE" == darwin* ]]`
+- Guard macOS-specific commands with `$IS_MACOS` / `$IS_LINUX` (set in `.zshrc`)
 - Don't commit secrets, credentials, or machine-specific paths
 - Use `~/.zshrc.local` for personal overrides
 - Add comments explaining non-obvious aliases or functions

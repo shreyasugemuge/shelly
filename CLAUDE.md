@@ -1,24 +1,30 @@
 # Claude Context — Shelly
 
+**Current version:** v3.1.0 (2026-03-14)
+
 ## What This Is
 
-Shelly is a modular zsh configuration by Shreyas Ugemuge. It lives in `~/.dotfiles/zsh` and gets symlinked into place by `install.sh`.
+Shelly is a modular zsh configuration and development workspace by Shreyas Ugemuge. It lives in `~/.dotfiles/zsh` and gets symlinked into place by `install.sh`.
 
 ## Repo Layout
 
 - `.zshrc` — entry point, sources all modules in `config/`
 - `config/` — modular config files (environment, prompt, aliases, functions, plugins, deps, monitor, sysinfo)
+- `.planning/` — GSD project planning (roadmap, phases, milestones)
 - `install.sh` — setup script with backup, `--dry-run`, `--uninstall`
-- `deploy.sh` — one-command push, tag, and GitHub release
+- `deploy.sh` — removed (moved to `to_delete/`)
 - `archive/` — legacy bash config preserved for reference, do not modify
 
 ## Key Design Decisions
 
 - **Color philosophy**: color should convey meaning, not decoration. The prompt face (yellow/red) signals exit status, git indicators (green/orange) signal repo state. Everything else (user, host, path) stays muted/default. Syntax highlighting from the zsh plugin handles command coloring.
 - **Startup splash** (`sysinfo.zsh`): neofetch-style ASCII art + system stats. Labels are dim gray, values are default terminal color. No bold, no cyan headers. No network calls on startup.
-- **macOS-first, Linux-compatible**: guard platform-specific code with `[[ "$OSTYPE" == darwin* ]]` and always provide a Linux fallback.
+- **macOS-first, Linux-compatible**: `IS_MACOS` / `IS_LINUX` booleans set once in `.zshrc`, used everywhere. No more scattered `$OSTYPE` checks.
 - **XDG-compliant**: config lives under `~/.config/zsh/`, not directly in `$HOME`.
-- **Performance matters**: NVM is lazy-loaded, compinit is cached daily, deps check runs once per day.
+- **Performance matters**: NVM is lazy-loaded, compinit is cached daily, deps check runs once per day. PATH is deduped via `typeset -U path` in environment.zsh.
+- **Plugin sourcing order**: zsh-syntax-highlighting MUST be sourced last in plugins.zsh. A guard comment is co-located with the source line to prevent reordering.
+- **fzf is a required dependency**: auto-installed by deps.zsh. Used by devtmux (project picker) and fzf-tab (completion). No fallbacks — fzf must be present.
+- **fzf-tab must load after compinit**: sourced in `.zshrc` after the completion block, not in `plugins.zsh`. It's installed via git clone (not brew) to `~/.local/share/zsh/plugins/fzf-tab`.
 - **sysmon force-writes config files on every launch**: btop.conf and nvtop's interface.ini are overwritten each time `sysmon` runs to ensure a consistent dashboard layout. This was a deliberate design choice after experiencing "sticky state" bugs where leftover config files survived git reverts and caused confusing layout changes. The force-write approach means the dashboard always matches what the code specifies.
 
 ## sysmon — System Monitor Dashboard
@@ -55,6 +61,30 @@ What DOES work: GPU utilization % graph, VRAM usage bar (e.g. 4.16Gi/128Gi), and
 
 There is NO `sysmon reset` subcommand. Any unrecognized argument falls through to the default case which launches the dashboard.
 
+## devtmux — Dynamic Dev Workspace
+
+The `devtmux` command (`config/functions.zsh`) launches a tmux workspace for multi-project development.
+
+### How It Works
+
+- Discovers code folder via `$DEVTMUX_DIR`, defaults to `~/code`, prompts if missing
+- Project picker: fzf multi-select if available, numbered-list fallback otherwise
+- Opens 1-3 projects, each as a tmux column with Claude Code (top) + terminal (bottom)
+- Session management: reattach existing, kill+recreate, or `devtmux kill`
+
+### Subcommands
+
+- `devtmux` — pick projects and launch/reattach
+- `devtmux kill` — tear down the devtmux session
+- `devtmux help` — quick reference
+
+### Design Notes
+
+- stderr for errors in helpers so stdout captures only project names/paths
+- fzf is a required dependency (auto-installed by deps.zsh)
+- 1-based zsh loop with `(i-1)*2` pane index formula for tmux pane targeting
+- Persists `DEVTMUX_DIR` to `~/.zshrc.local` (with duplicate guard)
+
 ## Versioning & Releases
 
 Follows semver. See CONTRIBUTING.md for the full process. Quick version:
@@ -62,7 +92,6 @@ Follows semver. See CONTRIBUTING.md for the full process. Quick version:
 2. Update `CHANGELOG.md` (move Unreleased -> new version section)
 3. Commit: `chore: bump version to x.y.z`
 4. Tag + push: `git tag -a vx.y.z -m "Release vx.y.z"` then `git push origin master --tags`
-5. Or use `deploy.sh` which handles push + tag + GitHub release in one command
 
 ## Commit Style
 
@@ -76,7 +105,10 @@ Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `sty
 
 - Never commit secrets, credentials, or machine-specific paths
 - The `ls` alias in `aliases.zsh` has BSD/GNU detection — don't simplify it
-- `plugins.zsh` must source syntax-highlighting LAST (zsh requirement)
+- `plugins.zsh` must source syntax-highlighting LAST (zsh requirement) — guard comment in place, do not reorder
+- Platform checks use `$IS_MACOS` / `$IS_LINUX` booleans (set in `.zshrc`), not `$OSTYPE` — keep it that way
+- shellcheck zero-warning baseline — do not introduce new warnings without inline suppressions
+- `portfind` validates port range (1-65535), `mkcd` validates non-empty args — maintain input validation
 - `~/.zshrc.local` is for machine-specific overrides and is not tracked in git
 - btop has NO `--conf` or `--config` CLI flag — it always reads `~/.config/btop/btop.conf`. Do not try to pass a config path.
 - btop and nvtop configs ARE force-written by monitor.zsh on every `sysmon` launch — this is intentional (see v1.3.2 design decision). Do not remove the force-write behavior.

@@ -137,38 +137,17 @@ _devtmux_pick_projects() {
     fi
 
     local selected=()
-    if command -v fzf &>/dev/null; then
-        local raw
-        raw="$(printf '%s\n' "${repos[@]}" | fzf --multi \
-            --prompt='Select projects (Tab=mark, Enter=confirm): ' \
-            --header='devtmux -- pick 1-3 projects')"
-        if [[ -z "$raw" ]]; then
-            echo -e "\033[0;31m✗\033[0m No projects selected" >&2
-            return 1
-        fi
-        while IFS= read -r line; do
-            selected+=("$line")
-        done <<< "$raw"
-    else
-        echo ""
-        local i=1
-        for r in "${repos[@]}"; do
-            echo "  $i) $r"
-            (( i++ ))
-        done
-        echo ""
-        # shellcheck disable=SC2034
-        # choices IS used — via zsh word-splitting expansion ${(z)choices} below
-        local choices
-        read -r "choices?Select projects (1-3, space-separated): "
-        # shellcheck disable=SC2296
-        # ${(z)choices} is zsh word-splitting syntax; not valid in bash but correct for zsh
-        for n in ${(z)choices}; do
-            if [[ "$n" =~ ^[0-9]+$ ]] && (( n >= 1 && n <= ${#repos[@]} )); then
-                selected+=("${repos[$n]}")
-            fi
-        done
+    local raw
+    raw="$(printf '%s\n' "${repos[@]}" | fzf --multi \
+        --prompt='Select projects (Tab=mark, Enter=confirm): ' \
+        --header='devtmux -- pick 1-3 projects')"
+    if [[ -z "$raw" ]]; then
+        echo -e "\033[0;31m✗\033[0m No projects selected" >&2
+        return 1
     fi
+    while IFS= read -r line; do
+        selected+=("$line")
+    done <<< "$raw"
 
     if (( ${#selected[@]} > 3 )); then
         echo -e "\033[0;33m·\033[0m Max 3 projects -- using first 3" >&2
@@ -250,12 +229,6 @@ _devtmux_status() {
         tmux list-panes -t "$_DEVTMUX_SESSION" -F '    #{pane_index}: #{pane_current_path}'
     else
         echo -e "  \033[0;90m·\033[0m No devtmux session running"
-    fi
-    echo ""
-    if command -v fzf &>/dev/null; then
-        echo -e "  \033[0;32m✓\033[0m fzf available (interactive picker)"
-    else
-        echo -e "  \033[0;33m·\033[0m fzf not found (using numbered fallback)"
     fi
     echo ""
 }
