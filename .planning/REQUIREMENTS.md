@@ -7,15 +7,15 @@
 
 ### Dev Workspace (devtmux)
 
-- [ ] **DEV-01**: `devtmux` command launches interactive project selection workflow
-- [ ] **DEV-02**: Auto-detects `~/code` as default code folder, prompts if not found
-- [ ] **DEV-03**: User can select 1-3 projects from code folder subdirectories
-- [ ] **DEV-04**: Project picker uses fzf when available, falls back to numbered list
-- [ ] **DEV-05**: Opens tmux session "dev" with one column per selected project
-- [ ] **DEV-06**: Each column has Claude Code pane (~85% top) and terminal pane (~15% bottom)
-- [ ] **DEV-07**: Claude Code auto-launches in each project's directory
-- [ ] **DEV-08**: Reattaches to existing "dev" session, or offers to kill and recreate
-- [ ] **DEV-09**: Works on macOS and Linux
+- [x] **DEV-01**: `devtmux` command launches interactive project selection workflow
+- [x] **DEV-02**: Auto-detects `~/code` as default code folder, prompts if not found
+- [x] **DEV-03**: User can select 1-3 projects from code folder subdirectories
+- [x] **DEV-04**: Project picker uses fzf when available, falls back to numbered list
+- [x] **DEV-05**: Opens tmux session "dev" with one column per selected project
+- [x] **DEV-06**: Each column has Claude Code pane (~85% top) and terminal pane (~15% bottom)
+- [x] **DEV-07**: Claude Code auto-launches in each project's directory
+- [x] **DEV-08**: Reattaches to existing "dev" session, or offers to kill and recreate
+- [x] **DEV-09**: Works on macOS and Linux
 - [ ] **DEV-10**: `devtmux kill` tears down the dev session
 
 ### Tech Debt Cleanup
@@ -47,15 +47,15 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DEV-01 | Phase 1 | Pending |
-| DEV-02 | Phase 1 | Pending |
-| DEV-03 | Phase 1 | Pending |
-| DEV-04 | Phase 1 | Pending |
-| DEV-05 | Phase 1 | Pending |
-| DEV-06 | Phase 1 | Pending |
-| DEV-07 | Phase 1 | Pending |
-| DEV-08 | Phase 1 | Pending |
-| DEV-09 | Phase 1 | Pending |
+| DEV-01 | Phase 1 | Complete |
+| DEV-02 | Phase 1 | Complete |
+| DEV-03 | Phase 1 | Complete |
+| DEV-04 | Phase 1 | Complete |
+| DEV-05 | Phase 1 | Complete |
+| DEV-06 | Phase 1 | Complete |
+| DEV-07 | Phase 1 | Complete |
+| DEV-08 | Phase 1 | Complete |
+| DEV-09 | Phase 1 | Complete |
 | DEV-10 | Phase 1 | Pending |
 | DEBT-01 | Phase 2 | Pending |
 | DEBT-02 | Phase 2 | Pending |
