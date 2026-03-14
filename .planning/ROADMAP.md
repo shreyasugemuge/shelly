@@ -9,7 +9,7 @@
 |-------|------|-------------|--------|
 | 1 | Dynamic devtmux | Complete    | 2026-03-14 |
 | 2 | 1/1 | Complete   | 2026-03-14 |
-| 3 | QA & Security Audit | QA-01 through QA-05 | Not started |
+| 3 | 1/2 | In Progress|  |
 
 ---
 
@@ -78,7 +78,7 @@ Plans:
 
 **Requirements:** QA-01, QA-02, QA-03, QA-04, QA-05
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 03-01-PLAN.md — Shellcheck audit, SC2155 fixes, inline suppressions, and input validation for portfind/mkcd

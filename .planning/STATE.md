@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: milestone
 status: planning
-last_updated: "2026-03-14T07:42:12.826Z"
+last_updated: "2026-03-14T09:15:53.073Z"
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
 ---
 
 # Project State
@@ -52,6 +52,8 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 - [Phase 02-tech-debt-cleanup]: IS_MACOS/IS_LINUX set once in .zshrc (no export), used as booleans in all 5 config modules — eliminates 11 scattered OSTYPE checks
 - [Phase 02-tech-debt-cleanup]: typeset -U path at bottom of environment.zsh deduplicates PATH on every shell start, preserving first-occurrence order
 - [Phase 02-tech-debt-cleanup]: Human-verified: exec zsh clean, sysmon status works, all aliases resolve, devtmux help prints — no regressions from platform detection refactoring
+- [Phase 03-02]: Guard comment block placed immediately above zsh-syntax-highlighting source line (co-located with hazard) to warn contributors at the exact point they'd add new plugins
+- [Phase 03-02]: Secrets audit clean: all /Users/ refs in .planning/ files only (planning artifacts), zero credentials or IPs in tracked config files
 
 ## Recent Activity
 

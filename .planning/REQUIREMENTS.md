@@ -30,8 +30,8 @@
 - [ ] **QA-01**: shellcheck passes on all config/*.zsh files (or documented exceptions)
 - [ ] **QA-02**: Shell functions validate inputs (mkcd, extract, etc.)
 - [ ] **QA-03**: PATH construction audited and hardened
-- [ ] **QA-04**: Plugin sourcing order enforced with guard comment or check
-- [ ] **QA-05**: No secrets or machine-specific paths in tracked files
+- [x] **QA-04**: Plugin sourcing order enforced with guard comment or check
+- [x] **QA-05**: No secrets or machine-specific paths in tracked files
 
 ## Out of Scope
 
@@ -64,8 +64,8 @@
 | QA-01 | Phase 3 | Pending |
 | QA-02 | Phase 3 | Pending |
 | QA-03 | Phase 3 | Pending |
-| QA-04 | Phase 3 | Pending |
-| QA-05 | Phase 3 | Pending |
+| QA-04 | Phase 3 | Complete |
+| QA-05 | Phase 3 | Complete |
 
 **Coverage:**
 - v3.0 requirements: 19 total
