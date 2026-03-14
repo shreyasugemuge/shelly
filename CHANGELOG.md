@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-03-14
+
+Bug fixes for devtmux and dependency checking.
+
+### Fixed
+- **devtmux project picker** — escaped glob-sensitive `(` in zsh parameter expansion, fixing "bad pattern" error when selecting projects
+- **deps.zsh** — stamp file now written only after `_install_plugins` succeeds, preventing skipped retries on failure
+
 ## [3.1.0] - 2026-03-14
 
 Fuzzy completion overhaul and dependency cleanup.

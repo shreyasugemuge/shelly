@@ -160,7 +160,7 @@ _devtmux_pick_projects() {
     fi
 
     for s in "${selected[@]}"; do
-        echo "${s% (*}"
+        echo "${s% \(*}"
     done
 }
 

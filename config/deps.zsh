@@ -110,9 +110,8 @@ _install_fzf_tab() {
 }
 
 if _should_check_deps; then
-    _install_plugins
+    _install_plugins && touch "$_deps_stamp"
     _install_fzf_tab
-    touch "$_deps_stamp"
 else
     # Always check fzf-tab even on cached days (git clone, not brew)
     _install_fzf_tab
