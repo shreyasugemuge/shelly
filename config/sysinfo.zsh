@@ -27,7 +27,7 @@ _f_packages=""
 
 _f_shell="zsh ${ZSH_VERSION}"
 
-if [[ "$OSTYPE" == darwin* ]]; then
+if $IS_MACOS; then
     _f_host="$(scutil --get ComputerName 2>/dev/null || hostname -s)"
     _f_os="macOS $(sw_vers -productVersion 2>/dev/null) ($(uname -m))"
     _f_cpu="$(sysctl -n machdep.cpu.brand_string 2>/dev/null)"
@@ -55,7 +55,7 @@ if [[ "$OSTYPE" == darwin* ]]; then
         _f_brew="$(brew list --formula 2>/dev/null | wc -l | tr -d ' ')"
         _f_packages="${_f_brew} (brew)"
     fi
-elif [[ "$OSTYPE" == linux* ]]; then
+elif $IS_LINUX; then
     _f_host="$(hostname -s 2>/dev/null)"
     if [[ -f /etc/os-release ]]; then
         _f_os="$(. /etc/os-release && echo "$PRETTY_NAME") ($(uname -m))"

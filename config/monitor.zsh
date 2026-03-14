@@ -45,7 +45,7 @@ _sysmon_pkg_install() {
 
 # ── Check if a GPU is present ──
 _sysmon_has_gpu() {
-    if [[ "$OSTYPE" == darwin* ]]; then
+    if $IS_MACOS; then
         system_profiler SPDisplaysDataType 2>/dev/null | grep -qi 'vendor\|chipset\|chip:' 2>/dev/null
     else
         lspci 2>/dev/null | grep -qiE 'VGA|3D|Display' 2>/dev/null
@@ -68,7 +68,7 @@ _sysmon_ensure_deps() {
 
     # nvtop — only if a GPU is present
     if _sysmon_has_gpu && ! command -v nvtop &>/dev/null; then
-        if [[ "$OSTYPE" == darwin* ]]; then
+        if $IS_MACOS; then
             missing+=(nvtop)
         elif _sysmon_has_nvidia || lspci 2>/dev/null | grep -qiE 'AMD|ATI|Intel' 2>/dev/null; then
             missing+=(nvtop)
@@ -76,7 +76,7 @@ _sysmon_ensure_deps() {
     fi
 
     # macmon — Apple Silicon thermal/power monitor (no sudo needed)
-    if [[ "$OSTYPE" == darwin* ]] && ! command -v macmon &>/dev/null; then
+    if $IS_MACOS && ! command -v macmon &>/dev/null; then
         missing+=(vladkens/tap/macmon)
     fi
 
@@ -146,7 +146,7 @@ BTOPEOF
     # ── Force-write nvtop config: hide all N/A fields on Apple Silicon ──
     # Keeps GPU % chart and VRAM bar, hides broken clock/temp/fan/power fields.
     # Written fresh on every launch.
-    if [[ "$OSTYPE" == darwin* ]]; then
+    if $IS_MACOS; then
         local nvtop_conf="${XDG_CONFIG_HOME:-$HOME/.config}/nvtop/interface.ini"
         mkdir -p "${nvtop_conf:h}"
         cat > "$nvtop_conf" << 'NVTOPEOF'
@@ -258,7 +258,7 @@ _sysmon_status() {
             esac
             echo -e "  ${_g}✓${_n} ${tool}  ${_d}${ver}${_n}"
         else
-            if [[ "$tool" == "macmon" && "$OSTYPE" != darwin* ]]; then
+            if [[ "$tool" == "macmon" ]] && ! $IS_MACOS; then
                 echo -e "  ${_d}·${_n} ${tool}  ${_d}macOS only${_n}"
             else
                 echo -e "  ${_r}✗${_n} ${tool}  ${_d}not installed${_n}"

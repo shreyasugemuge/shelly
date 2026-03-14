@@ -12,6 +12,11 @@ _zshrc_dir="${_zshrc_realpath:h}"
 ZSH_DOTFILES_VERSION="$(cat "$_zshrc_dir/VERSION" 2>/dev/null || echo 'unknown')"
 unset _zshrc_realpath _zshrc_dir
 
+# ── Platform Detection ──
+# Set once here, used in all sourced modules.
+[[ "$OSTYPE" == darwin* ]] && IS_MACOS=true || IS_MACOS=false
+[[ "$OSTYPE" == linux*  ]] && IS_LINUX=true  || IS_LINUX=false
+
 # ── Directory where config modules live ──
 ZDOTDIR_CUSTOM="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 

@@ -18,7 +18,7 @@ _deps_stamp="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/deps_checked"
 _should_check_deps() {
     if [[ -f "$_deps_stamp" ]]; then
         local stamp_day today
-        if [[ "$OSTYPE" == darwin* ]]; then
+        if $IS_MACOS; then
             stamp_day="$(stat -f '%Sm' -t '%Y-%m-%d' "$_deps_stamp" 2>/dev/null)"
         else
             stamp_day="$(date -r "$_deps_stamp" '+%Y-%m-%d' 2>/dev/null)"
@@ -51,7 +51,7 @@ _install_plugins() {
 
     echo -e "\033[0;36m·\033[0m Installing missing plugins: \033[1m${missing[*]}\033[0m"
 
-    if [[ "$OSTYPE" == darwin* ]]; then
+    if $IS_MACOS; then
         # macOS: use Homebrew (install it first if missing)
         if ! command -v brew &>/dev/null; then
             echo -e "\033[0;33m⚠  Homebrew not found — installing…\033[0m"

@@ -7,7 +7,7 @@ function pan() {
         echo "Usage: pan <command>"
         return 1
     fi
-    if [[ "$OSTYPE" == darwin* ]]; then
+    if $IS_MACOS; then
         man -t "$1" | open -f -a /Applications/Preview.app
     else
         echo "pan: this function requires macOS Preview.app"
@@ -51,7 +51,7 @@ function extract() {
 # ── whichip: Friendly display of all IPs ──
 function whichip() {
     echo "Public IP : $(curl -s --max-time 3 ipinfo.io/ip)"
-    if [[ "$OSTYPE" == darwin* ]]; then
+    if $IS_MACOS; then
         local _iface
         _iface="$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')"
         echo "Local IP  : $(ipconfig getifaddr "${_iface:-en0}" 2>/dev/null || echo 'not connected')"
