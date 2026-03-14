@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: milestone
 status: planning
-last_updated: "2026-03-14T07:13:42.619Z"
+last_updated: "2026-03-14T07:28:59.170Z"
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # Project State
@@ -46,6 +46,8 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 - stderr used for errors in helpers so stdout captures only project names/paths
 - fzf optional: command -v guard with numbered fallback ensures cross-platform UX
 - Left migration comment in aliases.zsh noting devtmux moved to functions.zsh (v3.0) for discoverability
+- [Phase 02-tech-debt-cleanup]: IS_MACOS/IS_LINUX set once in .zshrc (no export), used as booleans in all 5 config modules — eliminates 11 scattered OSTYPE checks
+- [Phase 02-tech-debt-cleanup]: typeset -U path at bottom of environment.zsh deduplicates PATH on every shell start, preserving first-occurrence order
 
 ## Recent Activity
 

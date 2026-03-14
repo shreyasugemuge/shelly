@@ -8,7 +8,7 @@
 | Phase | Name | Requirements | Status |
 |-------|------|-------------|--------|
 | 1 | Dynamic devtmux | Complete    | 2026-03-14 |
-| 2 | Tech Debt Cleanup | DEBT-01 through DEBT-04 | Not started |
+| 2 | 1/1 | Complete   | 2026-03-14 |
 | 3 | QA & Security Audit | QA-01 through QA-05 | Not started |
 
 ---
@@ -63,7 +63,7 @@ Plans:
 - `exec zsh` loads cleanly, sysmon works, all aliases resolve
 
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 02-01-PLAN.md — Centralize platform detection, PATH dedup, and doc cleanup

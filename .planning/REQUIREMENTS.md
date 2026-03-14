@@ -20,10 +20,10 @@
 
 ### Tech Debt Cleanup
 
-- [ ] **DEBT-01**: Platform detection centralized (single `IS_MACOS` variable or function)
-- [ ] **DEBT-02**: PATH deduplication prevents duplicate entries
-- [ ] **DEBT-03**: Hardcoded `~/.dotfiles/zsh` references use a single variable
-- [ ] **DEBT-04**: No regressions — all existing functionality preserved
+- [x] **DEBT-01**: Platform detection centralized (single `IS_MACOS` variable or function)
+- [x] **DEBT-02**: PATH deduplication prevents duplicate entries
+- [x] **DEBT-03**: Hardcoded `~/.dotfiles/zsh` references use a single variable
+- [x] **DEBT-04**: No regressions — all existing functionality preserved
 
 ### QA & Security
 
@@ -57,10 +57,10 @@
 | DEV-08 | Phase 1 | Complete |
 | DEV-09 | Phase 1 | Complete |
 | DEV-10 | Phase 1 | Complete |
-| DEBT-01 | Phase 2 | Pending |
-| DEBT-02 | Phase 2 | Pending |
-| DEBT-03 | Phase 2 | Pending |
-| DEBT-04 | Phase 2 | Pending |
+| DEBT-01 | Phase 2 | Complete |
+| DEBT-02 | Phase 2 | Complete |
+| DEBT-03 | Phase 2 | Complete |
+| DEBT-04 | Phase 2 | Complete |
 | QA-01 | Phase 3 | Pending |
 | QA-02 | Phase 3 | Pending |
 | QA-03 | Phase 3 | Pending |
