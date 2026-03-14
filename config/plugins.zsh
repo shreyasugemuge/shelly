@@ -35,6 +35,14 @@ if [[ -n "$_as_path" ]]; then
 fi
 unset _as_path
 
+# ── SOURCING ORDER GUARD ──────────────────────────────────────────────
+# zsh-syntax-highlighting MUST be the last plugin sourced in this file.
+# It wraps ZLE widgets at source time; sourcing anything after it
+# silently breaks those widgets (completions, history search, etc.).
+# DO NOT add any plugin source lines below this guard.
+# See: https://github.com/zsh-users/zsh-syntax-highlighting#why-must-zsh-syntax-highlighting-be-sourced-at-the-end
+# ─────────────────────────────────────────────────────────────────────
+
 # ── zsh-syntax-highlighting ──
 # Colors commands as you type: green = valid, red = not found.
 # MUST be sourced last (after all other plugins and widgets).
