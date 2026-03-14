@@ -1,6 +1,6 @@
 # Shelly
 
-[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux%20|%20WSL-orange.svg)](#prerequisites)
@@ -44,7 +44,7 @@ Preview without making changes:
 - **git** — for prompt branch/status info
 - **curl** — for network aliases
 
-Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`) and CLI tools (`figlet`, `tree`) are installed automatically on first launch via your platform's package manager (Homebrew, apt, dnf, or pacman).
+Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`) and CLI tools (`tree`) are installed automatically on first launch via your platform's package manager (Homebrew, apt, dnf, or pacman).
 
 ## File Structure
 
@@ -126,12 +126,16 @@ btop and nvtop configs are force-written on every launch for consistency. On App
 > **Requires** iTerm2 with Python API enabled: Preferences → General → Magic → Enable Python API
 
 ```
-┌──────────────┬──────────────┬──────────────┐
-│  Claude Code │  Claude Code │  Claude Code │
-│  (project 1) │  (project 2) │  (project 3) │
-├──────────────┼──────────────┼──────────────┤
-│  terminal    │  terminal    │  terminal    │
-└──────────────┴──────────────┴──────────────┘
+┌──────────────────┬──────────────────┬──────────────────┐
+│ claude :: proj1  │ claude :: proj2  │ claude :: proj3  │
+│                  │                  │                  │
+│  Claude Code     │  Claude Code     │  Claude Code     │
+│  (80%)           │  (80%)           │  (80%)           │
+│                  │                  │                  │
+├──────────────────┼──────────────────┼──────────────────┤
+│ terminal :: proj1│ terminal :: proj2│ terminal :: proj3│
+│  (20%)           │  (20%)           │  (20%)           │
+└──────────────────┴──────────────────┴──────────────────┘
 ```
 
 | Command          | Description                               |
@@ -141,7 +145,9 @@ btop and nvtop configs are force-written on every launch for consistency. On App
 | `devterm status` | Check window state                        |
 | `devterm help`   | Quick reference                           |
 
-Append `y` to a project number to launch Claude Code with `--dangerously-skip-permissions` (yolo mode). For example, entering `1y 3` opens project 1 in skip-permissions mode and project 3 normally.
+Pane titles show `claude :: project` (top) and `terminal :: project` (bottom). Claude pane titles are locked so Claude Code can't override them. Panes are resized to 80/20 via the iTerm2 Python API.
+
+Append `y` to a project number to launch Claude Code with `--dangerously-skip-permissions` (yolo mode). For example, entering `1y 3` opens project 1 in skip-permissions mode and project 3 normally. Yolo panes show `⚡ claude :: project` in the title.
 
 Set `DEVTMUX_DIR` to change the code folder (defaults to `~/code`).
 
@@ -151,7 +157,7 @@ Set `DEVTMUX_DIR` to change the code folder (defaults to `~/code`).
 
 **Aliases** — `..`, `ll`, `refresh`, `zshrc`, `myip`, `gs`, `gb`, `gco`, `gsw`, `tre`, `yell`, and more. See `config/aliases.zsh`.
 
-**Functions** — `pan` (man page as PDF), `mkcd`, `extract` (any archive), `whichip`, `weather`, `portfind`, `devterm`. See `config/functions.zsh`.
+**Functions** — `pan` (man page as PDF), `mkcd`, `extract` (any archive), `whichip`, `weather`, `portfind`, `cc` (Claude Code with notification), `ccnotify`, `iterm-setup`, `devterm`. See `config/functions.zsh`.
 
 ## Customization
 

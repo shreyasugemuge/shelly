@@ -30,21 +30,26 @@ Shelly is a modular zsh configuration and development workspace by Shreyas Ugemu
 
 Launches an iTerm2 window with btop (left), nvtop (top-right), and macmon (bottom-right).
 
-- Uses `it2api create-tab --command btop`, then `split-pane --vertical` for nvtop, `split-pane` for macmon
+- Uses `it2api create-tab`, then `send-text btop` to launch btop in the initial pane; `split-pane --vertical` for nvtop, `split-pane` for macmon
+- Split-pane failures are checked (null session ID guards) before sending commands
 - Session ID tracked at `~/.cache/zsh/sysmon.session_id`; `sysmon` re-focuses if open, re-launches if closed
 - `sysmon kill` finds the window via `show-hierarchy` and closes it via AppleScript
 - btop.conf and nvtop interface.ini force-written on every launch (see design decision above)
 - macOS-only; nvtop N/A fields on Apple Silicon hidden via force-written config
+- Inactive pane dimming disabled on launch (saved/restored on kill via `DimInactiveSplitPanes` defaults)
 
 ### Subcommands
 `sysmon` — launch or focus | `sysmon kill` — close window | `sysmon status` — tool versions + window state | `sysmon help`
 
 ## devterm — Dynamic Dev Workspace
 
-Launches an iTerm2 window with one column per project (Claude Code top + figlet terminal bottom).
+Launches an iTerm2 window with one column per project (Claude Code top 80% + terminal bottom 20%).
 
-- Numbered-list picker; 1-3 projects from `$DEVTMUX_DIR` (default `~/code`); append `y` for yolo mode
-- Uses `it2api create-tab`, then `split-pane --vertical` for additional columns, `split-pane` for terminal rows
+- Numbered-list picker; 1-3 projects from `$DEVTMUX_DIR` (default `~/code`); append `y` for yolo mode; worktrees detected alongside normal repos
+- **Three-phase build**: (1) create all splits and navigate panes to project dirs, (2) resize horizontal splits to 80/20 via Python API tree walk (`_dev_resize_layout`), (3) clear scrollback via `inject ClearScrollback` and launch Claude
+- **Pane titles**: top panes titled `claude :: project` (or `⚡ claude :: project` for yolo), bottom panes titled `terminal :: project`; set via `inject` (invisible)
+- **Title locking**: Claude panes use `set-profile-property allow_title_setting false` so Claude Code cannot override the pane title
+- **Stale session cleanup**: `_dev_build_session` always closes any tracked window before creating a new one
 - Session ID tracked at `~/.cache/zsh/devterm.session_id`
 - `devtmux` still works as a deprecation shim redirecting to `devterm`
 
@@ -72,3 +77,4 @@ Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `sty
 - btop and nvtop configs ARE force-written by monitor.zsh on every `sysmon` launch — intentional
 - `sysmon` and `devterm` check `$TERM_PROGRAM == "iTerm.app"` — in any other terminal they print a "non-iTerm mode" message and exit cleanly
 - `it2api` requires the Python `iterm2` module and the iTerm2 Python API to be enabled
+- In zsh, `local var` (without `=""`) inside a loop prints `var=value` to stdout on re-entry — always use `local var=""` when declaring variables in loops
