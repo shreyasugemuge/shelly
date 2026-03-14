@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.1] - 2026-03-14
+
+### Fixed
+- **Non-iTerm graceful degradation** — `sysmon` and `devterm` now print a clear "non-iTerm mode" message (instead of failing/hanging) when run outside iTerm2; uses `$TERM_PROGRAM` check
+- **iTerm2 gate before prompts** — iTerm2 check now runs before `_sysmon_ensure_deps` and before `devterm`'s interactive project picker, preventing wasted work in non-iTerm terminals
+
 ## [4.0.0] - 2026-03-14
 
 Replace tmux with iTerm2 native API for both sysmon and devterm. Rename devtmux to devterm.
@@ -301,7 +307,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.0.1...HEAD
+[4.0.1]: https://github.com/shreyasugemuge/shelly/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/shreyasugemuge/shelly/compare/v3.2.1...v4.0.0
 [3.2.1]: https://github.com/shreyasugemuge/shelly/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/shreyasugemuge/shelly/compare/v3.1.1...v3.2.0

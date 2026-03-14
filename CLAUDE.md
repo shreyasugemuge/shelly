@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v4.0.0 (2026-03-14)
+**Current version:** v4.0.1 (2026-03-14)
 
 ## What This Is
 
@@ -70,5 +70,5 @@ Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `sty
 - `~/.zshrc.local` is for machine-specific overrides — not tracked in git
 - btop has NO `--conf` CLI flag — it always reads `~/.config/btop/btop.conf`
 - btop and nvtop configs ARE force-written by monitor.zsh on every `sysmon` launch — intentional
-- `sysmon` and `devterm` are macOS/iTerm2-only — they check for `/Applications/iTerm.app` and fail gracefully on Linux
+- `sysmon` and `devterm` check `$TERM_PROGRAM == "iTerm.app"` — in any other terminal they print a "non-iTerm mode" message and exit cleanly
 - `it2api` requires the Python `iterm2` module and the iTerm2 Python API to be enabled
