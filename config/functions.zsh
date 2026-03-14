@@ -74,6 +74,14 @@ function portfind() {
         echo "Usage: portfind <port>"
         return 1
     fi
+    if [[ ! "$1" =~ ^[0-9]+$ ]]; then
+        echo "portfind: port must be a number (got: $1)"
+        return 1
+    fi
+    if (( $1 < 1 || $1 > 65535 )); then
+        echo "portfind: port must be 1-65535 (got: $1)"
+        return 1
+    fi
     lsof -i :"$1"
 }
 
