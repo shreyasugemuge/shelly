@@ -22,6 +22,8 @@ function mkcd() {
         echo "Usage: mkcd <directory>"
         return 1
     fi
+    # shellcheck disable=SC2164
+    # mkcd's purpose is mkdir + cd atomically; if mkdir succeeds and cd fails, returning is correct
     mkdir -p "$1" && cd "$1"
 }
 
@@ -147,8 +149,12 @@ _devtmux_pick_projects() {
             (( i++ ))
         done
         echo ""
+        # shellcheck disable=SC2034
+        # choices IS used — via zsh word-splitting expansion ${(z)choices} below
         local choices
         read -r "choices?Select projects (1-3, space-separated): "
+        # shellcheck disable=SC2296
+        # ${(z)choices} is zsh word-splitting syntax; not valid in bash but correct for zsh
         for n in ${(z)choices}; do
             if [[ "$n" =~ ^[0-9]+$ ]] && (( n >= 1 && n <= ${#repos[@]} )); then
                 selected+=("${repos[$n]}")
@@ -214,6 +220,8 @@ _devtmux_build_session() {
     # Status bar — magenta/purple accent (distinct from sysmon amber)
     tmux set-option -t "$_DEVTMUX_SESSION" status on
     tmux set-option -t "$_DEVTMUX_SESSION" status-style 'bg=colour235,fg=colour248'
+    # shellcheck disable=SC2296
+    # ${(j:, :)projects} is zsh array join syntax (join with ", "); not valid in bash
     tmux set-option -t "$_DEVTMUX_SESSION" status-left " #[fg=colour135,bold]devtmux#[fg=colour248] | #[fg=colour183]${(j:, :)projects}#[fg=colour248] "
     tmux set-option -t "$_DEVTMUX_SESSION" status-left-length 60
     tmux set-option -t "$_DEVTMUX_SESSION" status-right '#[fg=colour245]Ctrl-b d detach '

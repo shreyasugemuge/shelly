@@ -29,8 +29,14 @@ _find_plugin() {
 # Press → (right arrow) to accept, or keep typing to ignore.
 _as_path="$(_find_plugin zsh-autosuggestions)"
 if [[ -n "$_as_path" ]]; then
+    # shellcheck disable=SC1090
+    # Dynamic path: _as_path is resolved above by _find_plugin searching known directories
     source "$_as_path"
+    # shellcheck disable=SC2034
+    # ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE is read by the zsh-autosuggestions plugin after sourcing
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=245'
+    # shellcheck disable=SC2034
+    # ZSH_AUTOSUGGEST_STRATEGY is read by the zsh-autosuggestions plugin after sourcing
     ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 fi
 unset _as_path
@@ -48,6 +54,8 @@ unset _as_path
 # MUST be sourced last (after all other plugins and widgets).
 _sh_path="$(_find_plugin zsh-syntax-highlighting)"
 if [[ -n "$_sh_path" ]]; then
+    # shellcheck disable=SC1090
+    # Dynamic path: _sh_path is resolved above by _find_plugin searching known directories
     source "$_sh_path"
 fi
 unset _sh_path

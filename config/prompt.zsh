@@ -50,6 +50,8 @@ function _set_vcs_info() {
 }
 
 # Hook both into precmd — face MUST come first to capture $?
+# shellcheck disable=SC2034
+# precmd_functions is a zsh special array called before each prompt; it IS used by zsh internals
 precmd_functions=(_set_face _set_vcs_info)
 
 # ── Color reference ──
@@ -64,6 +66,9 @@ precmd_functions=(_set_face _set_vcs_info)
 # ── Build the prompt ──
 setopt PROMPT_SUBST
 
+# shellcheck disable=SC2034,SC2016
+# PROMPT is a zsh special variable set by the user and read by zsh prompt expansion
+# Single quotes are intentional: zsh performs prompt expansion (PROMPT_SUBST) at display time
 PROMPT='%F{245}[%f${_prompt_face}%F{245}]%f ${vcs_info_msg_0_}${_prompt_untracked} %F{245}%n@%m%f %(5~|%-1~/.../%3~|%~)
 %F{245}$%f '
 

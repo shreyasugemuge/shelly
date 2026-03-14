@@ -58,6 +58,8 @@ if $IS_MACOS; then
 elif $IS_LINUX; then
     _f_host="$(hostname -s 2>/dev/null)"
     if [[ -f /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        # /etc/os-release is a standard Linux file; not available at shellcheck analysis time
         _f_os="$(. /etc/os-release && echo "$PRETTY_NAME") ($(uname -m))"
     else
         _f_os="Linux $(uname -r) ($(uname -m))"

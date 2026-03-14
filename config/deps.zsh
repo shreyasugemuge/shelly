@@ -33,7 +33,8 @@ _should_check_deps() {
 # ── Check if a plugin is already installed somewhere ──
 _plugin_installed() {
     local plugin="$1"
-    local brew_share="$(brew --prefix 2>/dev/null)/share"
+    local brew_share
+    brew_share="$(brew --prefix 2>/dev/null)/share"
     for _dir in "$brew_share" /usr/share /usr/local/share; do
         [[ -f "$_dir/$plugin/$plugin.zsh" ]] && return 0
     done

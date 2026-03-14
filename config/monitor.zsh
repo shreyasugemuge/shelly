@@ -38,6 +38,8 @@ _sysmon_pkg_install() {
     elif command -v pacman &>/dev/null; then
         sudo pacman -S --noconfirm "$pkg"
     else
+        # shellcheck disable=SC2028
+        # zsh's echo expands \033 escape sequences by default; this is a zsh config file
         echo "\033[0;31m✗\033[0m No supported package manager found (brew/apt/dnf/pacman)"
         return 1
     fi
@@ -108,10 +110,14 @@ _sysmon_ensure_deps() {
 _sysmon_launch() {
     # Preflight
     if ! command -v tmux &>/dev/null; then
+        # shellcheck disable=SC2028
+        # zsh's echo expands \033 escape sequences by default; this is a zsh config file
         echo "\033[0;31m✗\033[0m tmux is required but not installed"
         return 1
     fi
     if ! command -v btop &>/dev/null; then
+        # shellcheck disable=SC2028
+        # zsh's echo expands \033 escape sequences by default; this is a zsh config file
         echo "\033[0;31m✗\033[0m btop is required but not installed"
         return 1
     fi

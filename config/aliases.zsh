@@ -22,6 +22,8 @@ alias refresh='exec zsh'
 
 # ── Network ──
 alias globip='echo "public: $(curl -s --max-time 3 ipinfo.io/ip)"'
+# shellcheck disable=SC2142
+# locip uses nested command substitution with awk; the \$2 escaping is intentional for awk field access
 alias locip='echo "local: $(ipconfig getifaddr "$(route -n get default 2>/dev/null | awk "/interface:/{print \$2}")" 2>/dev/null || hostname -I 2>/dev/null | awk "{print \$1}")"'
 alias myip='globip && locip'
 alias wifistat='ifconfig en0 2>/dev/null || ip addr show wlan0 2>/dev/null'

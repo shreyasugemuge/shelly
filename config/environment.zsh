@@ -16,7 +16,8 @@ export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
 # ── GPG ──
-export GPG_TTY=$(tty)
+GPG_TTY=$(tty)
+export GPG_TTY
 
 # ── Zsh Options ──
 setopt AUTO_CD              # cd by typing directory name
@@ -41,13 +42,19 @@ fi
 if [[ -n "$_nvm_script" ]]; then
     # Add NVM-managed node to PATH without sourcing the full script
     [[ -d "$NVM_DIR/versions/node" ]] && {
+        # shellcheck disable=SC2168
+        # zsh allows 'local' at file scope; this is a zsh config file, not POSIX sh
         local _default_node
+        # shellcheck disable=SC2012
+        # ls -d with sort -V is intentional here: we need version-sorted directory listing
         _default_node="$(ls -d "$NVM_DIR/versions/node/"* 2>/dev/null | sort -V | tail -1)"
         [[ -n "$_default_node" ]] && export PATH="$_default_node/bin:$PATH"
     }
 
     _lazy_load_nvm() {
         unfunction nvm node npm npx 2>/dev/null
+        # shellcheck disable=SC1090
+        # Dynamic path: _nvm_script is set above based on which NVM install location exists
         source "$_nvm_script"
         unset _nvm_script
     }
@@ -61,5 +68,7 @@ fi
 
 # ── PATH Deduplication ──
 # Remove duplicate entries; preserves first-occurrence order.
+# shellcheck disable=SC2034
+# $path is a zsh special array that is tied to $PATH; typeset -U deduplicates it
 typeset -U path
 export PATH
