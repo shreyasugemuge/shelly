@@ -346,4 +346,4 @@ _sysmon_completion() {
     )
     _describe 'sysmon command' subcmds
 }
-compdef _sysmon_completion sysmon
+# compdef registration moved to .zshrc (after compinit)

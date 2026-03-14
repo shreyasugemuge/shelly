@@ -2,7 +2,7 @@
 # Author: Shreyas Ugemuge
 #
 # Lightweight plugin loading — no framework needed.
-# Currently: fzf (shell integration), zsh-syntax-highlighting
+# Currently: zsh-autosuggestions, zsh-syntax-highlighting
 #
 # Search order: Homebrew → /usr/share (apt/dnf) → /usr/local/share
 
@@ -24,13 +24,22 @@ _find_plugin() {
     return 1
 }
 
-# ── fzf shell integration ──
-# Enables Ctrl-T (files), Ctrl-R (history), Alt-C (cd) keybindings
-if command -v fzf &>/dev/null; then
+# ── zsh-autosuggestions ──
+# Fish-style ghost-text suggestions from history as you type.
+# Accept with → (right arrow) or End. Partial accept with Alt-→ (word).
+_as_path="$(_find_plugin zsh-autosuggestions)"
+if [[ -n "$_as_path" ]]; then
     # shellcheck disable=SC1090
-    # fzf --zsh outputs shell code for key bindings and completion
-    source <(fzf --zsh)
+    # Dynamic path: _as_path is resolved above by _find_plugin searching known directories
+    source "$_as_path"
+    # shellcheck disable=SC2034
+    # ZSH_AUTOSUGGEST_* are read by zsh-autosuggestions internals, not by our code
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+    ZSH_AUTOSUGGEST_USE_ASYNC=1
+    ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=240'
 fi
+unset _as_path
 
 # ── SOURCING ORDER GUARD ──────────────────────────────────────────────
 # zsh-syntax-highlighting MUST be the last plugin sourced in this file.

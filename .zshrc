@@ -66,11 +66,21 @@ else
 fi
 unset _zcompdump
 zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+# Match strategy (tried in order, stops at first match):
+#   1. Case-insensitive
+#   2. Partial-word at separators (._-)
+#   3. Substring anywhere
+#   4. Approximate (allow 1 typo)
+zstyle ':completion:*' matcher-list \
+    'm:{a-zA-Z}={A-Za-z}' \
+    'r:|[._-]=* r:|=*' \
+    'l:|=* r:|=*' \
+    'm:{a-zA-Z}={A-Za-z} r:|?=**'
 zstyle ':completion:*' verbose yes
 zstyle ':completion:*:descriptions' format '%F{yellow}── %d ──%f'
 zstyle ':completion:*:messages' format '%F{purple}── %d ──%f'
 zstyle ':completion:*:warnings' format '%F{red}── no matches ──%f'
+zstyle ':completion:*:corrections' format '%F{green}── %d (errors: %e) ──%f'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' squeeze-slashes true
@@ -79,20 +89,22 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-
 zstyle ':completion:*' rehash true
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompcache"
+# Show recently modified files first for file completion
+zstyle ':completion:*' file-sort modification
+# cd: never offer the current directory, show parent (..) first
+zstyle ':completion:*:cd:*' ignore-parents parent pwd
+# Smarter directory completion: complete in-place before cycling
+zstyle ':completion:*' insert-tab pending
+# Deduplicate: don't offer a match that's already on the command line
+zstyle ':completion:*:(rm|cp|mv|kill|diff):*' ignore-line other
+# ssh/scp/rsync: complete hosts from known_hosts and config
+zstyle ':completion:*:(ssh|scp|rsync):*' hosts \
+    ${${${(f)"$(cat ~/.ssh/known_hosts 2>/dev/null)"}%%[# ]*}%%,*} \
+    ${${${(M)${(f)"$(cat ~/.ssh/config 2>/dev/null)"}:#Host *}#Host }:#*[*?]*}
 
-# ── fzf-tab (must load after compinit) ──
-_fzf_tab_dir="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf-tab"
-if [[ -f "$_fzf_tab_dir/fzf-tab.plugin.zsh" ]]; then
-    # shellcheck disable=SC1091
-    # fzf-tab is cloned by deps.zsh; path is known and stable
-    source "$_fzf_tab_dir/fzf-tab.plugin.zsh"
-    # Preview files/directories during completion
-    zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -1 --color=always $realpath 2>/dev/null || ls -1 $realpath'
-    zstyle ':fzf-tab:complete:ls:*' fzf-preview 'ls -1 --color=always $realpath 2>/dev/null || ls -1 $realpath'
-    zstyle ':fzf-tab:*' fzf-flags --height=40% --reverse
-    zstyle ':fzf-tab:*' switch-group ',' '.'
-fi
-unset _fzf_tab_dir
+# ── Register completions (must be after compinit) ──
+(( $+functions[_devtmux_completion] )) && compdef _devtmux_completion devtmux
+(( $+functions[_sysmon_completion] ))   && compdef _sysmon_completion sysmon
 
 # ── Key bindings (emacs mode) ──
 bindkey -e

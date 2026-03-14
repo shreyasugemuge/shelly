@@ -118,50 +118,58 @@ _devtmux_get_code_dir() {
     echo "$dir"
 }
 
-# _devtmux_pick_projects: Interactive project picker (fzf or numbered fallback)
+# _devtmux_pick_projects: Interactive project picker (numbered list)
 _devtmux_pick_projects() {
     local code_dir="$1"
-    local repos=()
+    local names=()
+    local branches=()
 
     for d in "$code_dir"/*/; do
         [[ -d "$d/.git" ]] || continue
-        local name="${d:t}"
-        local branch
-        branch="$(git -C "$d" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
-        repos+=("${name} (${branch})")
+        names+=("${d:t}")
+        branches+=("$(git -C "$d" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')")
     done
 
-    if (( ${#repos[@]} == 0 )); then
+    if (( ${#names[@]} == 0 )); then
         echo -e "\033[0;31m✗\033[0m No git repos found in $code_dir. Set DEVTMUX_DIR to a different folder." >&2
         return 1
     fi
 
-    local selected=()
-    local raw
-    raw="$(printf '%s\n' "${repos[@]}" | fzf --multi \
-        --prompt='Select projects (Tab=mark, Enter=confirm): ' \
-        --header='devtmux -- pick 1-3 projects')"
-    if [[ -z "$raw" ]]; then
+    echo "" >&2
+    echo -e "  \033[1mdevtmux\033[0m — pick 1-3 projects" >&2
+    echo "" >&2
+    for (( i=1; i<=${#names[@]}; i++ )); do
+        printf "  \033[0;33m%2d\033[0m  %s \033[0;90m(%s)\033[0m\n" "$i" "${names[$i]}" "${branches[$i]}" >&2
+    done
+    echo "" >&2
+
+    local input
+    read -r "input?  Enter numbers (e.g. 1 3): "
+    if [[ -z "$input" ]]; then
         echo -e "\033[0;31m✗\033[0m No projects selected" >&2
         return 1
     fi
-    while IFS= read -r line; do
-        selected+=("$line")
-    done <<< "$raw"
+
+    local selected=()
+    for num in ${(s: :)input}; do
+        if [[ ! "$num" =~ ^[0-9]+$ ]] || (( num < 1 || num > ${#names[@]} )); then
+            echo -e "\033[0;33m·\033[0m Skipping invalid: $num" >&2
+            continue
+        fi
+        selected+=("${names[$num]}")
+    done
+
+    if (( ${#selected[@]} == 0 )); then
+        echo -e "\033[0;31m✗\033[0m No valid projects selected" >&2
+        return 1
+    fi
 
     if (( ${#selected[@]} > 3 )); then
-        echo -e "\033[0;33m·\033[0m Max 3 projects -- using first 3" >&2
+        echo -e "\033[0;33m·\033[0m Max 3 projects — using first 3" >&2
         selected=("${selected[@]:0:3}")
     fi
 
-    if (( ${#selected[@]} == 0 )); then
-        echo -e "\033[0;31m✗\033[0m No projects selected" >&2
-        return 1
-    fi
-
-    for s in "${selected[@]}"; do
-        echo "${s% \(*}"
-    done
+    printf '%s\n' "${selected[@]}"
 }
 
 # _devtmux_build_session: Build the tmux layout with one column per project
@@ -249,7 +257,6 @@ _devtmux_help() {
     echo "  Inside the workspace:"
     echo "    mouse           click to switch panes, drag to resize"
     echo "    Ctrl-b d        detach (session keeps running)"
-    echo "    Tab             mark projects in fzf picker"
     echo ""
 }
 
@@ -329,4 +336,4 @@ _devtmux_completion() {
     )
     _describe 'devtmux command' subcmds
 }
-compdef _devtmux_completion devtmux
+# compdef registration moved to .zshrc (after compinit)

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-03-14
+
+Smarter completions with autosuggestions, remove fzf dependency.
+
+### Added
+- **zsh-autosuggestions** — fish-style ghost-text suggestions from history and completion engine; async mode, dim gray highlight, sourced before syntax-highlighting
+- **Smarter completion matching** — approximate matching (allows 1 typo), file sort by modification time, ssh host completion from known_hosts/config, dedup args for rm/cp/mv/kill/diff
+
+### Removed
+- **fzf** — removed as a dependency; no longer auto-installed by `deps.zsh`
+- **fzf-tab** — removed; tab completion uses native zsh `menu select` with enhanced matching
+- **fzf shell integration** — `Ctrl-T`, `Ctrl-R`, `Alt-C` keybindings removed (were fzf-specific)
+
+### Changed
+- **devtmux project picker** — replaced fzf multi-select with numbered-list picker (no external dependencies)
+- **Completion system** — native compinit with autosuggestions replaces fzf-tab; four-stage matcher (case-insensitive, partial-word, substring, approximate)
+- **compdef registration** — moved from individual config files to `.zshrc` (after compinit)
+
 ## [3.1.1] - 2026-03-14
 
 Bug fixes for devtmux and dependency checking.
@@ -250,7 +268,9 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/shreyasugemuge/shelly/compare/v3.1.1...v3.2.0
+[3.1.1]: https://github.com/shreyasugemuge/shelly/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/shreyasugemuge/shelly/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/shreyasugemuge/shelly/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/shreyasugemuge/shelly/compare/v2.0.0...v2.1.0

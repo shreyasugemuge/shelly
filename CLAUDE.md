@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v3.1.1 (2026-03-14)
+**Current version:** v3.2.0 (2026-03-14)
 
 ## What This Is
 
@@ -23,8 +23,7 @@ Shelly is a modular zsh configuration and development workspace by Shreyas Ugemu
 - **XDG-compliant**: config lives under `~/.config/zsh/`, not directly in `$HOME`.
 - **Performance matters**: NVM is lazy-loaded, compinit is cached daily, deps check runs once per day. PATH is deduped via `typeset -U path` in environment.zsh.
 - **Plugin sourcing order**: zsh-syntax-highlighting MUST be sourced last in plugins.zsh. A guard comment is co-located with the source line to prevent reordering.
-- **fzf is a required dependency**: auto-installed by deps.zsh. Used by devtmux (project picker) and fzf-tab (completion). No fallbacks — fzf must be present.
-- **fzf-tab must load after compinit**: sourced in `.zshrc` after the completion block, not in `plugins.zsh`. It's installed via git clone (not brew) to `~/.local/share/zsh/plugins/fzf-tab`.
+- **No fzf**: fzf was removed. Completion uses native zsh `menu select` + `zsh-autosuggestions` (fish-style ghost text from history/completion). devtmux uses a numbered-list picker. No external picker dependencies.
 - **sysmon force-writes config files on every launch**: btop.conf and nvtop's interface.ini are overwritten each time `sysmon` runs to ensure a consistent dashboard layout. This was a deliberate design choice after experiencing "sticky state" bugs where leftover config files survived git reverts and caused confusing layout changes. The force-write approach means the dashboard always matches what the code specifies.
 
 ## sysmon — System Monitor Dashboard
@@ -68,7 +67,7 @@ The `devtmux` command (`config/functions.zsh`) launches a tmux workspace for mul
 ### How It Works
 
 - Discovers code folder via `$DEVTMUX_DIR`, defaults to `~/code`, prompts if missing
-- Project picker: fzf multi-select if available, numbered-list fallback otherwise
+- Project picker: numbered-list multi-select (enter space-separated numbers)
 - Opens 1-3 projects, each as a tmux column with Claude Code (top) + terminal (bottom)
 - Session management: reattach existing, kill+recreate, or `devtmux kill`
 
@@ -81,7 +80,6 @@ The `devtmux` command (`config/functions.zsh`) launches a tmux workspace for mul
 ### Design Notes
 
 - stderr for errors in helpers so stdout captures only project names/paths
-- fzf is a required dependency (auto-installed by deps.zsh)
 - 1-based zsh loop with `(i-1)*2` pane index formula for tmux pane targeting
 - Persists `DEVTMUX_DIR` to `~/.zshrc.local` (with duplicate guard)
 
