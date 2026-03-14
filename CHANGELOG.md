@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.1] - 2026-03-14
+
+devtmux enhancements and dependency management improvements.
+
+### Added
+- **devtmux yolo mode** — append `y` to a project number (e.g. `1y 3`) to launch Claude Code with `--dangerously-skip-permissions` for that project
+- **figlet project banner** — bottom terminal panes now display the project name in large ASCII art via figlet
+- **CLI tool dependency tracking** — `deps.zsh` now auto-installs required CLI tools (`figlet`, `tree`) alongside zsh plugins
+
+### Changed
+- **deps.zsh** — renamed `_install_plugins` to `_install_missing`; now handles both zsh plugins and CLI tools in a single pass
+
 ## [3.2.0] - 2026-03-14
 
 Smarter completions with autosuggestions, remove fzf dependency.
@@ -268,7 +280,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/shreyasugemuge/shelly/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/shreyasugemuge/shelly/compare/v3.1.1...v3.2.0
 [3.1.1]: https://github.com/shreyasugemuge/shelly/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/shreyasugemuge/shelly/compare/v3.0.0...v3.1.0

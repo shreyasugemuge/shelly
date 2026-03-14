@@ -12,6 +12,12 @@ _zsh_deps=(
     zsh-completions
 )
 
+# ── Required CLI tools (used by aliases/functions) ──
+_cli_deps=(
+    figlet
+    tree
+)
+
 # ── Run at most once per day ──
 _deps_stamp="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/deps_checked"
 [[ -d "${_deps_stamp:h}" ]] || mkdir -p "${_deps_stamp:h}"
@@ -42,16 +48,19 @@ _plugin_installed() {
     return 1
 }
 
-# ── Install missing plugins via the platform's package manager ──
-_install_plugins() {
+# ── Install missing packages via the platform's package manager ──
+_install_missing() {
     local -a missing=()
     for _pkg in "${_zsh_deps[@]}"; do
         _plugin_installed "$_pkg" || missing+=("$_pkg")
     done
+    for _pkg in "${_cli_deps[@]}"; do
+        command -v "$_pkg" &>/dev/null || missing+=("$_pkg")
+    done
 
     (( ${#missing[@]} )) || return 0
 
-    echo -e "\033[0;36m·\033[0m Installing missing plugins: \033[1m${missing[*]}\033[0m"
+    echo -e "\033[0;36m·\033[0m Installing missing packages: \033[1m${missing[*]}\033[0m"
 
     if $IS_MACOS; then
         # macOS: use Homebrew (install it first if missing)
@@ -89,8 +98,8 @@ _install_plugins() {
 }
 
 if _should_check_deps; then
-    _install_plugins && touch "$_deps_stamp"
+    _install_missing && touch "$_deps_stamp"
 fi
 
-unset _deps_stamp _zsh_deps
-unfunction _should_check_deps _plugin_installed _install_plugins 2>/dev/null
+unset _deps_stamp _zsh_deps _cli_deps
+unfunction _should_check_deps _plugin_installed _install_missing 2>/dev/null

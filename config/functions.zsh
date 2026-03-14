@@ -144,19 +144,22 @@ _devtmux_pick_projects() {
     echo "" >&2
 
     local input
-    read -r "input?  Enter numbers (e.g. 1 3): "
+    read -r "input?  Enter numbers (e.g. 1 3, add y suffix to yolo: 1y 3): "
     if [[ -z "$input" ]]; then
         echo -e "\033[0;31m✗\033[0m No projects selected" >&2
         return 1
     fi
 
     local selected=()
-    for num in ${(s: :)input}; do
+    for token in ${(s: :)input}; do
+        local num="${token%%[yY]}"
+        local yolo=""
+        [[ "$token" =~ [yY]$ ]] && yolo=":yolo"
         if [[ ! "$num" =~ ^[0-9]+$ ]] || (( num < 1 || num > ${#names[@]} )); then
-            echo -e "\033[0;33m·\033[0m Skipping invalid: $num" >&2
+            echo -e "\033[0;33m·\033[0m Skipping invalid: $token" >&2
             continue
         fi
-        selected+=("${names[$num]}")
+        selected+=("${names[$num]}${yolo}")
     done
 
     if (( ${#selected[@]} == 0 )); then
@@ -174,7 +177,21 @@ _devtmux_pick_projects() {
 
 # _devtmux_build_session: Build the tmux layout with one column per project
 _devtmux_build_session() {
-    local projects=("$@")
+    # Split args on -- separator: projects before, yolo_flags after
+    local projects=()
+    local yolo_flags=()
+    local past_sep=0
+    for arg in "$@"; do
+        if [[ "$arg" == "--" ]]; then
+            past_sep=1
+            continue
+        fi
+        if (( past_sep )); then
+            yolo_flags+=("$arg")
+        else
+            projects+=("$arg")
+        fi
+    done
     local code_dir="${DEVTMUX_DIR:-$HOME/code}"
     local count=${#projects[@]}
 
@@ -203,13 +220,17 @@ _devtmux_build_session() {
     # Launch Claude Code in each top pane (indices 0, 2, 4, ...)
     for (( i=1; i<=count; i++ )); do
         local top_pane=$(( (i-1) * 2 ))
-        tmux send-keys -t "$_DEVTMUX_SESSION:0.$top_pane" "clear && claude" C-m
+        local claude_cmd="claude"
+        if (( ${yolo_flags[$i]:-0} )); then
+            claude_cmd="claude --dangerously-skip-permissions"
+        fi
+        tmux send-keys -t "$_DEVTMUX_SESSION:0.$top_pane" "clear && $claude_cmd" C-m
     done
 
-    # Clear each bottom terminal pane (indices 1, 3, 5, ...)
+    # Yell the project name in each bottom terminal pane (indices 1, 3, 5, ...)
     for (( i=1; i<=count; i++ )); do
         local bot_pane=$(( (i-1) * 2 + 1 ))
-        tmux send-keys -t "$_DEVTMUX_SESSION:0.$bot_pane" "clear" C-m
+        tmux send-keys -t "$_DEVTMUX_SESSION:0.$bot_pane" "clear && figlet ${projects[$i]}" C-m
     done
 
     # Status bar — magenta/purple accent (distinct from sysmon amber)
@@ -251,6 +272,7 @@ _devtmux_help() {
     echo ""
     echo "  Workspace layout:"
     echo "    1-3 projects    select from git repos in your code folder"
+    echo "    add y suffix    skip permissions mode (e.g. 1y 3)"
     echo "    top pane        Claude Code (~85% height)"
     echo "    bottom pane     terminal (~15% height)"
     echo ""
@@ -269,11 +291,19 @@ _devtmux_launch() {
     projects_raw="$(_devtmux_pick_projects "$code_dir")" || return 1
 
     local projects=()
+    local yolo_flags=()
     while IFS= read -r line; do
-        [[ -n "$line" ]] && projects+=("$line")
+        [[ -n "$line" ]] || continue
+        if [[ "$line" == *":yolo" ]]; then
+            projects+=("${line%:yolo}")
+            yolo_flags+=(1)
+        else
+            projects+=("$line")
+            yolo_flags+=(0)
+        fi
     done <<< "$projects_raw"
 
-    _devtmux_build_session "${projects[@]}"
+    _devtmux_build_session "${projects[@]}" -- "${yolo_flags[@]}"
 
     if [[ -n "$TMUX" ]]; then
         tmux switch-client -t "$_DEVTMUX_SESSION"
