@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-03-14
+
+Devterm full rebuild — pane resize, clean scrollback, locked titles, stale session cleanup.
+
+### Fixed
+- **Pane resize** — replaced broken `_dev_resize_pane` (single-session approach that failed silently) with `_dev_resize_layout`, which walks the tab's split tree via iTerm2 Python API and sets all horizontal splits to 80% Claude / 20% terminal
+- **Clean scrollback** — devterm now uses a 3-phase build: create splits & navigate, resize, then `inject ClearScrollback` + launch Claude; no more visible `cd && clear && claude` flash in the Claude pane
+- **Stale sessions** — `_dev_build_session` always closes any tracked window before creating a new one, preventing orphan panes from prior runs
+- **`local` variable leak** — fixed bare `local var` declarations inside loops (`col_out`, `col_sid`, `term_out`, `term_sid` in functions.zsh; `ver` in monitor.zsh) that printed values to stdout on loop re-entry (zsh `typeset` behavior)
+
+### Changed
+- **Pane titles** — top panes show `claude :: project` (or `⚡ claude :: project` for yolo), bottom panes show `terminal :: project`; titles set via `inject` (invisible) and locked on Claude panes with `set-profile-property allow_title_setting false` so Claude Code cannot override
+- **Removed badges** — large badge watermarks replaced by pane titles (cleaner in small panes)
+- **Removed figlet** — terminal panes launch clean with just the project directory and title
+- **sysmon robustness** — split-pane failures now checked (null session ID guards), btop launched via `send-text` instead of `--command` for reliable splitting, dimming save/restore on launch/kill
+
 ## [4.1.0] - 2026-03-14
 
 iTerm2 shell integration, devterm badges, yolo indicators, worktree support, and Claude Code notification helpers.
@@ -320,7 +336,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.1.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.2.0...HEAD
+[4.2.0]: https://github.com/shreyasugemuge/shelly/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/shreyasugemuge/shelly/compare/v4.0.1...v4.1.0
 [4.0.1]: https://github.com/shreyasugemuge/shelly/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/shreyasugemuge/shelly/compare/v3.2.1...v4.0.0

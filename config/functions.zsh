@@ -116,6 +116,51 @@ function iterm-setup() {
 
 _IT2API_DEV="/Applications/iTerm.app/Contents/Resources/it2api"
 
+# _dev_resize_layout: Resize all horizontal splits to 80% Claude / 20% terminal
+# Walks the tab's split tree via iTerm2 Python API and calls async_update_layout()
+_dev_resize_layout() {
+    local anchor_sid="$1"
+    python3 << PYEOF 2>/dev/null
+import iterm2
+
+async def main(connection):
+    app = await iterm2.async_get_app(connection)
+    tab = None
+    for w in app.terminal_windows:
+        for t in w.tabs:
+            for s in t.sessions:
+                if s.session_id == "${anchor_sid}":
+                    tab = t
+                    break
+            if tab:
+                break
+        if tab:
+            break
+    if not tab:
+        return
+
+    def resize(node):
+        if isinstance(node, iterm2.Session):
+            return
+        # Horizontal splitter = children stacked top-to-bottom
+        if not node.vertical and len(node.children) == 2:
+            top, bot = node.children[0], node.children[1]
+            if isinstance(top, iterm2.Session) and isinstance(bot, iterm2.Session):
+                total = top.grid_size.height + bot.grid_size.height
+                top.preferred_size = iterm2.util.Size(
+                    top.grid_size.width, int(total * 0.8))
+                bot.preferred_size = iterm2.util.Size(
+                    bot.grid_size.width, int(total * 0.2))
+        for child in node.children:
+            resize(child)
+
+    resize(tab.root)
+    await tab.async_update_layout()
+
+iterm2.run_until_complete(main)
+PYEOF
+}
+
 # _dev_state_file: Path to the file storing the primary session ID
 _dev_state_file() {
     echo "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/devterm.session_id"
@@ -160,7 +205,7 @@ _dev_pick_projects() {
         # Accept both .git dirs (normal repos) and .git files (worktrees)
         [[ -e "$d/.git" ]] || continue
         names+=("${d:t}")
-        local branch wt_marker=""
+        local branch="" wt_marker=""
         branch="$(git -C "$d" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
         [[ -f "$d/.git" ]] && wt_marker=" [wt]"
         branches+=("${branch}${wt_marker}")
@@ -276,6 +321,11 @@ _dev_close_window() {
 }
 
 # _dev_build_session: Build the iTerm2 layout with one column per project
+#
+# Three-phase approach:
+#   Phase 1 — Create all splits and navigate panes to project dirs
+#   Phase 2 — Resize horizontal splits to 80% Claude / 20% terminal
+#   Phase 3 — Clear scrollback on all panes and launch Claude
 _dev_build_session() {
     # Split args on -- separator: projects before, yolo_flags after
     local projects=()
@@ -297,6 +347,11 @@ _dev_build_session() {
 
     _dev_ensure_iterm2 || return 1
 
+    # Clean up any tracked window before creating a new one
+    if [[ -f "$(_dev_state_file)" ]]; then
+        _dev_close_window >/dev/null 2>&1
+    fi
+
     # Create first tab (new iTerm2 window)
     local output session_id
     output=$("$_IT2API_DEV" create-tab 2>/dev/null) || {
@@ -305,7 +360,6 @@ _dev_build_session() {
         echo "  Is Python API enabled? iTerm2 → Preferences → General → Magic → Enable Python API"
         return 1
     }
-    # Parse session ID: format is "Session "name" id=SESSION_ID WxH frame=..."
     session_id=${${(M)${=output}:#id=*}#id=}
     if [[ -z "$session_id" ]]; then
         # shellcheck disable=SC2028
@@ -316,47 +370,65 @@ _dev_build_session() {
     mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
     echo "$session_id" > "$(_dev_state_file)"
 
-    # Track top pane session IDs (one per column)
+    # Track pane session IDs
     local top_sessions=("$session_id")
+    local term_sessions=()
 
     # Create additional columns (vertical splits off the last top pane)
     local last_top="$session_id"
+    local col_out="" col_sid=""
     for (( i=2; i<=count; i++ )); do
-        local col_out col_sid
         col_out=$("$_IT2API_DEV" split-pane "$last_top" --vertical 2>/dev/null)
         col_sid=${${(M)${=col_out}:#id=*}#id=}
         top_sessions+=("$col_sid")
         last_top="$col_sid"
     done
 
-    # For each column: send claude to top pane, split for terminal, send figlet
+    # ── Phase 1: Create horizontal splits and navigate all panes ──
+    local term_out="" term_sid=""
     for (( i=1; i<=count; i++ )); do
         local top="${top_sessions[$i]}"
+        local proj_dir="$code_dir/${projects[$i]}"
+
+        # Navigate top pane to project dir and clear
+        "$_IT2API_DEV" send-text "$top" "cd ${(q)proj_dir} && clear"$'\n' 2>/dev/null
+
+        # Split horizontally for terminal pane (below)
+        term_out=$("$_IT2API_DEV" split-pane "$top" 2>/dev/null)
+        term_sid=${${(M)${=term_out}:#id=*}#id=}
+        term_sessions+=("$term_sid")
+
+        # Navigate terminal pane to project dir and clear
+        "$_IT2API_DEV" send-text "$term_sid" "cd ${(q)proj_dir} && clear"$'\n' 2>/dev/null
+    done
+
+    # ── Phase 2: Resize all horizontal splits to 80/20 ──
+    sleep 0.5
+    _dev_resize_layout "${top_sessions[1]}"
+
+    # ── Phase 3: Clear scrollback and launch Claude ──
+    for (( i=1; i<=count; i++ )); do
+        local top="${top_sessions[$i]}"
+        local term="${term_sessions[$i]}"
         local proj="${projects[$i]}"
-        local proj_dir="$code_dir/$proj"
         local claude_cmd="claude"
         if (( ${yolo_flags[$i]:-0} )); then
             claude_cmd="claude --dangerously-skip-permissions"
         fi
 
-        # Set badge to project name (persists through claude running)
-        local badge_b64
-        badge_b64=$(printf '%s' "$proj" | base64 | tr -d '\n')
-        "$_IT2API_DEV" send-text "$top" "printf '\\033]1337;SetBadgeFormat=${badge_b64}\\a'"$'\n' 2>/dev/null
+        # Clear scrollback on both panes (removes cd/clear from history)
+        "$_IT2API_DEV" inject "$top" $'\033]1337;ClearScrollback\007' 2>/dev/null
+        "$_IT2API_DEV" inject "$term" $'\033]1337;ClearScrollback\007' 2>/dev/null
 
-        # Yolo mode: set tab title with warning indicator
-        if (( ${yolo_flags[$i]:-0} )); then
-            "$_IT2API_DEV" send-text "$top" $'printf "\\033]2;\xe2\x9a\xa1 YOLO\\007"\n' 2>/dev/null
-        fi
+        # Set pane titles via inject, then lock Claude pane so it can't override
+        local yolo_prefix=""
+        (( ${yolo_flags[$i]:-0} )) && yolo_prefix=$'\xe2\x9a\xa1 '
+        "$_IT2API_DEV" inject "$top" "$(printf '\033]0;%sclaude :: %s\007' "$yolo_prefix" "$proj")" 2>/dev/null
+        "$_IT2API_DEV" set-profile-property "$top" allow_title_setting false 2>/dev/null
+        "$_IT2API_DEV" inject "$term" "$(printf '\033]0;terminal :: %s\007' "$proj")" 2>/dev/null
 
-        # Launch claude in top pane
-        "$_IT2API_DEV" send-text "$top" "cd ${(q)proj_dir} && clear && $claude_cmd"$'\n' 2>/dev/null
-
-        # Split horizontally for terminal pane (below)
-        local term_out term_sid
-        term_out=$("$_IT2API_DEV" split-pane "$top" 2>/dev/null)
-        term_sid=${${(M)${=term_out}:#id=*}#id=}
-        "$_IT2API_DEV" send-text "$term_sid" "cd ${(q)proj_dir} && clear && figlet ${(q)proj}"$'\n' 2>/dev/null
+        # Launch Claude in top pane
+        "$_IT2API_DEV" send-text "$top" "$claude_cmd"$'\n' 2>/dev/null
     done
 
     # Focus first top pane
