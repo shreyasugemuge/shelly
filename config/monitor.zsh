@@ -389,6 +389,7 @@ function sysmon() {
             echo ""
             ;;
         *)
+            _sysmon_ensure_iterm2 || return 1
             _sysmon_ensure_deps
             if _sysmon_window_exists; then
                 # shellcheck disable=SC2028

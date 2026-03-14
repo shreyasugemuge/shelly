@@ -380,6 +380,7 @@ function devterm() {
             echo ""
             ;;
         *)
+            _dev_ensure_iterm2 || return 1
             if _dev_window_exists; then
                 local choice
                 read -r "choice?devterm window exists. [f]ocus or [k]ill and start fresh? "
