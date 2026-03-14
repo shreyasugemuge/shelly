@@ -16,7 +16,7 @@
 - [x] **DEV-07**: Claude Code auto-launches in each project's directory
 - [x] **DEV-08**: Reattaches to existing "dev" session, or offers to kill and recreate
 - [x] **DEV-09**: Works on macOS and Linux
-- [ ] **DEV-10**: `devtmux kill` tears down the dev session
+- [x] **DEV-10**: `devtmux kill` tears down the dev session
 
 ### Tech Debt Cleanup
 
@@ -56,7 +56,7 @@
 | DEV-07 | Phase 1 | Complete |
 | DEV-08 | Phase 1 | Complete |
 | DEV-09 | Phase 1 | Complete |
-| DEV-10 | Phase 1 | Pending |
+| DEV-10 | Phase 1 | Complete |
 | DEBT-01 | Phase 2 | Pending |
 | DEBT-02 | Phase 2 | Pending |
 | DEBT-03 | Phase 2 | Pending |
@@ -74,4 +74,4 @@
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after initial definition*
+*Last updated: 2026-03-14 after plan 01-02 complete (DEV-10 marked complete)*
