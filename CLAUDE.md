@@ -70,5 +70,5 @@ Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `sty
 - `~/.zshrc.local` is for machine-specific overrides — not tracked in git
 - btop has NO `--conf` CLI flag — it always reads `~/.config/btop/btop.conf`
 - btop and nvtop configs ARE force-written by monitor.zsh on every `sysmon` launch — intentional
-- `sysmon` and `devterm` are macOS/iTerm2-only — they guard with `$IS_MACOS` internally
+- `sysmon` and `devterm` are macOS/iTerm2-only — they check for `/Applications/iTerm.app` and fail gracefully on Linux
 - `it2api` requires the Python `iterm2` module and the iTerm2 Python API to be enabled
