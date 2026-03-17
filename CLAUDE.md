@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v4.2.1 (2026-03-14)
+**Current version:** v4.3.0 (2026-03-17)
 
 ## What This Is
 

@@ -5,12 +5,8 @@
 # See:  CHANGELOG.md for release history
 
 # ── Version ──
-# Read from VERSION file relative to the real path of this .zshrc
-# (follows symlinks back to the repo)
-_zshrc_realpath="${${(%):-%x}:A}"
-_zshrc_dir="${_zshrc_realpath:h}"
-ZSH_DOTFILES_VERSION="$(cat "$_zshrc_dir/VERSION" 2>/dev/null || echo 'unknown')"
-unset _zshrc_realpath _zshrc_dir
+# Read from VERSION file installed alongside config modules
+ZSH_DOTFILES_VERSION="$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/VERSION" 2>/dev/null || echo 'unknown')"
 
 # ── Platform Detection ──
 # Set once here, used in all sourced modules.
@@ -122,3 +118,4 @@ alias shelly-version='echo "shelly v${ZSH_DOTFILES_VERSION}"'
 
 # ── Startup benchmark ──
 alias zsh-bench='time zsh -i -c exit'
+

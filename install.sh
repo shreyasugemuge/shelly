@@ -2,8 +2,8 @@
 # ── Shelly Installer ──
 # Author: Shreyas Ugemuge
 #
-# Symlinks shelly's zsh config files into the right places
-# on your system.
+# Copies shelly's zsh config files into the right places
+# on your system. Files are independent copies — re-run to update.
 #
 # Usage:
 #   ./install.sh            Normal install
@@ -49,7 +49,7 @@ for arg in "$@"; do
             echo ""
             echo "Options:"
             echo "  --dry-run      Show what would happen without making changes"
-            echo "  --uninstall    Remove symlinks and show backup location"
+            echo "  --uninstall    Remove installed files and show backup location"
             echo "  --version, -v  Print version and exit"
             echo "  --help, -h     Show this help message"
             exit 0
@@ -94,11 +94,10 @@ backup_existing() {
     fi
 }
 
-# ── Create symlinks ──
-create_symlinks() {
-    if [[ -L "$ZSHRC_TARGET" ]]; then
-        rm "$ZSHRC_TARGET"
-    elif [[ -f "$ZSHRC_TARGET" ]]; then
+# ── Install files (copy from repo) ──
+install_files() {
+    # Remove old symlinks or files
+    if [[ -L "$ZSHRC_TARGET" || -f "$ZSHRC_TARGET" ]]; then
         rm "$ZSHRC_TARGET"
     fi
 
@@ -110,11 +109,14 @@ create_symlinks() {
 
     mkdir -p "$(dirname "$ZSH_CONFIG_DIR")"
 
-    ln -s "$REPO_DIR/.zshrc" "$ZSHRC_TARGET"
-    ln -s "$REPO_DIR/config" "$ZSH_CONFIG_DIR"
+    # Copy files (independent of repo)
+    cp "$REPO_DIR/.zshrc" "$ZSHRC_TARGET"
+    cp -r "$REPO_DIR/config" "$ZSH_CONFIG_DIR"
+    cp "$REPO_DIR/VERSION" "$ZSH_CONFIG_DIR/VERSION"
 
-    ok "~/.zshrc → $REPO_DIR/.zshrc"
-    ok "~/.config/zsh → $REPO_DIR/config"
+    ok "Copied .zshrc → ~/.zshrc"
+    ok "Copied config/ → ~/.config/zsh/"
+    ok "Copied VERSION → ~/.config/zsh/VERSION"
 }
 
 # ── Ensure zsh data/cache dirs exist ──
@@ -151,14 +153,18 @@ do_uninstall() {
     echo -e "${YELLOW}Uninstalling shelly...${NC}"
     echo ""
 
-    if [[ -L "$ZSHRC_TARGET" ]]; then
+    if [[ -L "$ZSHRC_TARGET" || -f "$ZSHRC_TARGET" ]]; then
+        mkdir -p "$BACKUP_DIR"
+        cp "$ZSHRC_TARGET" "$BACKUP_DIR/.zshrc" 2>/dev/null
         rm "$ZSHRC_TARGET"
-        ok "Removed ~/.zshrc symlink"
+        ok "Removed ~/.zshrc"
     fi
 
-    if [[ -L "$ZSH_CONFIG_DIR" ]]; then
-        rm "$ZSH_CONFIG_DIR"
-        ok "Removed ~/.config/zsh symlink"
+    if [[ -L "$ZSH_CONFIG_DIR" || -d "$ZSH_CONFIG_DIR" ]]; then
+        mkdir -p "$BACKUP_DIR"
+        cp -r "$ZSH_CONFIG_DIR" "$BACKUP_DIR/zsh" 2>/dev/null
+        rm -rf "$ZSH_CONFIG_DIR"
+        ok "Removed ~/.config/zsh"
     fi
 
     local latest_backup
@@ -180,8 +186,9 @@ do_dry_run() {
     echo ""
     check_zsh
     info "Would back up existing configs (if any)"
-    info "Would symlink ~/.zshrc → $REPO_DIR/.zshrc"
-    info "Would symlink ~/.config/zsh → $REPO_DIR/config"
+    info "Would copy .zshrc → ~/.zshrc"
+    info "Would copy config/ → ~/.config/zsh/"
+    info "Would copy VERSION → ~/.config/zsh/VERSION"
     info "Would create ~/.local/share/zsh and ~/.cache/zsh"
     info "Would auto-install missing Homebrew dependencies on first shell open"
     info "Would offer to set zsh as default shell"
@@ -206,7 +213,7 @@ main() {
 
     check_zsh
     backup_existing
-    create_symlinks
+    install_files
     create_dirs
     maybe_set_default_shell
 
