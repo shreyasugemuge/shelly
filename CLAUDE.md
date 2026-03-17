@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v4.3.0 (2026-03-17)
+**Current version:** v4.4.0 (2026-03-17)
 
 ## What This Is
 
@@ -24,23 +24,23 @@ Shelly is a modular zsh configuration and development workspace by Shreyas Ugemu
 - **Plugin sourcing order**: zsh-syntax-highlighting MUST be sourced last in plugins.zsh. Guard comment in place — do not reorder.
 - **No fzf**: completion uses native zsh `menu select` + `zsh-autosuggestions`. `devterm` uses numbered-list picker.
 - **iTerm2 for sysmon and devterm**: both features use the `it2api` Python CLI bundled with iTerm2. Requires Python API enabled in iTerm2 preferences.
-- **Force-written configs**: btop.conf and nvtop interface.ini are overwritten on every `sysmon` launch to prevent sticky-state bugs.
+- **Force-written configs**: btop.conf is overwritten on every `sysmon` launch to prevent sticky-state bugs. mactop needs no config file.
 - **Startup caching**: sysinfo.zsh caches hardware info (until reboot), package count (1h), and git streak (5m) to ~/.cache/zsh/sysinfo_cache. brew --prefix computed once in .zshrc as _SHELLY_BREW_PREFIX and reused by deps/plugins.
 
 ## sysmon — System Monitor Dashboard
 
-Launches an iTerm2 window with btop (left), nvtop (top-right), and macmon (bottom-right).
+Launches an iTerm2 window with btop (left) and mactop (right).
 
-- Uses `it2api create-tab`, then `send-text btop` to launch btop in the initial pane; `split-pane --vertical` for nvtop, `split-pane` for macmon
+- Uses `it2api create-tab`, then `send-text btop` to launch btop in the initial pane; `split-pane --vertical` for mactop
 - Split-pane failures are checked (null session ID guards) before sending commands
 - Session ID tracked at `~/.cache/zsh/sysmon.session_id`; `sysmon` re-focuses if open, re-launches if closed
 - `sysmon kill` finds the window via `show-hierarchy` and closes it via AppleScript
-- btop.conf and nvtop interface.ini force-written on every launch (see design decision above)
-- macOS-only; nvtop N/A fields on Apple Silicon hidden via force-written config
+- btop.conf force-written on every launch (see design decision above); mactop auto-detects Apple Silicon
 - Inactive pane dimming disabled on launch (saved/restored on kill via `DimInactiveSplitPanes` defaults)
+- `sysmon-old` preserves the legacy nvtop+macmon layout with its own state file
 
 ### Subcommands
-`sysmon` — launch or focus | `sysmon kill` — close window | `sysmon status` — tool versions + window state | `sysmon help`
+`sysmon` — launch or focus | `sysmon kill` — close window | `sysmon status` — tool versions + window state | `sysmon help` | `sysmon-old` — legacy layout
 
 ## devterm — Dynamic Dev Workspace
 
@@ -75,7 +75,7 @@ Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `sty
 - `portfind` validates port range (1-65535), `mkcd` validates non-empty args
 - `~/.zshrc.local` is for machine-specific overrides — not tracked in git
 - btop has NO `--conf` CLI flag — it always reads `~/.config/btop/btop.conf`
-- btop and nvtop configs ARE force-written by monitor.zsh on every `sysmon` launch — intentional
+- btop config IS force-written by monitor.zsh on every `sysmon` launch — intentional
 - `sysmon` and `devterm` check `$TERM_PROGRAM == "iTerm.app"` — in any other terminal they print a "non-iTerm mode" message and exit cleanly
 - `it2api` requires the Python `iterm2` module and the iTerm2 Python API to be enabled
 - In zsh, `local var` (without `=""`) inside a loop prints `var=value` to stdout on re-entry — always use `local var=""` when declaring variables in loops
