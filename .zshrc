@@ -58,9 +58,9 @@ autoload -Uz compinit
 _zcompdump="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
 [[ -d "${_zcompdump:h}" ]] || mkdir -p "${_zcompdump:h}"
 if [[ -f "$_zcompdump" && $(date +'%j') == $(stat -f '%Sm' -t '%j' "$_zcompdump" 2>/dev/null || date -r "$_zcompdump" +'%j' 2>/dev/null) ]]; then
-    compinit -C -d "$_zcompdump"
+    compinit -u -C -d "$_zcompdump"
 else
-    compinit -d "$_zcompdump"
+    compinit -u -d "$_zcompdump"
 fi
 unset _zcompdump
 zstyle ':completion:*' menu select
