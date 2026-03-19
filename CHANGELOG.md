@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.4.1] - 2026-03-19
+
+### Fixed
+- **compinit insecure directory warning** — added `-u` flag to `compinit` calls to suppress the interactive prompt about group-writable Homebrew directories (common after `brew reinstall zsh-completions`)
+
+## [4.4.0] - 2026-03-17
+
+### Changed
+- **sysmon overhaul** — replaced nvtop (mostly N/A on Apple Silicon) and macmon with mactop; sudoless, M4-confirmed, shows GPU util/freq, ANE, power draw, and thermals
+- **mactop theme** — per-component color theme via force-written `~/.mactop/theme.json`
+- **Legacy preserved** — old nvtop+macmon layout available as `sysmon-old`
+
+## [4.3.0] - 2026-03-17
+
+### Changed
+- **Copy-based install** — `install.sh` now copies `.zshrc`, `config/`, and `VERSION` instead of symlinking; tools like iTerm2 can safely modify `~/.zshrc` without dirtying the repo; re-run `install.sh` to update from repo
+
 ## [4.2.1] - 2026-03-14
 
 Startup performance and robustness — no new features.
