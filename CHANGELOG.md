@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.5.0] - 2026-03-21
+
+### Changed
+- **devterm opens a tab, not a window** — `devterm` now creates a new tab in the current iTerm2 window (via `it2api create-tab --window`) instead of spawning a separate window; `devterm kill` closes only the devterm tab, not the entire window
+- **Renamed internals** — `_dev_window_exists` → `_dev_tab_exists`, `_dev_focus_window` → `_dev_focus_tab`, `_dev_close_window` → `_dev_close_tab`; all user-facing strings updated from "window" to "tab"
+
 ## [4.4.1] - 2026-03-19
 
 ### Fixed
@@ -364,7 +370,11 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.2.1...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.5.0...HEAD
+[4.5.0]: https://github.com/shreyasugemuge/shelly/compare/v4.4.1...v4.5.0
+[4.4.1]: https://github.com/shreyasugemuge/shelly/compare/v4.4.0...v4.4.1
+[4.4.0]: https://github.com/shreyasugemuge/shelly/compare/v4.3.0...v4.4.0
+[4.3.0]: https://github.com/shreyasugemuge/shelly/compare/v4.2.1...v4.3.0
 [4.2.1]: https://github.com/shreyasugemuge/shelly/compare/v4.2.0...v4.2.1
 [4.2.0]: https://github.com/shreyasugemuge/shelly/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/shreyasugemuge/shelly/compare/v4.0.1...v4.1.0

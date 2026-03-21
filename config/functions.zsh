@@ -274,49 +274,53 @@ _dev_ensure_iterm2() {
     fi
 }
 
-# _dev_window_exists: Check if the tracked devterm window is still open
-_dev_window_exists() {
+# _dev_tab_exists: Check if the tracked devterm tab is still open
+_dev_tab_exists() {
     local sid
     sid="$(cat "$(_dev_state_file)" 2>/dev/null)" || return 1
     [[ -n "$sid" ]] && "$_IT2API_DEV" show-hierarchy 2>/dev/null | grep -q "id=$sid"
 }
 
-# _dev_focus_window: Bring the devterm window to front
-_dev_focus_window() {
+# _dev_focus_tab: Bring the devterm tab to front
+_dev_focus_tab() {
     local sid
     sid="$(cat "$(_dev_state_file)" 2>/dev/null)" || return 1
     "$_IT2API_DEV" activate session "$sid" 2>/dev/null
     "$_IT2API_DEV" activate-app 2>/dev/null
 }
 
-# _dev_close_window: Close the devterm iTerm2 window
-_dev_close_window() {
+# _dev_close_tab: Close the devterm iTerm2 tab
+_dev_close_tab() {
     local sid
     sid="$(cat "$(_dev_state_file)" 2>/dev/null)" || {
         # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m No devterm window tracked"
+        echo "\033[0;90m·\033[0m No devterm tab tracked"
         return 0
     }
-    local hierarchy cur_win="" win_id=""
+    local hierarchy cur_win="" cur_tab="" win_id="" tab_id=""
     hierarchy=$("$_IT2API_DEV" show-hierarchy 2>/dev/null)
     while IFS= read -r line; do
         if [[ "$line" =~ 'Window id=([^ ]+)' ]]; then
             cur_win="${match[1]}"
+        elif [[ "$line" =~ 'Tab id=([^ ]+)' ]]; then
+            cur_tab="${match[1]}"
         elif [[ "$line" == *"id=$sid"* ]]; then
             win_id="$cur_win"
+            tab_id="$cur_tab"
             break
         fi
     done <<< "$hierarchy"
 
     rm -f "$(_dev_state_file)"
-    if [[ -n "$win_id" ]]; then
+    if [[ -n "$win_id" && -n "$tab_id" ]]; then
         local win_num="${win_id#w}"
-        osascript -e "tell application \"iTerm2\" to close window id $win_num" 2>/dev/null
+        local tab_num="${tab_id#t}"
+        osascript -e "tell application \"iTerm2\" to close (first tab of window id $win_num whose id = $tab_num)" 2>/dev/null
         # shellcheck disable=SC2028
-        echo "\033[0;32m✓\033[0m devterm window closed"
+        echo "\033[0;32m✓\033[0m devterm tab closed"
     else
         # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m devterm window already closed"
+        echo "\033[0;90m·\033[0m devterm tab already closed"
     fi
 }
 
@@ -347,16 +351,20 @@ _dev_build_session() {
 
     _dev_ensure_iterm2 || return 1
 
-    # Clean up any tracked window before creating a new one
+    # Clean up any tracked tab before creating a new one
     if [[ -f "$(_dev_state_file)" ]]; then
-        _dev_close_window >/dev/null 2>&1
+        _dev_close_tab >/dev/null 2>&1
     fi
 
-    # Create first tab (new iTerm2 window)
+    # Get current window ID so we create a tab, not a new window
+    local current_window
+    current_window=$("$_IT2API_DEV" show-focus 2>/dev/null | awk '/^Key window:/{print $3}')
+
+    # Create new tab in the current iTerm2 window
     local output session_id
-    output=$("$_IT2API_DEV" create-tab 2>/dev/null) || {
+    output=$("$_IT2API_DEV" create-tab --window "$current_window" 2>/dev/null) || {
         # shellcheck disable=SC2028
-        echo "\033[0;31m✗\033[0m Failed to create iTerm2 window"
+        echo "\033[0;31m✗\033[0m Failed to create iTerm2 tab"
         echo "  Is Python API enabled? iTerm2 → Preferences → General → Magic → Enable Python API"
         return 1
     }
@@ -469,22 +477,22 @@ _dev_launch() {
 function devterm() {
     case "${1:-}" in
         kill|stop)
-            _dev_close_window
+            _dev_close_tab
             ;;
         status|info)
             echo ""
-            if _dev_window_exists; then
-                echo -e "  \033[0;32m✓\033[0m devterm window open"
+            if _dev_tab_exists; then
+                echo -e "  \033[0;32m✓\033[0m devterm tab open"
             else
-                echo -e "  \033[0;90m·\033[0m No devterm window open"
+                echo -e "  \033[0;90m·\033[0m No devterm tab open"
             fi
             echo ""
             ;;
         help|-h|--help)
             echo ""
             echo "  devterm           launch the dev workspace (interactive project picker)"
-            echo "  devterm kill      close the iTerm2 window"
-            echo "  devterm status    check window state"
+            echo "  devterm kill      close the devterm tab"
+            echo "  devterm status    check tab state"
             echo "  devterm help      show this message"
             echo ""
             echo "  Workspace layout:"
@@ -499,16 +507,16 @@ function devterm() {
             ;;
         *)
             _dev_ensure_iterm2 || return 1
-            if _dev_window_exists; then
+            if _dev_tab_exists; then
                 local choice
-                read -r "choice?devterm window exists. [f]ocus or [k]ill and start fresh? "
+                read -r "choice?devterm tab exists. [f]ocus or [k]ill and start fresh? "
                 case "$choice" in
                     k|K)
-                        _dev_close_window
+                        _dev_close_tab
                         _dev_launch
                         ;;
                     *)
-                        _dev_focus_window
+                        _dev_focus_tab
                         ;;
                 esac
             else
@@ -529,10 +537,10 @@ _dev_completion() {
     # shellcheck disable=SC2034
     # subcmds is consumed by _describe, which shellcheck cannot trace
     local -a subcmds=(
-        'kill:close the devterm window'
-        'stop:close the devterm window'
-        'status:show window state'
-        'info:show window state'
+        'kill:close the devterm tab'
+        'stop:close the devterm tab'
+        'status:show tab state'
+        'info:show tab state'
         'help:show usage reference'
     )
     _describe 'devterm command' subcmds
