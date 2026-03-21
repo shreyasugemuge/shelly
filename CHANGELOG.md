@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.5.1] - 2026-03-21
+
+### Changed
+- **sysmon opens a tab, not a window** — `sysmon` and `sysmon-old` now create a new tab in the current iTerm2 window (via `it2api create-tab --window`) instead of spawning a separate window; `sysmon kill` closes only the sysmon tab, not the entire window
+- **Renamed internals** — `_sysmon_window_exists` → `_sysmon_tab_exists`, `_sysmon_focus_window` → `_sysmon_focus_tab`, `_sysmon_close_window` → `_sysmon_close_tab` (and matching `_sysmon_old_*` variants); all user-facing strings updated from "window" to "tab"
+
 ## [4.5.0] - 2026-03-21
 
 ### Changed
@@ -370,7 +376,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.5.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.5.1...HEAD
+[4.5.1]: https://github.com/shreyasugemuge/shelly/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/shreyasugemuge/shelly/compare/v4.4.1...v4.5.0
 [4.4.1]: https://github.com/shreyasugemuge/shelly/compare/v4.4.0...v4.4.1
 [4.4.0]: https://github.com/shreyasugemuge/shelly/compare/v4.3.0...v4.4.0

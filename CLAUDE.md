@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v4.5.0 (2026-03-21)
+**Current version:** v4.5.1 (2026-03-21)
 
 ## What This Is
 
@@ -29,33 +29,33 @@ Shelly is a modular zsh configuration and development workspace by Shreyas Ugemu
 
 ## sysmon — System Monitor Dashboard
 
-Launches an iTerm2 window with btop (left) and mactop (right).
+Launches an iTerm2 tab with btop (left) and mactop (right).
 
-- Uses `it2api create-tab`, then `send-text btop` to launch btop in the initial pane; `split-pane --vertical` for mactop
+- Uses `it2api create-tab --window WINDOW_ID` to open a tab in the current window, then `send-text btop` to launch btop in the initial pane; `split-pane --vertical` for mactop
 - Split-pane failures are checked (null session ID guards) before sending commands
 - Session ID tracked at `~/.cache/zsh/sysmon.session_id`; `sysmon` re-focuses if open, re-launches if closed
-- `sysmon kill` finds the window via `show-hierarchy` and closes it via AppleScript
+- `sysmon kill` finds the tab via `show-hierarchy` and closes it via AppleScript
 - btop.conf force-written on every launch (see design decision above); mactop auto-detects Apple Silicon
 - Inactive pane dimming disabled on launch (saved/restored on kill via `DimInactiveSplitPanes` defaults)
 - `sysmon-old` preserves the legacy nvtop+macmon layout with its own state file
 
 ### Subcommands
-`sysmon` — launch or focus | `sysmon kill` — close window | `sysmon status` — tool versions + window state | `sysmon help` | `sysmon-old` — legacy layout
+`sysmon` — launch or focus | `sysmon kill` — close tab | `sysmon status` — tool versions + tab state | `sysmon help` | `sysmon-old` — legacy layout
 
 ## devterm — Dynamic Dev Workspace
 
-Launches an iTerm2 window with one column per project (Claude Code top 80% + terminal bottom 20%).
+Launches an iTerm2 tab with one column per project (Claude Code top 80% + terminal bottom 20%).
 
 - Numbered-list picker; 1-3 projects from `$DEVTMUX_DIR` (default `~/code`); append `y` for yolo mode; worktrees detected alongside normal repos
 - **Three-phase build**: (1) create all splits and navigate panes to project dirs, (2) resize horizontal splits to 80/20 via Python API tree walk (`_dev_resize_layout`), (3) clear scrollback via `inject ClearScrollback` and launch Claude
 - **Pane titles**: top panes titled `claude :: project` (or `⚡ claude :: project` for yolo), bottom panes titled `terminal :: project`; set via `inject` (invisible)
 - **Title locking**: Claude panes use `set-profile-property allow_title_setting false` so Claude Code cannot override the pane title
-- **Stale session cleanup**: `_dev_build_session` always closes any tracked window before creating a new one
+- **Stale session cleanup**: `_dev_build_session` always closes any tracked tab before creating a new one
 - Session ID tracked at `~/.cache/zsh/devterm.session_id`
 - `devtmux` still works as a deprecation shim redirecting to `devterm`
 
 ### Subcommands
-`devterm` — pick and launch | `devterm kill` — close window | `devterm status` | `devterm help`
+`devterm` — pick and launch | `devterm kill` — close tab | `devterm status` | `devterm help`
 
 ## Versioning & Releases
 

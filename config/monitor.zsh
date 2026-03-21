@@ -2,7 +2,7 @@
 # Author: Shreyas Ugemuge
 #
 # One command — `sysmon` — that installs all prerequisites and launches
-# an iTerm2 monitoring window with:
+# an iTerm2 monitoring tab with:
 #   • btop   → all CPU cores + memory + network (left pane)
 #   • mactop → GPU util/freq + ANE + power + thermals (right pane)
 #
@@ -20,13 +20,13 @@
 #
 # Usage:
 #   sysmon          — launch dashboard (install deps if needed)
-#   sysmon kill     — close the iTerm2 window
+#   sysmon kill     — close the sysmon tab
 #   sysmon status   — check which monitor tools are installed
 #   sysmon help     — quick reference
 #
 # Legacy:
 #   sysmon-old      — launch old nvtop+macmon layout
-#   sysmon-old kill  — close the old layout window
+#   sysmon-old kill  — close the old layout tab
 
 _IT2API="/Applications/iTerm.app/Contents/Resources/it2api"
 
@@ -86,37 +86,40 @@ _sysmon_ensure_iterm2() {
     fi
 }
 
-# ── Check if sysmon window is still open ──
-_sysmon_window_exists() {
+# ── Check if sysmon tab is still open ──
+_sysmon_tab_exists() {
     local sid
     sid="$(cat "$(_sysmon_state_file)" 2>/dev/null)" || return 1
     [[ -n "$sid" ]] && "$_IT2API" show-hierarchy 2>/dev/null | grep -q "id=$sid"
 }
 
-# ── Focus the sysmon window ──
-_sysmon_focus_window() {
+# ── Focus the sysmon tab ──
+_sysmon_focus_tab() {
     local sid
     sid="$(cat "$(_sysmon_state_file)" 2>/dev/null)" || return 1
     "$_IT2API" activate session "$sid" 2>/dev/null
     "$_IT2API" activate-app 2>/dev/null
 }
 
-# ── Close the sysmon window ──
-_sysmon_close_window() {
+# ── Close the sysmon tab ──
+_sysmon_close_tab() {
     local sid
     sid="$(cat "$(_sysmon_state_file)" 2>/dev/null)" || {
         # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m No sysmon window tracked"
+        echo "\033[0;90m·\033[0m No sysmon tab tracked"
         return 0
     }
-    # Find window ID containing this session
-    local hierarchy cur_win="" win_id=""
+    # Find window and tab ID containing this session
+    local hierarchy cur_win="" cur_tab="" win_id="" tab_id=""
     hierarchy=$("$_IT2API" show-hierarchy 2>/dev/null)
     while IFS= read -r line; do
         if [[ "$line" =~ 'Window id=([^ ]+)' ]]; then
             cur_win="${match[1]}"
+        elif [[ "$line" =~ 'Tab id=([^ ]+)' ]]; then
+            cur_tab="${match[1]}"
         elif [[ "$line" == *"id=$sid"* ]]; then
             win_id="$cur_win"
+            tab_id="$cur_tab"
             break
         fi
     done <<< "$hierarchy"
@@ -133,14 +136,15 @@ _sysmon_close_window() {
     fi
 
     rm -f "$(_sysmon_state_file)"
-    if [[ -n "$win_id" ]]; then
+    if [[ -n "$win_id" && -n "$tab_id" ]]; then
         local win_num="${win_id#w}"
-        osascript -e "tell application \"iTerm2\" to close window id $win_num" 2>/dev/null
+        local tab_num="${tab_id#t}"
+        osascript -e "tell application \"iTerm2\" to close (first tab of window id $win_num whose id = $tab_num)" 2>/dev/null
         # shellcheck disable=SC2028
-        echo "\033[0;32m✓\033[0m sysmon window closed"
+        echo "\033[0;32m✓\033[0m sysmon tab closed"
     else
         # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m sysmon window already closed"
+        echo "\033[0;90m·\033[0m sysmon tab already closed"
     fi
 }
 
@@ -239,11 +243,15 @@ MACTOPEOF
     local has_mactop=false
     command -v mactop &>/dev/null && has_mactop=true
 
-    # ── Create iTerm2 window (plain shell, then send btop) ──
+    # ── Get current window ID so we create a tab, not a new window ──
+    local current_window
+    current_window=$("$_IT2API" show-focus 2>/dev/null | awk '/^Key window:/{print $3}')
+
+    # ── Create new tab in the current iTerm2 window ──
     local output session_id
-    output=$("$_IT2API" create-tab 2>/dev/null) || {
+    output=$("$_IT2API" create-tab --window "$current_window" 2>/dev/null) || {
         # shellcheck disable=SC2028
-        echo "\033[0;31m✗\033[0m Failed to create iTerm2 window"
+        echo "\033[0;31m✗\033[0m Failed to create iTerm2 tab"
         echo "  Ensure Python API is enabled: iTerm2 → Preferences → General → Magic → Enable Python API"
         return 1
     }
@@ -331,10 +339,10 @@ _sysmon_status() {
     fi
 
     echo ""
-    if _sysmon_window_exists; then
-        echo -e "  ${_d}Window${_n}  ${_g}open${_n} — \`sysmon\` to focus, \`sysmon kill\` to close"
+    if _sysmon_tab_exists; then
+        echo -e "  ${_d}Tab${_n}  ${_g}open${_n} — \`sysmon\` to focus, \`sysmon kill\` to close"
     else
-        echo -e "  ${_d}Window${_n}  not open — \`sysmon\` to start"
+        echo -e "  ${_d}Tab${_n}  not open — \`sysmon\` to start"
     fi
     echo ""
 }
@@ -343,7 +351,7 @@ _sysmon_status() {
 function sysmon() {
     case "${1:-}" in
         kill|stop)
-            _sysmon_close_window
+            _sysmon_close_tab
             ;;
         status|info)
             _sysmon_status
@@ -351,8 +359,8 @@ function sysmon() {
         help|-h|--help)
             echo ""
             echo "  sysmon           launch the monitoring dashboard"
-            echo "  sysmon kill      close the iTerm2 window"
-            echo "  sysmon status    check installed tools & window"
+            echo "  sysmon kill      close the sysmon tab"
+            echo "  sysmon status    check installed tools & tab"
             echo "  sysmon help      show this message"
             echo ""
             echo "  Dashboard panes:"
@@ -368,10 +376,10 @@ function sysmon() {
         *)
             _sysmon_ensure_iterm2 || return 1
             _sysmon_ensure_deps
-            if _sysmon_window_exists; then
+            if _sysmon_tab_exists; then
                 # shellcheck disable=SC2028
-                echo "\033[0;90m·\033[0m Focusing existing sysmon window…"
-                _sysmon_focus_window
+                echo "\033[0;90m·\033[0m Focusing existing sysmon tab…"
+                _sysmon_focus_tab
             else
                 _sysmon_launch
             fi
@@ -384,10 +392,10 @@ _sysmon_completion() {
     # shellcheck disable=SC2034
     # subcmds is consumed by _describe, which shellcheck cannot trace
     local -a subcmds=(
-        'kill:close the iTerm2 window'
-        'stop:close the iTerm2 window'
-        'status:check installed tools and window state'
-        'info:check installed tools and window state'
+        'kill:close the sysmon tab'
+        'stop:close the sysmon tab'
+        'status:check installed tools and tab state'
+        'info:check installed tools and tab state'
         'help:show usage and pane reference'
     )
     _describe 'sysmon command' subcmds
@@ -403,33 +411,36 @@ _sysmon_old_state_file() {
     echo "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon-old.session_id"
 }
 
-_sysmon_old_window_exists() {
+_sysmon_old_tab_exists() {
     local sid
     sid="$(cat "$(_sysmon_old_state_file)" 2>/dev/null)" || return 1
     [[ -n "$sid" ]] && "$_IT2API" show-hierarchy 2>/dev/null | grep -q "id=$sid"
 }
 
-_sysmon_old_focus_window() {
+_sysmon_old_focus_tab() {
     local sid
     sid="$(cat "$(_sysmon_old_state_file)" 2>/dev/null)" || return 1
     "$_IT2API" activate session "$sid" 2>/dev/null
     "$_IT2API" activate-app 2>/dev/null
 }
 
-_sysmon_old_close_window() {
+_sysmon_old_close_tab() {
     local sid
     sid="$(cat "$(_sysmon_old_state_file)" 2>/dev/null)" || {
         # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m No sysmon-old window tracked"
+        echo "\033[0;90m·\033[0m No sysmon-old tab tracked"
         return 0
     }
-    local hierarchy cur_win="" win_id=""
+    local hierarchy cur_win="" cur_tab="" win_id="" tab_id=""
     hierarchy=$("$_IT2API" show-hierarchy 2>/dev/null)
     while IFS= read -r line; do
         if [[ "$line" =~ 'Window id=([^ ]+)' ]]; then
             cur_win="${match[1]}"
+        elif [[ "$line" =~ 'Tab id=([^ ]+)' ]]; then
+            cur_tab="${match[1]}"
         elif [[ "$line" == *"id=$sid"* ]]; then
             win_id="$cur_win"
+            tab_id="$cur_tab"
             break
         fi
     done <<< "$hierarchy"
@@ -445,14 +456,15 @@ _sysmon_old_close_window() {
     fi
 
     rm -f "$(_sysmon_old_state_file)"
-    if [[ -n "$win_id" ]]; then
+    if [[ -n "$win_id" && -n "$tab_id" ]]; then
         local win_num="${win_id#w}"
-        osascript -e "tell application \"iTerm2\" to close window id $win_num" 2>/dev/null
+        local tab_num="${tab_id#t}"
+        osascript -e "tell application \"iTerm2\" to close (first tab of window id $win_num whose id = $tab_num)" 2>/dev/null
         # shellcheck disable=SC2028
-        echo "\033[0;32m✓\033[0m sysmon-old window closed"
+        echo "\033[0;32m✓\033[0m sysmon-old tab closed"
     else
         # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m sysmon-old window already closed"
+        echo "\033[0;90m·\033[0m sysmon-old tab already closed"
     fi
 }
 
@@ -536,11 +548,15 @@ NVTOPEOF
     command -v nvtop &>/dev/null && has_nvtop=true
     command -v macmon &>/dev/null && has_macmon=true
 
-    # Create iTerm2 window
+    # Get current window ID so we create a tab, not a new window
+    local current_window
+    current_window=$("$_IT2API" show-focus 2>/dev/null | awk '/^Key window:/{print $3}')
+
+    # Create new tab in the current iTerm2 window
     local output session_id
-    output=$("$_IT2API" create-tab 2>/dev/null) || {
+    output=$("$_IT2API" create-tab --window "$current_window" 2>/dev/null) || {
         # shellcheck disable=SC2028
-        echo "\033[0;31m✗\033[0m Failed to create iTerm2 window"
+        echo "\033[0;31m✗\033[0m Failed to create iTerm2 tab"
         return 1
     }
     session_id=${${(M)${=output}:#id=*}#id=}
@@ -604,20 +620,20 @@ NVTOPEOF
 function sysmon-old() {
     case "${1:-}" in
         kill|stop)
-            _sysmon_old_close_window
+            _sysmon_old_close_tab
             ;;
         help|-h|--help)
             echo ""
             echo "  sysmon-old       launch the legacy dashboard (btop + nvtop + macmon)"
-            echo "  sysmon-old kill  close the window"
+            echo "  sysmon-old kill  close the tab"
             echo ""
             ;;
         *)
             _sysmon_ensure_iterm2 || return 1
-            if _sysmon_old_window_exists; then
+            if _sysmon_old_tab_exists; then
                 # shellcheck disable=SC2028
-                echo "\033[0;90m·\033[0m Focusing existing sysmon-old window…"
-                _sysmon_old_focus_window
+                echo "\033[0;90m·\033[0m Focusing existing sysmon-old tab…"
+                _sysmon_old_focus_tab
             else
                 _sysmon_old_launch
             fi
