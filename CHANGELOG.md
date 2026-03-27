@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **devterm split mode** (`devterm -s`) — single-project, multi-Claude workspace with 1-8 equal-sized panes in an optimal grid layout; rows-first split strategy with Python API equalization; all panes run `claude --dangerously-skip-permissions`; separate state file from regular devterm
+
 ## [4.5.1] - 2026-03-21
 
 ### Changed

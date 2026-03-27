@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v4.5.1 (2026-03-21)
+**Current version:** v4.6.0 (2026-03-28)
 
 ## What This Is
 
@@ -56,6 +56,18 @@ Launches an iTerm2 tab with one column per project (Claude Code top 80% + termin
 
 ### Subcommands
 `devterm` — pick and launch | `devterm kill` — close tab | `devterm status` | `devterm help`
+
+### Split Mode (`devterm -s`)
+
+Opens a single project with 1-8 equal-sized Claude panes in an optimal grid layout. Every pane runs `claude --dangerously-skip-permissions`.
+
+- **Grid algorithm**: 1→full, 2→[2], 3→[3], 4→[2×2], 5→[2+2+1], 6→[3×3], 7→[3+3+1], 8→[4×4]
+- **Build strategy**: rows first (horizontal splits), then columns within each row (vertical splits), then Python API equalize
+- **Separate state**: tracked at `~/.cache/zsh/devterm-split.session_id` — regular devterm and split mode can coexist
+- **Pane titles**: `⚡ N :: project` (numbered, title-locked)
+
+#### Split Subcommands
+`devterm -s` — pick project and launch | `devterm -s kill` — close split tab | `devterm -s status` | `devterm -s help`
 
 ## Versioning & Releases
 
