@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v4.6.0 (2026-03-28)
+**Current version:** v4.7.0 (2026-03-28)
 
 ## What This Is
 
@@ -67,7 +67,7 @@ Opens a single project with 1-8 equal-sized Claude panes in an optimal grid layo
 - **Pane titles**: `⚡ N :: project` (numbered, title-locked)
 
 #### Split Subcommands
-`devterm -s` — pick project and launch | `devterm -s kill` — close split tab | `devterm -s status` | `devterm -s help`
+`devterm -s` — pick project and launch | `devterm -s -c` — use current directory (skip picker) | `devterm -s kill` — close split tab | `devterm -s status` | `devterm -s help`
 
 ## Versioning & Releases
 

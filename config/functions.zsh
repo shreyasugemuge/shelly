@@ -495,10 +495,11 @@ function devterm() {
             echo "  devterm status    check tab state"
             echo "  devterm help      show this message"
             echo ""
-            echo "  devterm -s        split mode — multiple Claude panes in a grid"
-            echo "  devterm -s kill   close the split tab"
-            echo "  devterm -s status check split tab state"
-            echo "  devterm -s help   show split mode help"
+            echo "  devterm -s           split mode — multiple Claude panes in a grid"
+            echo "  devterm -s -c        split mode in the current directory"
+            echo "  devterm -s kill      close the split tab"
+            echo "  devterm -s status    check split tab state"
+            echo "  devterm -s help      show split mode help"
             echo ""
             echo "  Workspace layout:"
             echo "    1-3 projects    select from git repos in your code folder"
@@ -516,6 +517,12 @@ function devterm() {
             ;;
         -s)
             shift
+            # Check for -c flag
+            local split_cwd=false
+            if [[ "${1:-}" == "-c" ]]; then
+                split_cwd=true
+                shift
+            fi
             case "${1:-}" in
                 kill|stop)
                     _dev_split_close_tab
@@ -531,10 +538,11 @@ function devterm() {
                     ;;
                 help|-h|--help)
                     echo ""
-                    echo "  devterm -s         launch split mode (single project, multiple Claude panes)"
-                    echo "  devterm -s kill    close the split tab"
-                    echo "  devterm -s status  check split tab state"
-                    echo "  devterm -s help    show this message"
+                    echo "  devterm -s            launch split mode (single project, multiple Claude panes)"
+                    echo "  devterm -s -c         split mode in the current directory (skip project picker)"
+                    echo "  devterm -s kill       close the split tab"
+                    echo "  devterm -s status     check split tab state"
+                    echo "  devterm -s help       show this message"
                     echo ""
                     echo "  Grid layouts (1-8 panes):"
                     echo "    1→full  2→[2]  3→[3]  4→[2×2]  5→[2+2+1]"
@@ -545,20 +553,22 @@ function devterm() {
                     ;;
                 *)
                     _dev_ensure_iterm2 || return 1
+                    local launch_fn="_dev_split_launch"
+                    [[ "$split_cwd" == true ]] && launch_fn="_dev_split_launch_cwd"
                     if _dev_split_tab_exists; then
                         local choice=""
                         read -r "choice?devterm split tab exists. [f]ocus or [k]ill and start fresh? "
                         case "$choice" in
                             k|K)
                                 _dev_split_close_tab
-                                _dev_split_launch
+                                "$launch_fn"
                                 ;;
                             *)
                                 _dev_split_focus_tab
                                 ;;
                         esac
                     else
-                        _dev_split_launch
+                        "$launch_fn"
                     fi
                     ;;
             esac
@@ -791,8 +801,7 @@ PYEOF
 _dev_split_build() {
     local project="$1"
     local pane_count="$2"
-    local code_dir="${DEVTMUX_DIR:-$HOME/code}"
-    local proj_dir="$code_dir/$project"
+    local proj_dir="${3:-${DEVTMUX_DIR:-$HOME/code}/$project}"
 
     _dev_ensure_iterm2 || return 1
 
@@ -920,6 +929,25 @@ _dev_split_launch() {
     fi
 
     _dev_split_build "$project" "$pane_count"
+}
+
+# _dev_split_launch_cwd: Split mode in the current directory (skip project picker)
+_dev_split_launch_cwd() {
+    local proj_dir=""
+    proj_dir="$(pwd)"
+    local project="${proj_dir:t}"
+
+    local pane_count=""
+    echo "" >&2
+    echo -e "  \033[1mdevterm split\033[0m — \033[0;36m$project\033[0m (current directory)" >&2
+    echo "" >&2
+    read -r "pane_count?  How many panes? (1-8): "
+    if [[ -z "$pane_count" || ! "$pane_count" =~ ^[0-9]+$ ]] || (( pane_count < 1 || pane_count > 8 )); then
+        echo -e "\033[0;31m✗\033[0m Invalid pane count (must be 1-8)" >&2
+        return 1
+    fi
+
+    _dev_split_build "$project" "$pane_count" "$proj_dir"
 }
 
 # compdef registration moved to .zshrc (after compinit)
