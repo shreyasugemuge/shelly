@@ -1,6 +1,6 @@
 # Shelly
 
-[![Version](https://img.shields.io/badge/version-4.7.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.8.0-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux%20|%20WSL-orange.svg)](#prerequisites)
@@ -143,10 +143,12 @@ Append `y` to a project number to launch Claude Code with `--dangerously-skip-pe
 
 | Command          | Description                               |
 |------------------|-------------------------------------------|
-| `devterm`        | Pick projects and launch                  |
-| `devterm kill`   | Close the devterm tab                     |
-| `devterm status` | Check tab state                           |
-| `devterm help`   | Quick reference                           |
+| `devterm`              | Pick projects and launch                  |
+| `devterm kill`         | Close the devterm tab                     |
+| `devterm status`       | Check tab state                           |
+| `devterm config`       | Show or change the code directory          |
+| `devterm config reset` | Reset to default (auto-detect)             |
+| `devterm help`         | Quick reference                           |
 
 ### Split Mode
 
@@ -170,7 +172,14 @@ Standard devterm and split mode have separate state — they can coexist.
 
 ### Configuration
 
-Set `DEVTMUX_DIR` to change the code folder (defaults to `~/code`).
+The code directory defaults to `~/code`. If it doesn't exist, devterm auto-detects directories with git repos (`~/projects`, `~/dev`, `~/src`, etc.) and presents a picker.
+
+| Command              | Description                                    |
+|----------------------|------------------------------------------------|
+| `devterm config`       | Show current directory, option to change       |
+| `devterm config reset` | Remove saved directory, revert to auto-detect  |
+
+You can also set `DEVTMUX_DIR` directly in `~/.zshrc.local`. The `devterm config` command manages this for you.
 
 `devtmux` still works as a deprecation shim redirecting to `devterm`.
 

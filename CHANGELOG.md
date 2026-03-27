@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.8.0] - 2026-03-28
+
+### Added
+- **devterm config** (`devterm config`) — show or change the code directory interactively; `devterm config reset` removes saved directory and reverts to auto-detect
+- **Interactive directory picker** — when no code directory is configured and `~/code` doesn't exist, devterm auto-detects directories containing git repos (`~/projects`, `~/dev`, `~/src`, `~/repos`, `~/workspace`, `~/work`) and presents a numbered picker with repo counts
+- **Persist updates** — `_dev_persist_dir` now updates `DEVTMUX_DIR` in place in `~/.zshrc.local` (previously only appended and skipped duplicates)
+
 ## [4.7.0] - 2026-03-28
 
 ### Added
@@ -387,7 +394,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.7.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.8.0...HEAD
+[4.8.0]: https://github.com/shreyasugemuge/shelly/compare/v4.7.0...v4.8.0
 [4.7.0]: https://github.com/shreyasugemuge/shelly/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/shreyasugemuge/shelly/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/shreyasugemuge/shelly/compare/v4.5.0...v4.5.1

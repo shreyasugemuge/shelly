@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v4.7.0 (2026-03-28)
+**Current version:** v4.8.0 (2026-03-28)
 
 ## What This Is
 
@@ -55,7 +55,7 @@ Launches an iTerm2 tab with one column per project (Claude Code top 80% + termin
 - `devtmux` still works as a deprecation shim redirecting to `devterm`
 
 ### Subcommands
-`devterm` — pick and launch | `devterm kill` — close tab | `devterm status` | `devterm help`
+`devterm` — pick and launch | `devterm kill` — close tab | `devterm status` | `devterm config` — show/change code directory | `devterm config reset` — reset to default | `devterm help`
 
 ### Split Mode (`devterm -s`)
 

@@ -23,12 +23,14 @@ Pick 1-3 projects from your code folder. Each project gets a column with Claude 
 
 ### Commands
 
-| Command          | Description                               |
-|------------------|-------------------------------------------|
-| `devterm`        | Pick projects and launch                  |
-| `devterm kill`   | Close the devterm tab                     |
-| `devterm status` | Check tab state                           |
-| `devterm help`   | Quick reference                           |
+| Command                | Description                               |
+|------------------------|-------------------------------------------|
+| `devterm`              | Pick projects and launch                  |
+| `devterm kill`         | Close the devterm tab                     |
+| `devterm status`       | Check tab state                           |
+| `devterm config`       | Show or change the code directory          |
+| `devterm config reset` | Reset to default (auto-detect)             |
+| `devterm help`         | Quick reference                           |
 
 ### Yolo Mode
 
@@ -73,15 +75,43 @@ This opens project 1 in skip-permissions mode and project 3 normally. Yolo panes
 
 ## Configuration
 
-| Variable        | Default     | Description                |
-|-----------------|-------------|----------------------------|
-| `DEVTMUX_DIR`   | `~/code`    | Directory to scan for projects |
+### Interactive Setup
 
-Set it in `~/.zshrc.local`:
+The code directory defaults to `~/code`. If it doesn't exist, devterm auto-detects directories with git repos and presents a picker:
+
+```
+  devterm — pick your code directory
+
+   1  ~/code (8 repos)
+   2  ~/projects (3 repos)
+   3  ~/dev (2 repos)
+
+   c  enter a custom path
+
+  Enter choice:
+```
+
+Scanned directories: `~/code`, `~/projects`, `~/dev`, `~/src`, `~/repos`, `~/workspace`, `~/work`. Only directories containing at least one git repo are shown.
+
+The selection is automatically saved to `~/.zshrc.local`.
+
+### Managing the Directory
+
+| Command                | Description                                |
+|------------------------|--------------------------------------------|
+| `devterm config`       | Show current directory, option to change    |
+| `devterm config reset` | Remove saved directory, revert to auto-detect |
+
+### Manual Override
+
+You can also set `DEVTMUX_DIR` directly:
 
 ```bash
+# in ~/.zshrc.local
 export DEVTMUX_DIR="$HOME/projects"
 ```
+
+The `devterm config` command manages this variable for you.
 
 ## How It Works
 

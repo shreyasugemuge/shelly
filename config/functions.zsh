@@ -166,33 +166,172 @@ _dev_state_file() {
     echo "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/devterm.session_id"
 }
 
-# _dev_persist_dir: Save DEVTMUX_DIR to ~/.zshrc.local (guards against duplicates)
+# _dev_persist_dir: Save or update DEVTMUX_DIR in ~/.zshrc.local
 _dev_persist_dir() {
     local dir="$1"
     local local_rc="$HOME/.zshrc.local"
     if [[ -f "$local_rc" ]] && grep -q 'DEVTMUX_DIR' "$local_rc"; then
-        return 0
+        sed -i '' "s|^export DEVTMUX_DIR=.*|export DEVTMUX_DIR=\"${dir}\"|" "$local_rc"
+    else
+        echo "export DEVTMUX_DIR=\"${dir}\"" >> "$local_rc"
     fi
-    echo "export DEVTMUX_DIR=\"${dir}\"" >> "$local_rc"
-    echo -e "\033[0;90m·\033[0m Saved DEVTMUX_DIR to ~/.zshrc.local"
+    # shellcheck disable=SC2028
+    echo "\033[0;90m·\033[0m Saved DEVTMUX_DIR to ~/.zshrc.local"
+}
+
+# _dev_unpersist_dir: Remove DEVTMUX_DIR from ~/.zshrc.local
+_dev_unpersist_dir() {
+    local local_rc="$HOME/.zshrc.local"
+    if [[ -f "$local_rc" ]] && grep -q 'DEVTMUX_DIR' "$local_rc"; then
+        sed -i '' '/^export DEVTMUX_DIR=/d' "$local_rc"
+        # shellcheck disable=SC2028
+        echo "\033[0;90m·\033[0m Removed DEVTMUX_DIR from ~/.zshrc.local"
+    fi
+    unset DEVTMUX_DIR
+}
+
+# _dev_pick_code_dir: Interactive directory picker for code folder
+_dev_pick_code_dir() {
+    local candidates=()
+    local candidate_labels=()
+
+    # Check common directory names
+    local common_dirs=("code" "projects" "dev" "src" "repos" "workspace" "work")
+    for name in "${common_dirs[@]}"; do
+        local path="$HOME/$name"
+        if [[ -d "$path" ]]; then
+            # Count git repos inside
+            local count=0
+            for d in "$path"/*/; do
+                [[ -e "$d/.git" ]] && (( count++ ))
+            done
+            if (( count > 0 )); then
+                candidates+=("$path")
+                # shellcheck disable=SC2088
+                candidate_labels+=("~/$name \033[0;90m($count repos)\033[0m")
+            fi
+        fi
+    done
+
+    echo "" >&2
+    echo -e "  \033[1mdevterm\033[0m — pick your code directory" >&2
+    echo "" >&2
+
+    if (( ${#candidates[@]} > 0 )); then
+        for (( i=1; i<=${#candidates[@]}; i++ )); do
+            printf "  \033[0;33m%2d\033[0m  %b\n" "$i" "${candidate_labels[$i]}" >&2
+        done
+        echo "" >&2
+        printf "  \033[0;33m c\033[0m  enter a custom path\n" >&2
+        echo "" >&2
+
+        local input=""
+        read -r "input?  Enter choice: "
+
+        if [[ "$input" == "c" || "$input" == "C" ]]; then
+            local custom=""
+            read -r "custom?  Enter path: "
+            custom="${custom/#\~/$HOME}"
+            if [[ ! -d "$custom" ]]; then
+                echo -e "\033[0;31m✗\033[0m Directory does not exist: $custom" >&2
+                return 1
+            fi
+            echo "$custom"
+            return 0
+        fi
+
+        if [[ -z "$input" || ! "$input" =~ ^[0-9]+$ ]] || (( input < 1 || input > ${#candidates[@]} )); then
+            echo -e "\033[0;31m✗\033[0m Invalid selection" >&2
+            return 1
+        fi
+        echo "${candidates[$input]}"
+    else
+        echo -e "  \033[0;90mNo common code directories found\033[0m" >&2
+        echo "" >&2
+        local custom=""
+        read -r "custom?  Enter path to your code folder: "
+        custom="${custom/#\~/$HOME}"
+        if [[ ! -d "$custom" ]]; then
+            echo -e "\033[0;31m✗\033[0m Directory does not exist: $custom" >&2
+            return 1
+        fi
+        echo "$custom"
+    fi
 }
 
 # _dev_get_code_dir: Discover code folder (env var, default, or prompt)
 _dev_get_code_dir() {
-    local dir="${DEVTMUX_DIR:-$HOME/code}"
-    if [[ ! -d "$dir" ]]; then
-        echo -e "\033[0;33m·\033[0m Code folder not found: $dir" >&2
-        local input
-        read -r "input?Enter path to your code folder: "
-        dir="${input/#\~/$HOME}"
-        if [[ ! -d "$dir" ]]; then
-            echo -e "\033[0;31m✗\033[0m Directory does not exist: $dir" >&2
-            return 1
-        fi
-        _dev_persist_dir "$dir"
-        export DEVTMUX_DIR="$dir"
+    # If explicitly configured, use it
+    if [[ -n "${DEVTMUX_DIR:-}" && -d "$DEVTMUX_DIR" ]]; then
+        echo "$DEVTMUX_DIR"
+        return 0
     fi
+
+    # If default ~/code exists, use it
+    if [[ -d "$HOME/code" ]]; then
+        echo "$HOME/code"
+        return 0
+    fi
+
+    # If DEVTMUX_DIR was set but doesn't exist, warn
+    if [[ -n "${DEVTMUX_DIR:-}" ]]; then
+        echo -e "\033[0;33m·\033[0m Configured code folder not found: $DEVTMUX_DIR" >&2
+    fi
+
+    # Interactive picker
+    local dir=""
+    dir="$(_dev_pick_code_dir)" || return 1
+    _dev_persist_dir "$dir"
+    export DEVTMUX_DIR="$dir"
     echo "$dir"
+}
+
+# _dev_config: Show or change the devterm code directory
+_dev_config() {
+    case "${1:-}" in
+        reset)
+            _dev_unpersist_dir
+            # shellcheck disable=SC2028
+            echo "\033[0;32m✓\033[0m devterm directory reset to default (~/$( [[ -d "$HOME/code" ]] && echo "code" || echo "auto-detect" ))"
+            echo "  Run 'devterm' to pick a new directory."
+            ;;
+        *)
+            local current="${DEVTMUX_DIR:-$HOME/code}"
+            echo ""
+            if [[ -n "${DEVTMUX_DIR:-}" ]]; then
+                echo -e "  \033[1mCode directory:\033[0m $current \033[0;90m(configured)\033[0m"
+            elif [[ -d "$HOME/code" ]]; then
+                echo -e "  \033[1mCode directory:\033[0m $current \033[0;90m(default)\033[0m"
+            else
+                echo -e "  \033[1mCode directory:\033[0m \033[0;90mnot configured\033[0m"
+            fi
+
+            if [[ -d "$current" ]]; then
+                local count=0
+                for d in "$current"/*/; do
+                    [[ -e "$d/.git" ]] && (( count++ ))
+                done
+                echo -e "  \033[0;90m$count repos found\033[0m"
+            fi
+            echo ""
+
+            local choice=""
+            read -r "choice?  [k]eep or [c]hange? "
+            case "$choice" in
+                c|C)
+                    local dir=""
+                    dir="$(_dev_pick_code_dir)" || return 1
+                    _dev_persist_dir "$dir"
+                    export DEVTMUX_DIR="$dir"
+                    # shellcheck disable=SC2028
+                    echo "\033[0;32m✓\033[0m Code directory set to $dir"
+                    ;;
+                *)
+                    echo -e "  \033[0;90m·\033[0m No changes"
+                    ;;
+            esac
+            ;;
+    esac
 }
 
 # _dev_pick_projects: Interactive project picker (numbered list)
@@ -488,12 +627,18 @@ function devterm() {
             fi
             echo ""
             ;;
+        config)
+            shift
+            _dev_config "${1:-}"
+            ;;
         help|-h|--help)
             echo ""
-            echo "  devterm           launch the dev workspace (interactive project picker)"
-            echo "  devterm kill      close the devterm tab"
-            echo "  devterm status    check tab state"
-            echo "  devterm help      show this message"
+            echo "  devterm              launch the dev workspace (interactive project picker)"
+            echo "  devterm kill         close the devterm tab"
+            echo "  devterm status       check tab state"
+            echo "  devterm config       show or change the code directory"
+            echo "  devterm config reset reset to default (auto-detect)"
+            echo "  devterm help         show this message"
             echo ""
             echo "  devterm -s           split mode — multiple Claude panes in a grid"
             echo "  devterm -s -c        split mode in the current directory"
@@ -609,6 +754,7 @@ _dev_completion() {
         'stop:close the devterm tab'
         'status:show tab state'
         'info:show tab state'
+        'config:show or change the code directory'
         'help:show usage reference'
         '-s:split mode — multiple Claude panes in a grid'
     )
