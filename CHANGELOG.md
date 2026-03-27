@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **devterm split cwd mode** (`devterm -s -c`) — skip the project picker and use the current working directory; only prompts for pane count (1-8)
 - Updated help text for both `devterm help` and `devterm -s help` to document the `-c` flag
 
+## [4.6.0] - 2026-03-28
+
+### Added
+- **devterm split mode** (`devterm -s`) — single-project, multi-Claude workspace with 1-8 equal-sized panes in an optimal grid layout; rows-first split strategy with Python API equalization; all panes run `claude --dangerously-skip-permissions`; separate state file from regular devterm
+
 ## [4.5.1] - 2026-03-21
 
 ### Changed
@@ -382,7 +387,9 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.5.1...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.7.0...HEAD
+[4.7.0]: https://github.com/shreyasugemuge/shelly/compare/v4.6.0...v4.7.0
+[4.6.0]: https://github.com/shreyasugemuge/shelly/compare/v4.5.1...v4.6.0
 [4.5.1]: https://github.com/shreyasugemuge/shelly/compare/v4.5.0...v4.5.1
 [4.5.0]: https://github.com/shreyasugemuge/shelly/compare/v4.4.1...v4.5.0
 [4.4.1]: https://github.com/shreyasugemuge/shelly/compare/v4.4.0...v4.4.1

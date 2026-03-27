@@ -1,6 +1,6 @@
 # Shelly
 
-[![Version](https://img.shields.io/badge/version-4.2.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.7.0-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux%20|%20WSL-orange.svg)](#prerequisites)
@@ -15,11 +15,12 @@ Named after a childhood nickname — and because it's a shell config.
 - **Modular config** — focused files under `config/`, sourced in order by `.zshrc`
 - **Smart completions** — cached compinit with fuzzy/approximate matching, autosuggestions from history + completion
 - **Dev workspace** — `devterm` picks 1-3 projects and opens Claude Code + terminal per column in iTerm2
+- **Split mode** — `devterm -s` opens 1-8 Claude Code panes in an optimal grid for parallel AI-assisted development
 - **Auto-dependency management** — Homebrew and zsh plugins installed automatically on first shell open
 - **Startup splash** — randomized ASCII art + system stats, no network calls
-- **System monitoring** — `sysmon` launches an iTerm2 dashboard with btop, nvtop, and macmon
+- **System monitoring** — `sysmon` launches an iTerm2 dashboard with btop and mactop
 - **XDG-compliant** — config lives under `~/.config/zsh/`, not in `$HOME`
-- **One-command install** — backs up existing configs, symlinks everything into place
+- **One-command install** — copies config files into place with automatic backup
 
 ## Quick Start
 
@@ -30,7 +31,7 @@ cd ~/.dotfiles/zsh
 exec zsh
 ```
 
-> **Note:** `~/.dotfiles/zsh` is a conventional example location — you can clone to any path you prefer (e.g., `~/shelly`, `~/.config/shelly`). The install script symlinks config files into place dynamically.
+> **Note:** `~/.dotfiles/zsh` is a conventional example location — you can clone to any path you prefer (e.g., `~/shelly`, `~/.config/shelly`). The install script copies config files into place. Re-run `install.sh` to update from repo.
 
 Preview without making changes:
 
@@ -56,11 +57,11 @@ Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions
 │   ├── environment.zsh     Exports, locale, zsh options, NVM setup
 │   ├── prompt.zsh          Custom prompt with face + git integration
 │   ├── aliases.zsh         Aliases organized by category
-│   ├── functions.zsh       Utility functions (extract, mkcd, pan, etc.)
+│   ├── functions.zsh       Utility functions + devterm workspace
 │   ├── plugins.zsh         Plugin loading (autosuggestions, syntax highlighting)
 │   ├── monitor.zsh         System monitor dashboard (sysmon command)
 │   └── sysinfo.zsh         Neofetch-style startup splash screen
-├── install.sh              Setup script (symlinks + backup)
+├── install.sh              Setup script (copies config + backup)
 ├── VERSION                 Current version number
 ├── CHANGELOG.md            Release history
 ├── CONTRIBUTING.md         How to contribute and release
@@ -77,53 +78,53 @@ $
 
 | Element     | Color   | Meaning                          |
 |-------------|---------|----------------------------------|
-| `[-_-]`     | yellow  | Last command succeeded           |
-| `[O_O]`     | red     | Last command failed              |
-| `(main)`    | green   | Git branch                       |
-| `*` / `+`   | orange  | Unstaged / staged changes        |
-| `user@host` | gray    | Username and hostname (muted)    |
-| `~/path`    | default | Current directory                |
+| `[-_-]`     | yellow  | Last command succeeded            |
+| `[O_O]`     | red     | Last command failed               |
+| `(main)`    | green   | Git branch                        |
+| `*` / `+`   | orange  | Unstaged / staged changes         |
+| `?`         | orange  | Untracked files                   |
+| `user@host` | gray    | Username and hostname (muted)     |
+| `~/path`    | default | Current directory (auto-truncated)|
 
 Branch section is hidden outside git repositories.
 
 ## System Monitor
 
-`sysmon` launches an iTerm2 dashboard. Auto-installs all tools on first run.
+`sysmon` launches an iTerm2 tab with btop (left) and mactop (right).
 
 > **Requires** iTerm2 with Python API enabled: Preferences → General → Magic → Enable Python API
 
 ```
-┌──────────────┬──────────┐
-│              │  nvtop   │
-│  btop        │  GPU %   │
-│  CPU+mem+net │  VRAM    │
-│              ├──────────┤
-│              │  macmon  │
-│              │  Temp    │
-│              │  Power   │
-└──────────────┴──────────┘
+┌──────────────────────────┬──────────────────────┐
+│                          │                      │
+│  btop                    │  mactop              │
+│  CPU cores + memory      │  CPU/GPU temp        │
+│  + network               │  Power draw          │
+│                          │  Frequency           │
+│                          │  ANE + thermals      │
+│                          │                      │
+└──────────────────────────┴──────────────────────┘
 ```
 
-| Pane               | Tool   | Shows                              |
-|--------------------|--------|------------------------------------|
-| Left (60%)         | btop   | All CPU cores + memory + network   |
-| Top-right          | nvtop  | GPU utilization % + VRAM bar       |
-| Bottom-right       | macmon | CPU/GPU temp + power + frequency   |
+| Command         | Description                            |
+|-----------------|----------------------------------------|
+| `sysmon`        | Launch or focus existing tab           |
+| `sysmon kill`   | Close the sysmon tab                   |
+| `sysmon status` | Check installed tools and tab state    |
+| `sysmon help`   | Quick reference                        |
+| `sysmon-old`    | Legacy layout (nvtop + macmon)         |
 
-| Command         | Description                             |
-|-----------------|-----------------------------------------|
-| `sysmon`        | Launch or focus existing window         |
-| `sysmon kill`   | Close the iTerm2 window                 |
-| `sysmon status` | Check installed tools and window state  |
-| `sysmon help`   | Quick reference                         |
-
-btop and nvtop configs are force-written on every launch for consistency. On Apple Silicon, nvtop's N/A fields are hidden automatically; macmon provides the thermal/power data that nvtop can't.
+btop config is force-written on every launch for consistency. mactop auto-detects Apple Silicon — no config needed. Inactive pane dimming is disabled while sysmon is open.
 
 ## Dev Workspace
 
-`devterm` launches an iTerm2 workspace for multi-project development.
+`devterm` launches an iTerm2 tab for multi-project development with Claude Code.
 
 > **Requires** iTerm2 with Python API enabled: Preferences → General → Magic → Enable Python API
+
+### Standard Mode
+
+Pick 1-3 projects from your code folder. Each project gets a column with Claude Code (80%) on top and a terminal (20%) on the bottom.
 
 ```
 ┌──────────────────┬──────────────────┬──────────────────┐
@@ -138,26 +139,46 @@ btop and nvtop configs are force-written on every launch for consistency. On App
 └──────────────────┴──────────────────┴──────────────────┘
 ```
 
+Append `y` to a project number to launch Claude Code with `--dangerously-skip-permissions` (yolo mode). For example, entering `1y 3` opens project 1 in skip-permissions mode and project 3 normally. Yolo panes show `⚡ claude :: project` in the title.
+
 | Command          | Description                               |
 |------------------|-------------------------------------------|
 | `devterm`        | Pick projects and launch                  |
-| `devterm kill`   | Close the iTerm2 window                   |
-| `devterm status` | Check window state                        |
+| `devterm kill`   | Close the devterm tab                     |
+| `devterm status` | Check tab state                           |
 | `devterm help`   | Quick reference                           |
 
-Pane titles show `claude :: project` (top) and `terminal :: project` (bottom). Claude pane titles are locked so Claude Code can't override them. Panes are resized to 80/20 via the iTerm2 Python API.
+### Split Mode
 
-Append `y` to a project number to launch Claude Code with `--dangerously-skip-permissions` (yolo mode). For example, entering `1y 3` opens project 1 in skip-permissions mode and project 3 normally. Yolo panes show `⚡ claude :: project` in the title.
+`devterm -s` opens a single project with 1-8 Claude Code panes in an optimal grid layout. Every pane runs `claude --dangerously-skip-permissions`.
+
+```
+Grid layouts:
+  1 → full    2 → [2]      3 → [3]      4 → [2x2]
+  5 → [2+2+1] 6 → [3x3]   7 → [3+3+1]  8 → [4x4]
+```
+
+| Command              | Description                                    |
+|----------------------|------------------------------------------------|
+| `devterm -s`         | Pick a project and launch split grid           |
+| `devterm -s -c`      | Use current directory (skip project picker)     |
+| `devterm -s kill`    | Close the split tab                            |
+| `devterm -s status`  | Check split tab state                          |
+| `devterm -s help`    | Show split mode help                           |
+
+Standard devterm and split mode have separate state — they can coexist.
+
+### Configuration
 
 Set `DEVTMUX_DIR` to change the code folder (defaults to `~/code`).
 
-`devtmux` still works as a shim that redirects to `devterm`.
+`devtmux` still works as a deprecation shim redirecting to `devterm`.
 
 ## Aliases & Functions
 
-**Aliases** — `..`, `ll`, `refresh`, `zshrc`, `myip`, `gs`, `gb`, `gco`, `gsw`, `tre`, `yell`, and more. See `config/aliases.zsh`.
+**Aliases** — `..`, `ll`, `refresh`, `zshrc`, `myip`, `gs`, `gb`, `gco`, `gsw`, `tre`, `yell`, and more. See [`config/aliases.zsh`](config/aliases.zsh).
 
-**Functions** — `pan` (man page as PDF), `mkcd`, `extract` (any archive), `whichip`, `weather`, `portfind`, `cc` (Claude Code with notification), `ccnotify`, `iterm-setup`, `devterm`. See `config/functions.zsh`.
+**Functions** — `pan` (man page as PDF), `mkcd`, `extract` (any archive), `whichip`, `weather`, `portfind`, `cc` (Claude Code with notification), `ccnotify`, `iterm-setup`, `devterm`, `sysmon`. See [`config/functions.zsh`](config/functions.zsh) and [`config/monitor.zsh`](config/monitor.zsh).
 
 ## Customization
 
@@ -177,4 +198,4 @@ Follows [Semantic Versioning](https://semver.org/). See [CHANGELOG.md](CHANGELOG
 
 ## License
 
-[MIT](LICENSE) — Shreyas Ugemuge, 2017–2026
+[MIT](LICENSE) — Shreyas Ugemuge, 2017-2026

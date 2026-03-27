@@ -18,7 +18,10 @@ This project uses [Semantic Versioning](https://semver.org/):
    - `config/environment.zsh` — exports, options, PATH
    - `config/prompt.zsh` — prompt appearance and behavior
    - `config/aliases.zsh` — command aliases
-   - `config/functions.zsh` — shell functions
+   - `config/functions.zsh` — shell functions (devterm, utilities)
+   - `config/monitor.zsh` — system monitor dashboard (sysmon)
+   - `config/plugins.zsh` — plugin loading
+   - `config/sysinfo.zsh` — startup splash screen
 4. Test your changes: `exec zsh` to reload
 5. Update `CHANGELOG.md` under `[Unreleased]`
 6. Commit with a clear message
