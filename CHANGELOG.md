@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.8.1] - 2026-03-28
+
+### Changed
+- **ccnotify** — layered iTerm2 notifications: OSC 9 banner + `RequestAttention=once` dock bounce for reliable multi-pane awareness
+- **cc wrapper** — notification now includes project name (e.g. "Claude done — shelly")
+- **notify-done.sh hook** — switched from `osascript` to `terminal-notifier` for native Notification Center integration; removed iTerm2-focused guard that suppressed all notifications during multi-pane work; added project name and click-to-activate iTerm2; grouped by project
+
 ## [4.8.0] - 2026-03-28
 
 ### Added

@@ -89,14 +89,17 @@ function portfind() {
 function ccnotify() {
     local msg="${*:-done}"
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+        # Layer 1: macOS notification via iTerm2 OSC 9
         printf '\033]9;%s\007' "$msg"
+        # Layer 2: Dock bounce once (catches attention when iTerm2 is not focused)
+        printf '\033]1337;RequestAttention=once\007'
     fi
 }
 
 # ── cc: Claude Code with completion notification ──
 function cc() {
     claude "$@"
-    ccnotify "Claude Code finished"
+    ccnotify "Claude done — $(basename "$PWD")"
 }
 
 # ── iterm-setup: Install iTerm2 shell integration (run once) ──
