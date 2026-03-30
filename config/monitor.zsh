@@ -28,7 +28,7 @@
 #   sysmon-old      — launch old nvtop+macmon layout
 #   sysmon-old kill  — close the old layout tab
 
-_IT2API="/Applications/iTerm.app/Contents/Resources/it2api"
+# iTerm2 API path provided by iterm2.zsh as $_SHELLY_IT2API
 
 # ── Detect package manager ──
 _sysmon_pkg_install() {
@@ -69,83 +69,52 @@ _sysmon_state_file() {
 }
 
 # ── Ensure running inside iTerm2 and Python module is available ──
-_sysmon_ensure_iterm2() {
-    if [[ "$TERM_PROGRAM" != "iTerm.app" ]]; then
-        # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m non-iTerm mode: sysmon requires iTerm2 (current terminal: ${TERM_PROGRAM:-unknown})"
-        return 1
-    fi
-    if ! python3 -c "import iterm2" 2>/dev/null; then
-        # shellcheck disable=SC2028
-        echo "\033[0;33m·\033[0m Installing Python iterm2 module…"
-        pip3 install iterm2 --quiet || {
-            # shellcheck disable=SC2028
-            echo "\033[0;31m✗\033[0m Failed to install iterm2 module. Run: pip3 install iterm2"
-            return 1
-        }
-    fi
-}
+_sysmon_ensure_iterm2() { _iterm2_ensure "sysmon"; }
 
 # ── Check if sysmon tab is still open ──
-_sysmon_tab_exists() {
-    local sid
-    sid="$(cat "$(_sysmon_state_file)" 2>/dev/null)" || return 1
-    [[ -n "$sid" ]] && "$_IT2API" show-hierarchy 2>/dev/null | grep -q "id=$sid"
-}
+_sysmon_tab_exists() { _iterm2_tab_exists "$(_sysmon_state_file)"; }
 
 # ── Focus the sysmon tab ──
-_sysmon_focus_tab() {
-    local sid
-    sid="$(cat "$(_sysmon_state_file)" 2>/dev/null)" || return 1
-    "$_IT2API" activate session "$sid" 2>/dev/null
-    "$_IT2API" activate-app 2>/dev/null
-}
+_sysmon_focus_tab() { _iterm2_focus_tab "$(_sysmon_state_file)"; }
 
 # ── Close the sysmon tab ──
 _sysmon_close_tab() {
-    local sid
-    sid="$(cat "$(_sysmon_state_file)" 2>/dev/null)" || {
-        # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m No sysmon tab tracked"
-        return 0
-    }
-    # Find window and tab ID containing this session
-    local hierarchy cur_win="" cur_tab="" win_id="" tab_id=""
-    hierarchy=$("$_IT2API" show-hierarchy 2>/dev/null)
-    while IFS= read -r line; do
-        if [[ "$line" =~ 'Window id=([^ ]+)' ]]; then
-            cur_win="${match[1]}"
-        elif [[ "$line" =~ 'Tab id=([^ ]+)' ]]; then
-            cur_tab="${match[1]}"
-        elif [[ "$line" == *"id=$sid"* ]]; then
-            win_id="$cur_win"
-            tab_id="$cur_tab"
-            break
-        fi
-    done <<< "$hierarchy"
+    _iterm2_close_tab "$(_sysmon_state_file)" "sysmon" \
+        "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon.dim_state"
+}
 
-    # Restore dimming preference to pre-sysmon state
-    local dim_state_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon.dim_state"
-    if [[ -f "$dim_state_file" ]]; then
-        local prev_dim
-        prev_dim=$(cat "$dim_state_file" 2>/dev/null)
-        if [[ "$prev_dim" == "1" ]]; then
-            defaults write com.googlecode.iterm2 DimInactiveSplitPanes -bool true
-        fi
-        rm -f "$dim_state_file"
-    fi
+# ── Force-write btop config (shared by sysmon and sysmon-old) ──
+# Removes disks and process table so CPU core graphs get more space.
+_sysmon_write_btop_conf() {
+    local btop_conf="${XDG_CONFIG_HOME:-$HOME/.config}/btop/btop.conf"
+    mkdir -p "${btop_conf:h}"
+    cat > "$btop_conf" << 'BTOPEOF'
+#* sysmon-managed btop config — written fresh on every sysmon launch
+shown_boxes = "cpu mem net"
+graph_symbol = "braille"
+graph_symbol_cpu = "braille"
+graph_symbol_net = "braille"
+theme_background = False
+color_theme = "Default"
+cpu_graph_upper = "total"
+cpu_graph_lower = "user"
+cpu_single_graph = False
+show_coretemp = True
+update_ms = 1000
+rounded_corners = True
+show_battery = True
+net_auto = True
+net_sync = True
+BTOPEOF
+}
 
-    rm -f "$(_sysmon_state_file)"
-    if [[ -n "$win_id" && -n "$tab_id" ]]; then
-        local win_num="${win_id#w}"
-        local tab_num="${tab_id#t}"
-        osascript -e "tell application \"iTerm2\" to close (first tab of window id $win_num whose id = $tab_num)" 2>/dev/null
-        # shellcheck disable=SC2028
-        echo "\033[0;32m✓\033[0m sysmon tab closed"
-    else
-        # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m sysmon tab already closed"
-    fi
+# ── Save current dim state and disable dimming ──
+_sysmon_disable_dimming() {
+    local dim_state_file="$1"
+    local cur_dim=""
+    cur_dim=$(defaults read com.googlecode.iterm2 DimInactiveSplitPanes 2>/dev/null)
+    echo "${cur_dim:-1}" > "$dim_state_file"
+    defaults write com.googlecode.iterm2 DimInactiveSplitPanes -bool false
 }
 
 # ── Install prerequisites ──
@@ -195,29 +164,7 @@ _sysmon_launch() {
         return 1
     fi
 
-    # ── Force-write btop config: CPU + memory + network ──
-    # Removes disks and process table so CPU core graphs get more space.
-    # Written fresh on every launch.
-    local btop_conf="${XDG_CONFIG_HOME:-$HOME/.config}/btop/btop.conf"
-    mkdir -p "${btop_conf:h}"
-    cat > "$btop_conf" << 'BTOPEOF'
-#* sysmon-managed btop config — written fresh on every sysmon launch
-shown_boxes = "cpu mem net"
-graph_symbol = "braille"
-graph_symbol_cpu = "braille"
-graph_symbol_net = "braille"
-theme_background = False
-color_theme = "Default"
-cpu_graph_upper = "total"
-cpu_graph_lower = "user"
-cpu_single_graph = False
-show_coretemp = True
-update_ms = 1000
-rounded_corners = True
-show_battery = True
-net_auto = True
-net_sync = True
-BTOPEOF
+    _sysmon_write_btop_conf
 
     # ── Force-write mactop theme: per-component colors ──
     # Muted palette — each metric gets its own hue so you can scan at a glance.
@@ -245,11 +192,11 @@ MACTOPEOF
 
     # ── Get current window ID so we create a tab, not a new window ──
     local current_window
-    current_window=$("$_IT2API" show-focus 2>/dev/null | awk '/^Key window:/{print $3}')
+    current_window=$("$_SHELLY_IT2API" show-focus 2>/dev/null | awk '/^Key window:/{print $3}')
 
     # ── Create new tab in the current iTerm2 window ──
     local output session_id
-    output=$("$_IT2API" create-tab --window "$current_window" 2>/dev/null) || {
+    output=$("$_SHELLY_IT2API" create-tab --window "$current_window" 2>/dev/null) || {
         # shellcheck disable=SC2028
         echo "\033[0;31m✗\033[0m Failed to create iTerm2 tab"
         echo "  Ensure Python API is enabled: iTerm2 → Preferences → General → Magic → Enable Python API"
@@ -267,16 +214,16 @@ MACTOPEOF
     echo "$session_id" > "$(_sysmon_state_file)"
 
     # Launch btop via send-text (more reliable than --command for splitting)
-    "$_IT2API" send-text "$session_id" $'btop\n' 2>/dev/null
+    "$_SHELLY_IT2API" send-text "$session_id" $'btop\n' 2>/dev/null
     sleep 0.5
 
     if $has_mactop; then
         # Single vertical split: mactop on the right
         local mactop_out mactop_sid
-        mactop_out=$("$_IT2API" split-pane "$session_id" --vertical 2>/dev/null)
+        mactop_out=$("$_SHELLY_IT2API" split-pane "$session_id" --vertical 2>/dev/null)
         mactop_sid=${${(M)${=mactop_out}:#id=*}#id=}
         if [[ -n "$mactop_sid" ]]; then
-            "$_IT2API" send-text "$mactop_sid" $'mactop\n' 2>/dev/null
+            "$_SHELLY_IT2API" send-text "$mactop_sid" $'mactop\n' 2>/dev/null
         else
             # shellcheck disable=SC2028
             echo "\033[0;33m·\033[0m mactop pane failed to create"
@@ -284,15 +231,11 @@ MACTOPEOF
     fi
 
     # Disable dimming so all sysmon panes are equally visible
-    local dim_state_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon.dim_state"
-    local cur_dim
-    cur_dim=$(defaults read com.googlecode.iterm2 DimInactiveSplitPanes 2>/dev/null)
-    echo "${cur_dim:-1}" > "$dim_state_file"
-    defaults write com.googlecode.iterm2 DimInactiveSplitPanes -bool false
+    _sysmon_disable_dimming "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon.dim_state"
 
     # Focus btop pane
-    "$_IT2API" activate session "$session_id" 2>/dev/null
-    "$_IT2API" activate-app 2>/dev/null
+    "$_SHELLY_IT2API" activate session "$session_id" 2>/dev/null
+    "$_SHELLY_IT2API" activate-app 2>/dev/null
 }
 
 # ── Status check ──
@@ -411,61 +354,13 @@ _sysmon_old_state_file() {
     echo "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon-old.session_id"
 }
 
-_sysmon_old_tab_exists() {
-    local sid
-    sid="$(cat "$(_sysmon_old_state_file)" 2>/dev/null)" || return 1
-    [[ -n "$sid" ]] && "$_IT2API" show-hierarchy 2>/dev/null | grep -q "id=$sid"
-}
+_sysmon_old_tab_exists() { _iterm2_tab_exists "$(_sysmon_old_state_file)"; }
 
-_sysmon_old_focus_tab() {
-    local sid
-    sid="$(cat "$(_sysmon_old_state_file)" 2>/dev/null)" || return 1
-    "$_IT2API" activate session "$sid" 2>/dev/null
-    "$_IT2API" activate-app 2>/dev/null
-}
+_sysmon_old_focus_tab() { _iterm2_focus_tab "$(_sysmon_old_state_file)"; }
 
 _sysmon_old_close_tab() {
-    local sid
-    sid="$(cat "$(_sysmon_old_state_file)" 2>/dev/null)" || {
-        # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m No sysmon-old tab tracked"
-        return 0
-    }
-    local hierarchy cur_win="" cur_tab="" win_id="" tab_id=""
-    hierarchy=$("$_IT2API" show-hierarchy 2>/dev/null)
-    while IFS= read -r line; do
-        if [[ "$line" =~ 'Window id=([^ ]+)' ]]; then
-            cur_win="${match[1]}"
-        elif [[ "$line" =~ 'Tab id=([^ ]+)' ]]; then
-            cur_tab="${match[1]}"
-        elif [[ "$line" == *"id=$sid"* ]]; then
-            win_id="$cur_win"
-            tab_id="$cur_tab"
-            break
-        fi
-    done <<< "$hierarchy"
-
-    local dim_state_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon-old.dim_state"
-    if [[ -f "$dim_state_file" ]]; then
-        local prev_dim
-        prev_dim=$(cat "$dim_state_file" 2>/dev/null)
-        if [[ "$prev_dim" == "1" ]]; then
-            defaults write com.googlecode.iterm2 DimInactiveSplitPanes -bool true
-        fi
-        rm -f "$dim_state_file"
-    fi
-
-    rm -f "$(_sysmon_old_state_file)"
-    if [[ -n "$win_id" && -n "$tab_id" ]]; then
-        local win_num="${win_id#w}"
-        local tab_num="${tab_id#t}"
-        osascript -e "tell application \"iTerm2\" to close (first tab of window id $win_num whose id = $tab_num)" 2>/dev/null
-        # shellcheck disable=SC2028
-        echo "\033[0;32m✓\033[0m sysmon-old tab closed"
-    else
-        # shellcheck disable=SC2028
-        echo "\033[0;90m·\033[0m sysmon-old tab already closed"
-    fi
+    _iterm2_close_tab "$(_sysmon_old_state_file)" "sysmon-old" \
+        "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon-old.dim_state"
 }
 
 _sysmon_old_launch() {
@@ -476,27 +371,7 @@ _sysmon_old_launch() {
         return 1
     fi
 
-    # Force-write btop config (same as sysmon)
-    local btop_conf="${XDG_CONFIG_HOME:-$HOME/.config}/btop/btop.conf"
-    mkdir -p "${btop_conf:h}"
-    cat > "$btop_conf" << 'BTOPEOF'
-#* sysmon-managed btop config — written fresh on every sysmon launch
-shown_boxes = "cpu mem net"
-graph_symbol = "braille"
-graph_symbol_cpu = "braille"
-graph_symbol_net = "braille"
-theme_background = False
-color_theme = "Default"
-cpu_graph_upper = "total"
-cpu_graph_lower = "user"
-cpu_single_graph = False
-show_coretemp = True
-update_ms = 1000
-rounded_corners = True
-show_battery = True
-net_auto = True
-net_sync = True
-BTOPEOF
+    _sysmon_write_btop_conf
 
     # Force-write nvtop config: hide N/A fields on Apple Silicon
     if $IS_MACOS; then
@@ -550,11 +425,11 @@ NVTOPEOF
 
     # Get current window ID so we create a tab, not a new window
     local current_window
-    current_window=$("$_IT2API" show-focus 2>/dev/null | awk '/^Key window:/{print $3}')
+    current_window=$("$_SHELLY_IT2API" show-focus 2>/dev/null | awk '/^Key window:/{print $3}')
 
     # Create new tab in the current iTerm2 window
     local output session_id
-    output=$("$_IT2API" create-tab --window "$current_window" 2>/dev/null) || {
+    output=$("$_SHELLY_IT2API" create-tab --window "$current_window" 2>/dev/null) || {
         # shellcheck disable=SC2028
         echo "\033[0;31m✗\033[0m Failed to create iTerm2 tab"
         return 1
@@ -569,25 +444,25 @@ NVTOPEOF
     mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
     echo "$session_id" > "$(_sysmon_old_state_file)"
 
-    "$_IT2API" send-text "$session_id" $'btop\n' 2>/dev/null
+    "$_SHELLY_IT2API" send-text "$session_id" $'btop\n' 2>/dev/null
     sleep 0.5
 
     if $has_gpu && $has_nvtop; then
         local nvtop_out nvtop_sid
-        nvtop_out=$("$_IT2API" split-pane "$session_id" --vertical 2>/dev/null)
+        nvtop_out=$("$_SHELLY_IT2API" split-pane "$session_id" --vertical 2>/dev/null)
         nvtop_sid=${${(M)${=nvtop_out}:#id=*}#id=}
         if [[ -z "$nvtop_sid" ]]; then
             # shellcheck disable=SC2028
             echo "\033[0;33m·\033[0m nvtop pane failed to create"
         else
-            "$_IT2API" send-text "$nvtop_sid" $'nvtop\n' 2>/dev/null
+            "$_SHELLY_IT2API" send-text "$nvtop_sid" $'nvtop\n' 2>/dev/null
             if $has_macmon; then
                 sleep 0.3
                 local macmon_out macmon_sid
-                macmon_out=$("$_IT2API" split-pane "$nvtop_sid" 2>/dev/null)
+                macmon_out=$("$_SHELLY_IT2API" split-pane "$nvtop_sid" 2>/dev/null)
                 macmon_sid=${${(M)${=macmon_out}:#id=*}#id=}
                 if [[ -n "$macmon_sid" ]]; then
-                    "$_IT2API" send-text "$macmon_sid" $'macmon\n' 2>/dev/null
+                    "$_SHELLY_IT2API" send-text "$macmon_sid" $'macmon\n' 2>/dev/null
                 else
                     # shellcheck disable=SC2028
                     echo "\033[0;33m·\033[0m macmon pane failed to create"
@@ -596,10 +471,10 @@ NVTOPEOF
         fi
     elif $has_macmon; then
         local macmon_out macmon_sid
-        macmon_out=$("$_IT2API" split-pane "$session_id" --vertical 2>/dev/null)
+        macmon_out=$("$_SHELLY_IT2API" split-pane "$session_id" --vertical 2>/dev/null)
         macmon_sid=${${(M)${=macmon_out}:#id=*}#id=}
         if [[ -n "$macmon_sid" ]]; then
-            "$_IT2API" send-text "$macmon_sid" $'macmon\n' 2>/dev/null
+            "$_SHELLY_IT2API" send-text "$macmon_sid" $'macmon\n' 2>/dev/null
         else
             # shellcheck disable=SC2028
             echo "\033[0;33m·\033[0m macmon pane failed to create"
@@ -607,14 +482,10 @@ NVTOPEOF
     fi
 
     # Disable dimming
-    local dim_state_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon-old.dim_state"
-    local cur_dim
-    cur_dim=$(defaults read com.googlecode.iterm2 DimInactiveSplitPanes 2>/dev/null)
-    echo "${cur_dim:-1}" > "$dim_state_file"
-    defaults write com.googlecode.iterm2 DimInactiveSplitPanes -bool false
+    _sysmon_disable_dimming "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/sysmon-old.dim_state"
 
-    "$_IT2API" activate session "$session_id" 2>/dev/null
-    "$_IT2API" activate-app 2>/dev/null
+    "$_SHELLY_IT2API" activate session "$session_id" 2>/dev/null
+    "$_SHELLY_IT2API" activate-app 2>/dev/null
 }
 
 function sysmon-old() {

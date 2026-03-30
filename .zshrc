@@ -27,7 +27,10 @@ for config_file in \
     "$ZDOTDIR_CUSTOM/environment.zsh" \
     "$ZDOTDIR_CUSTOM/prompt.zsh" \
     "$ZDOTDIR_CUSTOM/aliases.zsh" \
+    "$ZDOTDIR_CUSTOM/iterm2.zsh" \
     "$ZDOTDIR_CUSTOM/functions.zsh" \
+    "$ZDOTDIR_CUSTOM/release.zsh" \
+    "$ZDOTDIR_CUSTOM/devterm.zsh" \
     "$ZDOTDIR_CUSTOM/plugins.zsh" \
     "$ZDOTDIR_CUSTOM/monitor.zsh" \
     "$ZDOTDIR_CUSTOM/sysinfo.zsh"; do

@@ -18,9 +18,12 @@ This project uses [Semantic Versioning](https://semver.org/):
    - `config/environment.zsh` — exports, options, PATH
    - `config/prompt.zsh` — prompt appearance and behavior
    - `config/aliases.zsh` — command aliases
-   - `config/functions.zsh` — shell functions (devterm, utilities)
-   - `config/monitor.zsh` — system monitor dashboard (sysmon)
+   - `config/iterm2.zsh` — shared iTerm2 tab/session utilities
+   - `config/functions.zsh` — utility functions (pan, mkcd, extract, etc.)
+   - `config/release.zsh` — versioning and release CLI (`shelly` command)
+   - `config/devterm.zsh` — dev workspace (`devterm` command)
    - `config/plugins.zsh` — plugin loading
+   - `config/monitor.zsh` — system monitor dashboard (`sysmon` command)
    - `config/sysinfo.zsh` — startup splash screen
 4. Test your changes: `exec zsh` to reload
 5. Update `CHANGELOG.md` under `[Unreleased]`
@@ -42,12 +45,14 @@ Prefixes: `feat`, `fix`, `docs`, `chore`, `refactor`, `style`, `test`
 
 ## Release Process
 
-1. Update `VERSION` file with the new version number
-2. Move `[Unreleased]` entries in `CHANGELOG.md` to a new version section
-3. Update comparison links at the bottom of `CHANGELOG.md`
-4. Commit: `chore: bump version to x.y.z`
-5. Tag: `git tag -a vx.y.z -m "Release vx.y.z"`
-6. Push: `git push origin master --tags`
+Use the automated release command:
+
+```bash
+shelly release <major|minor|patch>
+```
+
+This handles: VERSION bump, CHANGELOG sectioning, commit, tag, and push.
+Ensure the `[Unreleased]` section in CHANGELOG.md has entries before releasing.
 
 ## Guidelines
 

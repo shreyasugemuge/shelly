@@ -15,6 +15,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **install.sh** — respects `SHELLY_ROOT` environment variable for Homebrew compatibility; existing `git clone && ./install.sh` workflow unchanged
 
+## [4.9.0] - 2026-03-31
+
+### Added
+- **Shared iTerm2 utility layer** (`config/iterm2.zsh`) — `_iterm2_tab_exists`, `_iterm2_focus_tab`, `_iterm2_close_tab` consolidate 12 duplicated tab management functions into 3 parameterized ones; `$_SHELLY_IT2API` replaces hardcoded paths
+- **Dedicated config modules** — `config/devterm.zsh` (dev workspace), `config/release.zsh` (shelly CLI) split out from the 1247-line `config/functions.zsh` monolith; `functions.zsh` now contains only utility functions (117 lines)
+- **Configurable defaults** — `SHELLY_IT2API`, `SHELLY_DEVTERM_RATIO`, `SHELLY_CODE_DIRS` overridable in `~/.zshrc.local`
+- **Full test suite** — 139 tests via bats-core covering all config modules: syntax checks, sourcing smoke tests, function unit tests, semver parsing, grid layout, iTerm2 hierarchy regex, mocked external commands
+- **CI pipeline** (`.github/workflows/test.yml`) — automated tests, shellcheck linting, and syntax checks on push/PR
+- **Test runner** (`tests/run`) — run all tests, specific files, or filter by pattern
+
+### Changed
+- **`config/monitor.zsh`** — extracted `_sysmon_write_btop_conf()` and `_sysmon_disable_dimming()` shared helpers; eliminated verbatim btop config duplication between sysmon and sysmon-old
+- **`config/functions.zsh`** — reduced from 1247 to 117 lines (utilities only: pan, mkcd, extract, whichip, weather, portfind, cc, ccnotify, iterm-setup)
+- **`.zshrc` source order** — now includes iterm2.zsh, release.zsh, devterm.zsh in the correct dependency order
+- **Documentation** — updated README (version badge, file structure, macOS-only note, configurable defaults), CONTRIBUTING.md (automated release process), CLAUDE.md (new file layout and design decisions)
+
 ## [4.8.1] - 2026-03-28
 
 ### Changed
@@ -409,7 +425,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.8.1...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.9.0...HEAD
+[4.9.0]: https://github.com/shreyasugemuge/shelly/compare/v4.8.1...v4.9.0
 [4.8.1]: https://github.com/shreyasugemuge/shelly/compare/v4.8.0...v4.8.1
 [4.8.0]: https://github.com/shreyasugemuge/shelly/compare/v4.7.0...v4.8.0
 [4.7.0]: https://github.com/shreyasugemuge/shelly/compare/v4.6.0...v4.7.0
