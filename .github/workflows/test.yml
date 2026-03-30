@@ -1,0 +1,50 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Tests (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run tests
+        run: ./tests/run
+
+  lint:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Lint config files
+        run: |
+          shellcheck -x -s bash install.sh
+          # zsh files: shellcheck doesn't fully support zsh, but catches common issues
+          for f in config/*.zsh; do
+            shellcheck -x -s bash -e SC2296,SC2299,SC2300,SC2301,SC2034,SC2028,SC2164,SC2088 "$f" || true
+          done
+
+  syntax:
+    name: Syntax check
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: zsh -n on all files
+        shell: zsh {0}
+        run: |
+          for f in .zshrc config/*.zsh; do
+            echo -n "$f: "
+            zsh -n "$f" && echo "OK" || { echo "FAIL"; exit 1; }
+          done

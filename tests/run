@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Run the shelly test suite
+#
+# Usage:
+#   ./tests/run              Run all tests
+#   ./tests/run functions    Run only functions.bats
+#   ./tests/run -t "pattern" Run tests matching pattern
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BATS="${SCRIPT_DIR}/.bats/bats-core/bin/bats"
+
+if [[ ! -x "$BATS" ]]; then
+    echo "bats-core not found. Run: git submodule update --init --recursive"
+    exit 1
+fi
+
+if [[ $# -eq 0 ]]; then
+    # Run all tests
+    "$BATS" --pretty "${SCRIPT_DIR}"/*.bats
+elif [[ "$1" == "-t" ]]; then
+    # Filter by pattern
+    shift
+    "$BATS" --pretty --filter "$1" "${SCRIPT_DIR}"/*.bats
+elif [[ -f "${SCRIPT_DIR}/${1}.bats" ]]; then
+    # Run specific test file
+    "$BATS" --pretty "${SCRIPT_DIR}/${1}.bats"
+else
+    # Pass through to bats
+    "$BATS" --pretty "$@"
+fi

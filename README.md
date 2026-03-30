@@ -1,6 +1,6 @@
 # Shelly
 
-[![Version](https://img.shields.io/badge/version-4.8.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.8.1-blue.svg)](CHANGELOG.md)
 [![Shell](https://img.shields.io/badge/shell-zsh-green.svg)](https://www.zsh.org/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Linux%20|%20WSL-orange.svg)](#prerequisites)
@@ -47,6 +47,8 @@ Preview without making changes:
 
 Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`) and CLI tools (`tree`) are installed automatically on first launch via your platform's package manager (Homebrew, apt, dnf, or pacman).
 
+> **macOS-only features**: `sysmon`, `devterm`, `pan` (Preview.app), and `mactop` require macOS and iTerm2. On Linux, the core config (prompt, aliases, completions, startup splash) works fully; iTerm2 features are gracefully skipped.
+
 ## File Structure
 
 ```
@@ -57,7 +59,10 @@ Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions
 │   ├── environment.zsh     Exports, locale, zsh options, NVM setup
 │   ├── prompt.zsh          Custom prompt with face + git integration
 │   ├── aliases.zsh         Aliases organized by category
-│   ├── functions.zsh       Utility functions + devterm workspace
+│   ├── iterm2.zsh          Shared iTerm2 tab/session utilities
+│   ├── functions.zsh       Utility functions (pan, mkcd, extract, etc.)
+│   ├── release.zsh         Versioning and release CLI (shelly command)
+│   ├── devterm.zsh         Dev workspace (devterm command)
 │   ├── plugins.zsh         Plugin loading (autosuggestions, syntax highlighting)
 │   ├── monitor.zsh         System monitor dashboard (sysmon command)
 │   └── sysinfo.zsh         Neofetch-style startup splash screen
@@ -187,13 +192,17 @@ You can also set `DEVTMUX_DIR` directly in `~/.zshrc.local`. The `devterm config
 
 **Aliases** — `..`, `ll`, `refresh`, `zshrc`, `myip`, `gs`, `gb`, `gco`, `gsw`, `tre`, `yell`, and more. See [`config/aliases.zsh`](config/aliases.zsh).
 
-**Functions** — `pan` (man page as PDF), `mkcd`, `extract` (any archive), `whichip`, `weather`, `portfind`, `cc` (Claude Code with notification), `ccnotify`, `iterm-setup`, `devterm`, `sysmon`. See [`config/functions.zsh`](config/functions.zsh) and [`config/monitor.zsh`](config/monitor.zsh).
+**Functions** — `pan` (man page as PDF), `mkcd`, `extract` (any archive), `whichip`, `weather`, `portfind`, `cc` (Claude Code with notification), `ccnotify`, `iterm-setup`. See [`config/functions.zsh`](config/functions.zsh). Dev workspace in [`config/devterm.zsh`](config/devterm.zsh), system monitor in [`config/monitor.zsh`](config/monitor.zsh).
 
 ## Customization
 
 - **Local overrides**: `~/.zshrc.local` — machine-specific, not tracked by git
 - **Add aliases/functions**: edit the appropriate file in `config/`
 - **Change colors**: prompt colors in `config/prompt.zsh` using `%F{color}`
+- **Configurable defaults** (set in `~/.zshrc.local`):
+  - `SHELLY_IT2API` — path to iTerm2 `it2api` binary
+  - `SHELLY_DEVTERM_RATIO` — Claude/terminal split ratio (default: `0.8`)
+  - `SHELLY_CODE_DIRS` — directories to search under `$HOME` for code folders
 
 ## Uninstall
 

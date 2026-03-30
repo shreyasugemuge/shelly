@@ -9,7 +9,18 @@ Shelly is a modular zsh configuration and development workspace by Shreyas Ugemu
 ## Repo Layout
 
 - `.zshrc` — entry point, sources all modules in `config/`
-- `config/` — modular config files (environment, prompt, aliases, functions, plugins, deps, monitor, sysinfo)
+- `config/` — modular config files:
+  - `deps.zsh` — auto-install Homebrew, plugins, CLI tools
+  - `environment.zsh` — exports, locale, zsh options, NVM lazy-load
+  - `prompt.zsh` — custom prompt with face + git integration
+  - `aliases.zsh` — command aliases
+  - `iterm2.zsh` — shared iTerm2 tab/session utilities (`_iterm2_*` functions, `$_SHELLY_IT2API`)
+  - `functions.zsh` — utility functions (pan, mkcd, extract, whichip, weather, portfind, cc, ccnotify)
+  - `release.zsh` — `shelly` CLI (release command, version)
+  - `devterm.zsh` — dev workspace (`devterm` command, split mode)
+  - `plugins.zsh` — plugin loading (syntax-highlighting LAST)
+  - `monitor.zsh` — system monitor (`sysmon`, `sysmon-old`)
+  - `sysinfo.zsh` — startup splash screen with caching
 - `install.sh` — setup script with backup, `--dry-run`, `--uninstall`
 - `archive/` — legacy bash config preserved for reference, do not modify
 - `to_delete/` — files staged for removal (not committed)
@@ -26,6 +37,8 @@ Shelly is a modular zsh configuration and development workspace by Shreyas Ugemu
 - **iTerm2 for sysmon and devterm**: both features use the `it2api` Python CLI bundled with iTerm2. Requires Python API enabled in iTerm2 preferences.
 - **Force-written configs**: btop.conf is overwritten on every `sysmon` launch to prevent sticky-state bugs. mactop needs no config file.
 - **Startup caching**: sysinfo.zsh caches hardware info (until reboot), package count (1h), and git streak (5m) to ~/.cache/zsh/sysinfo_cache. brew --prefix computed once in .zshrc as _SHELLY_BREW_PREFIX and reused by deps/plugins.
+- **Shared iTerm2 layer**: `iterm2.zsh` provides `_iterm2_tab_exists`, `_iterm2_focus_tab`, `_iterm2_close_tab` and the `$_SHELLY_IT2API` path — used by both devterm and sysmon to avoid duplication.
+- **Configurable defaults**: `SHELLY_IT2API`, `SHELLY_DEVTERM_RATIO`, `SHELLY_CODE_DIRS` can be overridden in `~/.zshrc.local`. Defaults are set via `: "${VAR:=default}"` at source time.
 
 ## sysmon — System Monitor Dashboard
 
