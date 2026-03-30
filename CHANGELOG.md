@@ -401,7 +401,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.8.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.8.1...HEAD
+[4.8.1]: https://github.com/shreyasugemuge/shelly/compare/v4.8.0...v4.8.1
 [4.8.0]: https://github.com/shreyasugemuge/shelly/compare/v4.7.0...v4.8.0
 [4.7.0]: https://github.com/shreyasugemuge/shelly/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/shreyasugemuge/shelly/compare/v4.5.1...v4.6.0

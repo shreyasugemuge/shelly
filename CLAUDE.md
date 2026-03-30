@@ -71,7 +71,14 @@ Opens a single project with 1-8 equal-sized Claude panes in an optimal grid layo
 
 ## Versioning & Releases
 
-Follows semver. Update `VERSION`, `CHANGELOG.md`, commit `chore: bump version`, tag and push.
+**Always use `shelly release <major|minor|patch>`.** Do not manually edit VERSION, do not manually update CHANGELOG links, do not manually tag or push. The command handles everything: VERSION bump, CHANGELOG sectioning, commit, tag, and push.
+
+Before running `shelly release`, ensure:
+1. All feature/fix commits are already on master
+2. The `## [Unreleased]` section in CHANGELOG.md has entries describing the changes
+3. Working tree is clean
+
+The release commit message is always `chore: release v<version>` — feature commits use their own prefixes (`feat:`, `fix:`, etc.) and should already be committed before releasing.
 
 ## Commit Style
 
