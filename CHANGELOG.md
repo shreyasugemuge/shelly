@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.10.0] - 2026-03-31
+
 ### Added
 - **Homebrew support** — `brew tap shreyasugemuge/shelly && brew install shelly` installs Shelly via Homebrew tap; `shelly install` activates the zsh config
 - **`bin/shelly` CLI wrapper** — subcommands: `install`, `uninstall`, `version`, `update`, `help`
@@ -425,7 +427,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.9.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.10.0...HEAD
+[4.10.0]: https://github.com/shreyasugemuge/shelly/compare/v4.9.0...v4.10.0
 [4.9.0]: https://github.com/shreyasugemuge/shelly/compare/v4.8.1...v4.9.0
 [4.8.1]: https://github.com/shreyasugemuge/shelly/compare/v4.8.0...v4.8.1
 [4.8.0]: https://github.com/shreyasugemuge/shelly/compare/v4.7.0...v4.8.0
