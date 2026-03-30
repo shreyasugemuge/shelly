@@ -80,6 +80,17 @@ Before running `shelly release`, ensure:
 
 The release commit message is always `chore: release v<version>` — feature commits use their own prefixes (`feat:`, `fix:`, etc.) and should already be committed before releasing.
 
+## Homebrew Distribution
+
+Shelly is available via Homebrew: `brew tap shreyasugemuge/shelly && brew install shelly && shelly install`.
+
+- Formula lives in separate repo: `shreyasugemuge/homebrew-shelly`
+- Formula downloads release tarball, installs to `share/shelly/`, exposes `bin/shelly`
+- `bin/shelly` resolves through Homebrew's symlink chain to find `share/shelly/`
+- `SHELLY_ROOT` env var tells `install.sh` where to find repo files (set by `bin/shelly`, unset for git clone workflow)
+- Formula never touches `$HOME` — caveats tell user to run `shelly install`
+- After `brew upgrade shelly`, run `shelly update` to re-copy config files
+
 ## Commit Style
 
 Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `style:`

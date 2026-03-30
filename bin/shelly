@@ -1,0 +1,144 @@
+#!/bin/bash
+# ── Shelly CLI ──
+# Author: Shreyas Ugemuge
+#
+# Wrapper for Homebrew-distributed Shelly.
+# Resolves through Homebrew's symlink chain to find the installation,
+# then dispatches to the appropriate subcommand.
+#
+# Usage:
+#   shelly install [--dry-run]   Install/update zsh config files
+#   shelly uninstall             Remove installed files
+#   shelly update                Upgrade via Homebrew and re-install
+#   shelly version               Print version
+#   shelly help                  Show this help
+
+set -euo pipefail
+
+# ── Resolve real script path (follows Homebrew symlinks) ──
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [[ -L "$SCRIPT_PATH" ]]; do
+    SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+    SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
+    [[ "$SCRIPT_PATH" != /* ]] && SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_PATH"
+done
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+
+# ── Locate shelly root ──
+# Homebrew layout: Cellar/shelly/VERSION/bin/shelly
+#   -> sibling:    Cellar/shelly/VERSION/share/shelly/
+# Git clone layout: repo/bin/shelly
+#   -> parent:     repo/ (has install.sh)
+if [[ -d "$SCRIPT_DIR/../share/shelly" ]]; then
+    SHELLY_ROOT="$(cd "$SCRIPT_DIR/../share/shelly" && pwd)"
+elif [[ -f "$SCRIPT_DIR/../install.sh" ]]; then
+    SHELLY_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+    echo "shelly: cannot find shelly installation" >&2
+    exit 1
+fi
+
+# ── Version ──
+VERSION=$(cat "$SHELLY_ROOT/VERSION" 2>/dev/null || echo "unknown")
+
+# ── Colors ──
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+ok()   { echo -e "  ${GREEN}✓${NC} $1"; }
+warn() { echo -e "  ${YELLOW}→${NC} $1"; }
+err()  { echo -e "  ${RED}✗${NC} $1"; }
+info() { echo -e "  ${CYAN}·${NC} $1"; }
+
+# ── Help ──
+show_help() {
+    echo ""
+    echo -e "${CYAN}── Shelly v${VERSION} ──${NC}"
+    echo ""
+    echo -e "${BOLD}Usage:${NC} shelly <command> [options]"
+    echo ""
+    echo -e "${BOLD}Commands:${NC}"
+    echo "  install [opts]   Install/update zsh config files"
+    echo "                   Passes through flags (e.g. --dry-run)"
+    echo "  uninstall        Remove installed files and show backup location"
+    echo "  update           Upgrade via Homebrew, then re-install configs"
+    echo "  version          Print version"
+    echo "  help             Show this help message"
+    echo ""
+    echo -e "${BOLD}Examples:${NC}"
+    echo "  shelly install"
+    echo "  shelly install --dry-run"
+    echo "  shelly update"
+    echo ""
+}
+
+# ── Subcommands ──
+cmd_install() {
+    export SHELLY_ROOT
+    bash "$SHELLY_ROOT/install.sh" "$@"
+}
+
+cmd_uninstall() {
+    export SHELLY_ROOT
+    bash "$SHELLY_ROOT/install.sh" --uninstall
+}
+
+cmd_version() {
+    echo "shelly v${VERSION}"
+}
+
+cmd_update() {
+    echo ""
+    echo -e "${CYAN}── Shelly Update ──${NC}"
+    echo ""
+
+    if command -v brew &>/dev/null; then
+        info "Upgrading shelly via Homebrew..."
+        if brew upgrade shelly 2>/dev/null; then
+            ok "Homebrew upgrade complete"
+        else
+            warn "Already on the latest version (or not installed via Homebrew)"
+        fi
+        echo ""
+        info "Re-installing configs..."
+        export SHELLY_ROOT
+        bash "$SHELLY_ROOT/install.sh"
+    else
+        err "Homebrew not found"
+        echo ""
+        info "If you installed from git, update manually:"
+        echo "    cd $(printf '%q' "$SHELLY_ROOT")"
+        echo "    git pull"
+        echo "    ./install.sh"
+        echo ""
+    fi
+}
+
+# ── Dispatch ──
+case "${1:-help}" in
+    install)
+        shift
+        cmd_install "$@"
+        ;;
+    uninstall)
+        cmd_uninstall
+        ;;
+    update)
+        cmd_update
+        ;;
+    version|--version|-v)
+        cmd_version
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        err "Unknown command: $1"
+        show_help
+        exit 1
+        ;;
+esac
