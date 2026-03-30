@@ -13,7 +13,7 @@
 set -euo pipefail
 
 # ── Config ──
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="${SHELLY_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 VERSION=$(cat "$REPO_DIR/VERSION" 2>/dev/null || echo "unknown")
 ZSHRC_TARGET="$HOME/.zshrc"
 ZSH_CONFIG_DIR="$HOME/.config/zsh"
@@ -168,6 +168,7 @@ do_uninstall() {
     fi
 
     local latest_backup
+    # shellcheck disable=SC2012
     latest_backup=$(ls -dt "$HOME"/.zsh_backup_* 2>/dev/null | head -1)
     if [[ -n "$latest_backup" ]]; then
         warn "Your most recent backup is at: $latest_backup"

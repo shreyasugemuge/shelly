@@ -24,6 +24,17 @@ Named after a childhood nickname — and because it's a shell config.
 
 ## Quick Start
 
+### Option 1: Homebrew (macOS)
+
+```bash
+brew tap shreyasugemuge/shelly
+brew install shelly
+shelly install
+exec zsh
+```
+
+### Option 2: Git Clone
+
 ```bash
 git clone https://github.com/shreyasugemuge/shelly.git ~/.dotfiles/zsh
 cd ~/.dotfiles/zsh

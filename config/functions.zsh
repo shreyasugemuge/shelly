@@ -114,4 +114,3 @@ function iterm-setup() {
         echo "✓ Installed — restart your shell or run: source $dest" || \
         echo "✗ Download failed"
 }
-

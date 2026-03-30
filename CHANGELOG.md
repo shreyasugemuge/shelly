@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Homebrew support** — `brew tap shreyasugemuge/shelly && brew install shelly` installs Shelly via Homebrew tap; `shelly install` activates the zsh config
+- **`bin/shelly` CLI wrapper** — subcommands: `install`, `uninstall`, `version`, `update`, `help`
+- **Homebrew formula** — `Formula/shelly.rb` downloads release tarball, installs to `share/shelly/`, exposes `bin/shelly` on PATH
+
+### Changed
+- **install.sh** — respects `SHELLY_ROOT` environment variable for Homebrew compatibility; existing `git clone && ./install.sh` workflow unchanged
+
 ## [4.9.0] - 2026-03-31
 
 ### Added
