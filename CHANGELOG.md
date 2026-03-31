@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.11.0] - 2026-03-31
+
 ### Added
 - **`claude` alias** — wraps Claude Code with `caffeinate -disu` to prevent display sleep during sessions
 - **`comfy-monitor` alias** — conditional alias for ComfyUI Live Monitor dashboard; only defined when ComfyUI is installed. Configurable via `SHELLY_COMFY_DIR`
@@ -431,7 +433,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.10.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.11.0...HEAD
+[4.11.0]: https://github.com/shreyasugemuge/shelly/compare/v4.10.0...v4.11.0
 [4.10.0]: https://github.com/shreyasugemuge/shelly/compare/v4.9.0...v4.10.0
 [4.9.0]: https://github.com/shreyasugemuge/shelly/compare/v4.8.1...v4.9.0
 [4.8.1]: https://github.com/shreyasugemuge/shelly/compare/v4.8.0...v4.8.1
