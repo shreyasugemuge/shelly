@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.12.0] - 2026-03-31
+
 ### Added
 - **`comfy-monitor` dashboard overhaul** — full-featured ComfyUI monitoring dashboard with live system metrics, workflow details, and job tracking
   - **3-column system view** — memory (system + PyTorch), CPU & process (PID, RSS, uptime), storage & queue side by side
@@ -456,7 +458,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.11.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.12.0...HEAD
+[4.12.0]: https://github.com/shreyasugemuge/shelly/compare/v4.11.0...v4.12.0
 [4.11.0]: https://github.com/shreyasugemuge/shelly/compare/v4.10.0...v4.11.0
 [4.10.0]: https://github.com/shreyasugemuge/shelly/compare/v4.9.0...v4.10.0
 [4.9.0]: https://github.com/shreyasugemuge/shelly/compare/v4.8.1...v4.9.0
