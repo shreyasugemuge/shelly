@@ -54,10 +54,10 @@ alias yell='figlet'
 # ── Claude Code (prevent display sleep while running) ──
 alias claude='caffeinate -disu claude'
 
-# ── ComfyUI Monitor (only if ComfyUI is installed) ──
+# ── ComfyUI Monitor (requires ComfyUI's venv for websockets) ──
 : "${SHELLY_COMFY_DIR:=$HOME/Comfy}"
-if [[ -f "$SHELLY_COMFY_DIR/user/default/workflows/_scripts/comfy_monitor.py" ]]; then
-    alias comfy-monitor="$SHELLY_COMFY_DIR/.venv/bin/python $SHELLY_COMFY_DIR/user/default/workflows/_scripts/comfy_monitor.py"
+if [[ -x "$SHELLY_COMFY_DIR/.venv/bin/python" ]]; then
+    alias comfy-monitor="$SHELLY_COMFY_DIR/.venv/bin/python ${XDG_CONFIG_HOME:-$HOME/.config}/zsh/scripts/comfy_monitor.py"
 fi
 
 # ── Typo Corrections ──

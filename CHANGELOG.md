@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`comfy-monitor` dashboard overhaul** — full-featured ComfyUI monitoring dashboard with live system metrics, workflow details, and job tracking
+  - **3-column system view** — memory (system + PyTorch), CPU & process (PID, RSS, uptime), storage & queue side by side
+  - **Phase timeline bar** — colored visual showing time in loading (yellow), sampling (cyan), post-process (magenta) with percentages
+  - **Overall job progress** — estimates total completion factoring in loading + sampling remaining + post-process
+  - **Workflow metadata** — model name, resolution, frames, steps, sampler, scheduler, CFG, seed, LoRAs, prompt preview, workflow type badges (I2V/T2V/IMG/VID)
+  - **Human-readable node descriptions** — plain-English explanation of what each node is doing
+  - **Sampling progress** — per-step sparkline, throughput (Mpx/s, frames/s), ETA with finish time
+  - **Completion summary** — phase breakdown with visual bars, top 3 bottleneck nodes, step timing stats
+  - **Idle time tracking** — shows time idle between jobs and total idle this session
+  - **Job history table** — recent jobs with ID, type, status, duration, model, size, output count
+  - **Recent outputs** — newest output files with size and age
+  - **Server log tail** — last 5 ComfyUI log entries
+  - **Pending queue** — queued jobs with workflow type and model info
+  - **Connection health** — WebSocket activity indicator, API latency, auto-reconnect with backoff
+  - **CPU monitoring** — system CPU gauge with trend sparkline, ComfyUI process stats
+  - **Disk usage** — free space and output directory size
+- **`scripts/` directory** — bundled scripts installed to `~/.config/zsh/scripts/`; `comfy-monitor` now ships with Shelly instead of depending on an external script
+
+### Changed
+- **`comfy-monitor` alias** — now points to bundled `scripts/comfy_monitor.py` instead of external ComfyUI workflow script; still requires ComfyUI's venv for the `websockets` dependency
+- **`install.sh`** — copies `scripts/` directory to `~/.config/zsh/scripts/` during install
+
 ## [4.11.0] - 2026-03-31
 
 ### Added

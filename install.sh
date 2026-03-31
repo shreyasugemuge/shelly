@@ -113,6 +113,9 @@ install_files() {
     cp "$REPO_DIR/.zshrc" "$ZSHRC_TARGET"
     cp -r "$REPO_DIR/config" "$ZSH_CONFIG_DIR"
     cp "$REPO_DIR/VERSION" "$ZSH_CONFIG_DIR/VERSION"
+    if [[ -d "$REPO_DIR/scripts" ]]; then
+        cp -r "$REPO_DIR/scripts" "$ZSH_CONFIG_DIR/scripts"
+    fi
 
     ok "Copied .zshrc → ~/.zshrc"
     ok "Copied config/ → ~/.config/zsh/"

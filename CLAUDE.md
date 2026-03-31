@@ -21,6 +21,8 @@ Shelly is a modular zsh configuration and development workspace by Shreyas Ugemu
   - `plugins.zsh` — plugin loading (syntax-highlighting LAST)
   - `monitor.zsh` — system monitor (`sysmon`, `sysmon-old`)
   - `sysinfo.zsh` — startup splash screen with caching
+- `scripts/` — bundled scripts:
+  - `comfy_monitor.py` — ComfyUI live monitoring dashboard (Python, requires `websockets`)
 - `install.sh` — setup script with backup, `--dry-run`, `--uninstall`
 - `archive/` — legacy bash config preserved for reference, do not modify
 - `to_delete/` — files staged for removal (not committed)
