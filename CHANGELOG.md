@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`claude` alias** — wraps Claude Code with `caffeinate -disu` to prevent display sleep during sessions
+- **`comfy-monitor` alias** — conditional alias for ComfyUI Live Monitor dashboard; only defined when ComfyUI is installed. Configurable via `SHELLY_COMFY_DIR`
+
 ## [4.10.0] - 2026-03-31
 
 ### Added

@@ -51,6 +51,15 @@ alias tre='tree -C -L 2'
 # ── Fun ──
 alias yell='figlet'
 
+# ── Claude Code (prevent display sleep while running) ──
+alias claude='caffeinate -disu claude'
+
+# ── ComfyUI Monitor (only if ComfyUI is installed) ──
+: "${SHELLY_COMFY_DIR:=$HOME/Comfy}"
+if [[ -f "$SHELLY_COMFY_DIR/user/default/workflows/_scripts/comfy_monitor.py" ]]; then
+    alias comfy-monitor="$SHELLY_COMFY_DIR/.venv/bin/python $SHELLY_COMFY_DIR/user/default/workflows/_scripts/comfy_monitor.py"
+fi
+
 # ── Typo Corrections ──
 alias celar='clear'
 alias vlear='clear'
