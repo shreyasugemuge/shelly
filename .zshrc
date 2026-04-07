@@ -64,6 +64,7 @@ if [[ -f "$_zcompdump" && $(date +'%j') == $(stat -f '%Sm' -t '%j' "$_zcompdump"
     compinit -u -C -d "$_zcompdump"
 else
     compinit -u -d "$_zcompdump"
+    touch "$_zcompdump"
 fi
 unset _zcompdump
 zstyle ':completion:*' menu select
