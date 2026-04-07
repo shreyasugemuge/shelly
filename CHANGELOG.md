@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **compinit cache not persisting** — `compinit -d` only rewrites the zcompdump when completions change, leaving a stale mtime that caused every shell to rescan completions instead of using the cached path
+
 ## [4.12.0] - 2026-03-31
 
 ### Added
