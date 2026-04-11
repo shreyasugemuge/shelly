@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.12.2] - 2026-04-12
+
 ### Fixed
 - **async git prompt** — prompt no longer blocks on `git status` in large/slow repos. The git segment is now computed in a backgrounded worker that writes to a tempfile and signals the parent shell via `SIGUSR1`; the prompt repaints via `zle reset-prompt` when the worker finishes. In-flight workers are cancelled if a new prompt arrives, so they never pile up. Previously, repos with heavy untracked trees could block the prompt for 10-30 seconds on every command.
 
@@ -466,7 +468,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.12.1...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.12.2...HEAD
+[4.12.2]: https://github.com/shreyasugemuge/shelly/compare/v4.12.1...v4.12.2
 [4.12.1]: https://github.com/shreyasugemuge/shelly/compare/v4.12.0...v4.12.1
 [4.12.0]: https://github.com/shreyasugemuge/shelly/compare/v4.11.0...v4.12.0
 [4.11.0]: https://github.com/shreyasugemuge/shelly/compare/v4.10.0...v4.11.0
