@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **async git prompt** — prompt no longer blocks on `git status` in large/slow repos. The git segment is now computed in a backgrounded worker that writes to a tempfile and signals the parent shell via `SIGUSR1`; the prompt repaints via `zle reset-prompt` when the worker finishes. In-flight workers are cancelled if a new prompt arrives, so they never pile up. Previously, repos with heavy untracked trees could block the prompt for 10-30 seconds on every command.
+
 ## [4.12.1] - 2026-04-11
 
 ### Fixed
