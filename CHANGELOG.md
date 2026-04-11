@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.12.1] - 2026-04-11
+
 ### Fixed
 - **compinit cache not persisting** — `compinit -d` only rewrites the zcompdump when completions change, leaving a stale mtime that caused every shell to rescan completions instead of using the cached path
 
@@ -461,7 +463,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.12.0...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.12.1...HEAD
+[4.12.1]: https://github.com/shreyasugemuge/shelly/compare/v4.12.0...v4.12.1
 [4.12.0]: https://github.com/shreyasugemuge/shelly/compare/v4.11.0...v4.12.0
 [4.11.0]: https://github.com/shreyasugemuge/shelly/compare/v4.10.0...v4.11.0
 [4.10.0]: https://github.com/shreyasugemuge/shelly/compare/v4.9.0...v4.10.0
