@@ -60,6 +60,9 @@ if [[ -x "$SHELLY_COMFY_DIR/.venv/bin/python" ]]; then
     alias comfy-monitor="$SHELLY_COMFY_DIR/.venv/bin/python ${XDG_CONFIG_HOME:-$HOME/.config}/zsh/scripts/comfy_monitor.py"
 fi
 
+# ── Clipboard (fix line endings for RDP paste) ──
+alias fixpaste='pbpaste | tr -d "\r\n" | tr -s " " | pbcopy && echo "✓ Clipboard fixed (single line)"'
+
 # ── Typo Corrections ──
 alias celar='clear'
 alias vlear='clear'

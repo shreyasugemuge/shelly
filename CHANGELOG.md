@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`fixpaste` alias** — strips line endings (`\r`, `\n`) and collapses spaces in the macOS clipboard so multi-line commands paste cleanly into Windows RDP sessions
+
 ## [4.12.2] - 2026-04-12
 
 ### Fixed
