@@ -52,13 +52,30 @@ Preview without making changes:
 
 ## Prerequisites
 
+### Hard dependencies (you install these)
+
 - **zsh** — included on macOS; `sudo apt install zsh` on Ubuntu/WSL; `sudo dnf install zsh` on Fedora; `sudo pacman -S zsh` on Arch
 - **git** — for prompt branch/status info
 - **curl** — for network aliases
+- **Homebrew** (macOS) — required for auto-dependency installation. If missing, `deps.zsh` will install it for you on first launch.
 
-Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`) and CLI tools (`eza`, `figlet`, `tree`) are installed automatically on first launch via your platform's package manager (Homebrew, apt, dnf, or pacman).
+### Auto-installed on first launch
 
-> **macOS-only features**: `sysmon`, `devterm`, `pan` (Preview.app), and `mactop` require macOS and iTerm2. On Linux, the core config (prompt, aliases, completions, startup splash) works fully; iTerm2 features are gracefully skipped.
+Shelly's `deps.zsh` checks once a day and installs anything missing:
+
+| Kind | Packages | Purpose |
+|------|----------|---------|
+| zsh plugins | `zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions` | inline suggestions, color-coded commands, extra completions |
+| CLI tools | `eza`, `figlet`, `tree` | `ll` listing, ASCII art (`yell`), `tre` directory tree |
+| Casks (macOS) | `font-meslo-lg-nerd-font` | Nerd Font used by `eza --icons` in `ll`; auto-wired into iTerm2's Non-ASCII Font slot on first shell open |
+
+On Linux: casks are skipped (Homebrew Cask is macOS-only). Install a Nerd Font manually if you want icon glyphs in `ll` — e.g. `sudo apt install fonts-firacode`, then configure your terminal to use it.
+
+### macOS-only features
+
+- `sysmon`, `devterm`, `pan` (Preview.app), and `mactop` require **macOS + iTerm2**
+- iTerm2 must have the **Python API enabled** (Preferences → General → Magic → Enable Python API) and the `iterm2` Python module installed (`pip3 install iterm2` — Shelly auto-installs this on first use)
+- On Linux, the core config (prompt, aliases, completions, startup splash) works fully; iTerm2 features are gracefully skipped
 
 ## File Structure
 

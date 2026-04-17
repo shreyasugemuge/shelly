@@ -47,6 +47,38 @@ _iterm2_focus_tab() {
     "$_SHELLY_IT2API" activate-app 2>/dev/null
 }
 
+# ── One-shot: enable iTerm2 Non-ASCII Font → Nerd Font ──
+# Runs at shell open when the Nerd Font is installed but iTerm2's Default
+# profile isn't yet wired to use it for non-ASCII codepoints (icon glyphs).
+# Guarded by a stamp file so it runs at most once. Leaves Normal Font
+# (user's text font) completely untouched. No-op outside iTerm2 or when
+# iTerm2 Python API module isn't available.
+_iterm2_wire_nerd_font() {
+    local stamp="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/nerd_font_wired"
+    [[ -f "$stamp" ]] && return 0
+    $IS_MACOS || return 0
+    [[ "$TERM_PROGRAM" == "iTerm.app" ]] || return 0
+    [[ -f "$HOME/Library/Fonts/MesloLGSNerdFontMono-Regular.ttf" ]] || return 0
+    python3 -c "import iterm2" 2>/dev/null || return 0
+    [[ -d "${stamp:h}" ]] || mkdir -p "${stamp:h}"
+
+    python3 << 'PYEOF' 2>/dev/null && touch "$stamp" && \
+        echo "\033[0;32m✓\033[0m iTerm2 Non-ASCII Font set to MesloLGS Nerd Font — \033[0;90micons now render in \`ll\`\033[0m"
+import iterm2, re
+
+async def main(connection):
+    profile = await iterm2.Profile.async_get_default(connection)
+    # Match the non-ASCII font size to the user's Normal Font size so
+    # cell metrics stay aligned. Falls back to 12 if parse fails.
+    m = re.search(r'(\d+(?:\.\d+)?)\s*$', profile.normal_font or "")
+    size = m.group(1) if m else "12"
+    await profile.async_set_non_ascii_font(f"MesloLGSNFM-Regular {size}")
+    await profile.async_set_use_non_ascii_font(True)
+
+iterm2.run_until_complete(main)
+PYEOF
+}
+
 # ── Close a tracked tab ──
 # Usage: _iterm2_close_tab "$(state_file_fn)" "label" ["dim_state_file"]
 # When dim_state_file is provided, restores the dim-inactive-panes preference.
@@ -99,3 +131,7 @@ _iterm2_close_tab() {
         echo "\033[0;90m·\033[0m $label tab already closed"
     fi
 }
+
+# ── Auto-wire Nerd Font on first shell open inside iTerm2 ──
+# Short-circuits on the stamp file, so steady-state cost is a single `[[ -f ]]`.
+_iterm2_wire_nerd_font

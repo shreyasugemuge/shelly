@@ -1,4 +1,4 @@
-### Shelly v4.8.0
+### Shelly v4.12.3
 
 **[[Home]]**
 

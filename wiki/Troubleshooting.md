@@ -11,6 +11,34 @@
 
 Also make sure you're running the command inside iTerm2, not Terminal.app or another terminal emulator.
 
+## `ll` shows `?` boxes instead of icons
+
+**Problem:** `ll` output has `?` glyphs where folder/file icons should appear.
+
+**Root cause:** `eza --icons` emits Nerd Font glyphs, but your terminal's font doesn't include them.
+
+**Fix (macOS, automatic):** Shelly installs `font-meslo-lg-nerd-font` via Homebrew Cask and wires it into iTerm2's Non-ASCII Font slot on first shell open. If your icons still don't render:
+
+1. Confirm the font is installed: `ls ~/Library/Fonts/MesloLGSNerdFontMono-Regular.ttf`
+2. Confirm iTerm2 is running and its Python API is enabled
+3. Delete the wire stamp and restart the shell:
+   ```bash
+   rm ~/.cache/zsh/nerd_font_wired
+   exec zsh
+   ```
+4. If you use a non-Default iTerm2 profile, enable Non-ASCII Font manually: Profile → Text → "Use a different font for non-ASCII text" → select `MesloLGS Nerd Font Mono`. Shelly only auto-wires the Default profile.
+
+**Fix (Linux):** Install a Nerd Font manually and set it in your terminal, e.g.:
+```bash
+sudo apt install fonts-firacode   # or download from https://www.nerdfonts.com
+```
+Then configure your terminal emulator's font.
+
+**Disable icons instead:** If you don't want icons at all, override the `ll` alias in `~/.zshrc.local`:
+```bash
+alias ll='eza --long --header --git --group-directories-first --time-style=long-iso --color-scale=size'
+```
+
 ## Slow Shell Startup
 
 **Problem:** Shell takes more than 500ms to start.

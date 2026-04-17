@@ -1,6 +1,6 @@
 # Claude Context — Shelly
 
-**Current version:** v4.8.1 (2026-03-28)
+**Current version:** v4.12.3 (2026-04-18)
 
 ## What This Is
 
@@ -41,6 +41,7 @@ Shelly is a modular zsh configuration and development workspace by Shreyas Ugemu
 - **Startup caching**: sysinfo.zsh caches hardware info (until reboot), package count (1h), and git streak (5m) to ~/.cache/zsh/sysinfo_cache. brew --prefix computed once in .zshrc as _SHELLY_BREW_PREFIX and reused by deps/plugins.
 - **Shared iTerm2 layer**: `iterm2.zsh` provides `_iterm2_tab_exists`, `_iterm2_focus_tab`, `_iterm2_close_tab` and the `$_SHELLY_IT2API` path — used by both devterm and sysmon to avoid duplication.
 - **Configurable defaults**: `SHELLY_IT2API`, `SHELLY_DEVTERM_RATIO`, `SHELLY_CODE_DIRS` can be overridden in `~/.zshrc.local`. Defaults are set via `: "${VAR:=default}"` at source time.
+- **Nerd Font auto-install + iTerm2 wiring** (macOS): `deps.zsh` auto-installs `font-meslo-lg-nerd-font` via `brew install --cask` (cask deps in `_cask_deps`, detected per-cask via `_cask_installed` — fonts use a fast file probe, other casks fall back to `brew list --cask`). `iterm2.zsh` runs a one-shot `_iterm2_wire_nerd_font` on shell open that sets the Default profile's `Non Ascii Font` to `MesloLGSNFM-Regular <size>` and enables `Use Non-ASCII Font` via the iTerm2 Python API. **Normal Font is never touched** — the wire only affects non-ASCII codepoints (icon glyphs). Guarded by `~/.cache/zsh/nerd_font_wired` stamp so steady-state cost is a single `[[ -f ]]`. No-op on Linux, outside iTerm2, or when the `iterm2` Python module is missing.
 
 ## sysmon — System Monitor Dashboard
 
@@ -124,6 +125,8 @@ Conventional-ish prefixes: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `sty
 - `sysmon` and `devterm` check `$TERM_PROGRAM == "iTerm.app"` — in any other terminal they print a "non-iTerm mode" message and exit cleanly
 - `it2api` requires the Python `iterm2` module and the iTerm2 Python API to be enabled
 - In zsh, `local var` (without `=""`) inside a loop prints `var=value` to stdout on re-entry — always use `local var=""` when declaring variables in loops
+- **Nerd Font wire is one-shot**: to re-apply after user changes (e.g. profile reset), delete `~/.cache/zsh/nerd_font_wired` and `exec zsh`. The wire only runs on macOS, inside iTerm2, when the font file is present. It mutates the Default profile only — if the user uses a non-default profile, they'll need to enable Non-ASCII Font manually.
+- `deps.zsh` cask installs are macOS-only. Linux branch does not call `brew install --cask` because Homebrew Cask doesn't exist on Linux.
 - sysinfo cache at ~/.cache/zsh/sysinfo_cache — delete it to force a full refresh on next shell open
 - _SHELLY_BREW_PREFIX is set in .zshrc before modules and unset after — modules must not depend on it persisting
 

@@ -82,3 +82,44 @@ setup() { load test_helper/setup; }
     assert_success
     assert_output "not found"
 }
+
+@test "_cask_installed: returns false when neither file nor brew detect the cask" {
+    # Isolate from the real system: HOME → tmpdir (no font file) and PATH=""
+    # (no brew available). Function must return false.
+    run zsh -c "
+        HOME='${TEST_TMPDIR}'
+        PATH=''
+        _cask_installed() {
+            local cask=\"\$1\"
+            case \"\$cask\" in
+                font-meslo-lg-nerd-font)
+                    [[ -f \"\$HOME/Library/Fonts/MesloLGSNerdFontMono-Regular.ttf\" ]] && return 0
+                    ;;
+            esac
+            command -v brew &>/dev/null && brew list --cask \"\$cask\" &>/dev/null
+        }
+        _cask_installed font-meslo-lg-nerd-font && echo 'found' || echo 'not found'
+    "
+    assert_success
+    assert_output "not found"
+}
+
+@test "_cask_installed: font fast-path detects installed font" {
+    mkdir -p "${TEST_TMPDIR}/Library/Fonts"
+    touch "${TEST_TMPDIR}/Library/Fonts/MesloLGSNerdFontMono-Regular.ttf"
+    run zsh -c "
+        HOME='${TEST_TMPDIR}'
+        _cask_installed() {
+            local cask=\"\$1\"
+            case \"\$cask\" in
+                font-meslo-lg-nerd-font)
+                    [[ -f \"\$HOME/Library/Fonts/MesloLGSNerdFontMono-Regular.ttf\" ]] && return 0
+                    ;;
+            esac
+            command -v brew &>/dev/null && brew list --cask \"\$cask\" &>/dev/null
+        }
+        _cask_installed font-meslo-lg-nerd-font && echo 'found' || echo 'not found'
+    "
+    assert_success
+    assert_output "found"
+}

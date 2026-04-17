@@ -19,6 +19,11 @@ _cli_deps=(
     tree
 )
 
+# ── Required Homebrew casks (macOS-only; Nerd Font used by eza icons in `ll`) ──
+_cask_deps=(
+    font-meslo-lg-nerd-font
+)
+
 # ── Run at most once per day ──
 _deps_stamp="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/deps_checked"
 [[ -d "${_deps_stamp:h}" ]] || mkdir -p "${_deps_stamp:h}"
@@ -49,19 +54,41 @@ _plugin_installed() {
     return 1
 }
 
+# Cask probe — fast path for known fonts, falls back to `brew list --cask`
+_cask_installed() {
+    local cask="$1"
+    case "$cask" in
+        font-meslo-lg-nerd-font)
+            [[ -f "$HOME/Library/Fonts/MesloLGSNerdFontMono-Regular.ttf" ]] && return 0
+            ;;
+    esac
+    command -v brew &>/dev/null && brew list --cask "$cask" &>/dev/null
+}
+
 # ── Install missing packages via the platform's package manager ──
 _install_missing() {
-    local -a missing=()
+    local -a missing=() missing_casks=()
     for _pkg in "${_zsh_deps[@]}"; do
         _plugin_installed "$_pkg" || missing+=("$_pkg")
     done
     for _pkg in "${_cli_deps[@]}"; do
         command -v "$_pkg" &>/dev/null || missing+=("$_pkg")
     done
+    # Casks: macOS-only (Homebrew Cask doesn't exist on Linux)
+    if $IS_MACOS; then
+        for _pkg in "${_cask_deps[@]}"; do
+            _cask_installed "$_pkg" || missing_casks+=("$_pkg")
+        done
+    fi
 
-    (( ${#missing[@]} )) || return 0
+    (( ${#missing[@]} + ${#missing_casks[@]} )) || return 0
 
-    echo -e "\033[0;36m·\033[0m Installing missing packages: \033[1m${missing[*]}\033[0m"
+    if (( ${#missing[@]} )); then
+        echo -e "\033[0;36m·\033[0m Installing missing packages: \033[1m${missing[*]}\033[0m"
+    fi
+    if (( ${#missing_casks[@]} )); then
+        echo -e "\033[0;36m·\033[0m Installing missing casks: \033[1m${missing_casks[*]}\033[0m"
+    fi
 
     if $IS_MACOS; then
         # macOS: use Homebrew (install it first if missing)
@@ -79,7 +106,8 @@ _install_missing() {
             fi
             echo -e "\033[0;32m✓\033[0m Homebrew installed"
         fi
-        brew install "${missing[@]}" 2>&1 | tail -1
+        (( ${#missing[@]} ))       && brew install "${missing[@]}" 2>&1 | tail -1
+        (( ${#missing_casks[@]} )) && brew install --cask "${missing_casks[@]}" 2>&1 | tail -1
     elif command -v apt-get &>/dev/null; then
         sudo apt-get install -y "${missing[@]}"
     elif command -v dnf &>/dev/null; then
@@ -87,7 +115,7 @@ _install_missing() {
     elif command -v pacman &>/dev/null; then
         sudo pacman -S --noconfirm "${missing[@]}"
     elif command -v brew &>/dev/null; then
-        # Linux with Homebrew (linuxbrew)
+        # Linux with Homebrew (linuxbrew) — no cask support on Linux
         brew install "${missing[@]}" 2>&1 | tail -1
     else
         echo -e "\033[0;31m✗\033[0m No supported package manager found (brew/apt/dnf/pacman)"
@@ -102,5 +130,5 @@ if _should_check_deps; then
     _install_missing && touch "$_deps_stamp"
 fi
 
-unset _deps_stamp _zsh_deps _cli_deps
-unfunction _should_check_deps _plugin_installed _install_missing 2>/dev/null
+unset _deps_stamp _zsh_deps _cli_deps _cask_deps
+unfunction _should_check_deps _plugin_installed _cask_installed _install_missing 2>/dev/null

@@ -9,7 +9,7 @@ Defined in [`config/aliases.zsh`](https://github.com/shreyasugemuge/shelly/blob/
 |-------|---------|-------------|
 | `..` | `cd ..` | Go up one directory |
 | `...` | `cd ../..` | Go up two directories |
-| `ll` | `eza --long --header --git --icons --group-directories-first --color-scale=size ...` | Beautiful long listing — smart size units (B/K/M/G), size-gradient coloring, git status column, Nerd Font icons, dirs grouped first. Falls back to `ls -lh` if `eza` isn't installed. |
+| `ll` | `eza --long --header --git --icons --group-directories-first --color-scale=size ...` | Beautiful long listing — smart size units (B/K/M/G), size-gradient coloring, git status column, Nerd Font icons, dirs grouped first. Falls back to `ls -lh` if `eza` isn't installed. Icons require a Nerd Font — on macOS Shelly auto-installs `font-meslo-lg-nerd-font` and wires it into iTerm2's Non-ASCII Font slot; on Linux install one manually. See [[Troubleshooting#ll-shows--boxes-instead-of-icons]] if icons render as `?`. |
 | `la` | `ls -a` | Short listing with hidden files |
 | `lla` | `ls -la` | Plain long listing with hidden files |
 | `tre` | `tree -C -L 2` | Colorized directory tree (2 levels) |

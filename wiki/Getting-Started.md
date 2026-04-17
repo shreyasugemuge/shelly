@@ -2,13 +2,36 @@
 
 ## Prerequisites
 
+### Hard dependencies (you install these)
+
 | Tool | macOS | Ubuntu/WSL | Fedora | Arch |
 |------|-------|------------|--------|------|
 | zsh  | included | `sudo apt install zsh` | `sudo dnf install zsh` | `sudo pacman -S zsh` |
 | git  | `xcode-select --install` | `sudo apt install git` | `sudo dnf install git` | `sudo pacman -S git` |
 | curl | included | `sudo apt install curl` | included | included |
+| Homebrew | [brew.sh](https://brew.sh) — auto-installed by `deps.zsh` if missing | n/a | n/a | n/a |
 
-Everything else (zsh plugins, CLI tools) is installed automatically on first shell open.
+### Auto-installed on first shell open
+
+`config/deps.zsh` runs once a day and installs anything missing via your platform's package manager:
+
+| Kind | Packages | Notes |
+|------|----------|-------|
+| zsh plugins | `zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions` | all platforms |
+| CLI tools | `eza`, `figlet`, `tree` | all platforms |
+| Casks (macOS) | `font-meslo-lg-nerd-font` | Nerd Font used for `eza` icons in `ll`; iTerm2's Default profile is auto-wired to use it as the Non-ASCII Font (your main text font is untouched) |
+
+On Linux, cask installs are skipped. Install a Nerd Font manually (e.g. `sudo apt install fonts-firacode`) and configure your terminal to use it if you want icon glyphs in `ll`.
+
+### macOS-only features
+
+`sysmon`, `devterm`, `pan`, and `mactop` require **iTerm2** with the **Python API enabled**:
+
+1. Open iTerm2 Preferences (Cmd+,)
+2. General → Magic → Enable Python API
+3. Shelly will install the `iterm2` Python module on first use
+
+In any other terminal (Terminal.app, Ghostty, etc.) these features print a "non-iTerm mode" message and exit cleanly.
 
 ## Install
 
