@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.12.3] - 2026-04-18
+
 ### Changed
 - **`ll` powered by `eza`** — long listings now use [eza](https://github.com/eza-community/eza) when available: headered columns, Nerd Font icons, per-file git status, directories grouped first, ISO timestamps, and a size-gradient color scale so MB/GB files visually pop. Sizes auto-scale (`892`, `1.4k`, `2.1M`, `1.2G`). Falls back to `ls -lh` when eza isn't installed. `la` and `lla` remain on plain `ls`. `eza` added to auto-installed CLI deps.
 
@@ -471,7 +473,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.12.2...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.12.3...HEAD
+[4.12.3]: https://github.com/shreyasugemuge/shelly/compare/v4.12.2...v4.12.3
 [4.12.2]: https://github.com/shreyasugemuge/shelly/compare/v4.12.1...v4.12.2
 [4.12.1]: https://github.com/shreyasugemuge/shelly/compare/v4.12.0...v4.12.1
 [4.12.0]: https://github.com/shreyasugemuge/shelly/compare/v4.11.0...v4.12.0
