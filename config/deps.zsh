@@ -14,6 +14,7 @@ _zsh_deps=(
 
 # ── Required CLI tools (used by aliases/functions) ──
 _cli_deps=(
+    eza
     figlet
     tree
 )

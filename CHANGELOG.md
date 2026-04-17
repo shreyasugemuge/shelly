@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **`ll` powered by `eza`** — long listings now use [eza](https://github.com/eza-community/eza) when available: headered columns, Nerd Font icons, per-file git status, directories grouped first, ISO timestamps, and a size-gradient color scale so MB/GB files visually pop. Sizes auto-scale (`892`, `1.4k`, `2.1M`, `1.2G`). Falls back to `ls -lh` when eza isn't installed. `la` and `lla` remain on plain `ls`. `eza` added to auto-installed CLI deps.
+
 ## [4.12.2] - 2026-04-12
 
 ### Fixed

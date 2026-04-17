@@ -12,8 +12,33 @@ else
     alias ls='ls -hG'
 fi
 alias la='ls -a'
-alias ll='ls -l'
 alias lla='ls -la'
+
+# ll: long listing powered by eza when available, ls -lh otherwise.
+# eza auto-scales sizes (B/K/M/G) and color-grades the size column so large
+# files visually pop. Falls back cleanly when stdout is a pipe.
+if command -v eza &>/dev/null; then
+    function ll() {
+        local -a display_flags flags paths
+        if [[ -t 1 ]]; then
+            display_flags=(--color=always --icons=auto)
+        else
+            display_flags=(--color=never --icons=never)
+        fi
+        # Split args into flags and paths so we can default the path to '.'
+        # when the user passes only flags (eza emits nothing without a target).
+        local arg
+        for arg in "$@"; do
+            if [[ "$arg" == -* ]]; then flags+=("$arg"); else paths+=("$arg"); fi
+        done
+        (( ${#paths} == 0 )) && paths=(.)
+        eza --long --header --git --group-directories-first \
+            --time-style=long-iso --color-scale=size \
+            "${display_flags[@]}" "${flags[@]}" "${paths[@]}"
+    }
+else
+    alias ll='ls -lh'
+fi
 
 # ── Config Management ──
 alias zshrc='${EDITOR:-vim} ~/.zshrc'

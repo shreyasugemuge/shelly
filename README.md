@@ -56,7 +56,7 @@ Preview without making changes:
 - **git** — for prompt branch/status info
 - **curl** — for network aliases
 
-Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`) and CLI tools (`tree`) are installed automatically on first launch via your platform's package manager (Homebrew, apt, dnf, or pacman).
+Dependencies (`zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`) and CLI tools (`eza`, `figlet`, `tree`) are installed automatically on first launch via your platform's package manager (Homebrew, apt, dnf, or pacman).
 
 > **macOS-only features**: `sysmon`, `devterm`, `pan` (Preview.app), and `mactop` require macOS and iTerm2. On Linux, the core config (prompt, aliases, completions, startup splash) works fully; iTerm2 features are gracefully skipped.
 
