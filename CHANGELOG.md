@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.13.0] - 2026-04-18
+
 ### Added
 - **Nerd Font auto-install + iTerm2 auto-wire** (macOS) — `deps.zsh` now installs `font-meslo-lg-nerd-font` via `brew install --cask` on first launch if missing. New `_cask_deps` array + `_cask_installed` probe (fast file check for known fonts, falls back to `brew list --cask`). On first shell open inside iTerm2, `_iterm2_wire_nerd_font` in `iterm2.zsh` sets the Default profile's `Non Ascii Font` to `MesloLGSNFM-Regular <size>` and enables `Use Non-ASCII Font` via the iTerm2 Python API — so `eza` icons in `ll` render correctly without changing the user's main text font. Guarded by `~/.cache/zsh/nerd_font_wired` stamp (one-shot; delete to re-apply). No-op on Linux, outside iTerm2, or when the `iterm2` Python module is missing.
 - Two new tests in `tests/deps.bats` covering `_cask_installed` behavior.
@@ -480,7 +482,8 @@ Legacy bash configuration. Last version before the zsh rewrite.
 
 ---
 
-[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.12.3...HEAD
+[Unreleased]: https://github.com/shreyasugemuge/shelly/compare/v4.13.0...HEAD
+[4.13.0]: https://github.com/shreyasugemuge/shelly/compare/v4.12.3...v4.13.0
 [4.12.3]: https://github.com/shreyasugemuge/shelly/compare/v4.12.2...v4.12.3
 [4.12.2]: https://github.com/shreyasugemuge/shelly/compare/v4.12.1...v4.12.2
 [4.12.1]: https://github.com/shreyasugemuge/shelly/compare/v4.12.0...v4.12.1
